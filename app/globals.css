@@ -1,49 +1,82 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #1a1a1a;
-  --primary: #6B8E23; /* Verde oliva elegante */
-  --primary-dark: #556B2F; /* Verde oliva oscuro */
-  --primary-light: #98FB98; /* Verde claro elegante */
-  --secondary: #F5F5DC; /* Beige muy claro */
-  --accent: #90EE90; /* Verde claro suave */
-  --text-dark: #1a1a1a;
-  --text-muted: #666666;
+  --background: #FAFCF9;
+  --background-elevated: #FFFFFF;
+  --background-soft: #EAF8EC;
+  --foreground: #0F2A1A;
+  --primary: #3E9A60;
+  --primary-light: #6FCB8C;
+  --primary-dark: #1F6B3C;
+  --accent: #8FE0A4;
+  --border-soft: #DCEFDD;
+  --text-muted: #5C7A66;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-poppins);
+  --font-sans: var(--font-space-grotesk);
   --font-serif: var(--font-playfair);
   --font-display: var(--font-cormorant);
-  --font-decorative: var(--font-great-vibes);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #ffffff;
-    --foreground: #1a1a1a;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-poppins), sans-serif;
+  font-family: var(--font-space-grotesk), sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-playfair), serif;
 }
 
-.font-decorative {
-  font-family: var(--font-great-vibes), cursive;
-}
-
 .font-display {
   font-family: var(--font-cormorant), serif;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-soft);
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(95, 190, 123, 0.12);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  border-color: var(--primary-light);
+  box-shadow: 0 0 24px rgba(111, 203, 140, 0.25);
+  transform: scale(1.02);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #6FCB8C, #3E9A60);
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(62, 154, 96, 0.2);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.btn-primary:hover::after {
+  left: 100%;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(62, 154, 96, 0.3);
 }
 
 @keyframes fade-in {
@@ -89,17 +122,17 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .animate-fade-in {
-  animation: fade-in 0.8s ease-out;
+  animation: fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .animate-slide-up {
-  animation: slide-up 0.8s ease-out;
+  animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .animate-slide-in-left {
-  animation: slide-in-left 0.8s ease-out;
+  animation: slide-in-left 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .animate-scale-in {
-  animation: scale-in 0.6s ease-out;
+  animation: scale-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }

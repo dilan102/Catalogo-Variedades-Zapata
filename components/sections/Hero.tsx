@@ -3,23 +3,34 @@ import Link from 'next/link'
 
 export default function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F5F5DC] via-white to-[#98FB98]/30 overflow-hidden">
-      {/* Decorative elements */}
-      <div className="absolute top-20 left-10 w-32 h-32 bg-[#6B8E23]/10 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-20 right-10 w-40 h-40 bg-[#98FB98]/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+    <section className="relative min-h-screen flex items-center justify-center bg-[#FAFCF9] overflow-hidden">
+      {/* Radial gradient natural */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_10%,rgba(111,203,140,0.15),transparent_55%)]" />
+      
+      {/* Botanical leaf SVG decoration */}
+      <svg className="absolute top-20 right-10 w-48 h-48 opacity-25" viewBox="0 0 100 100" fill="none" stroke="#6FCB8C" strokeWidth="1">
+        <path d="M50 95 C30 85 20 65 25 45 C30 25 45 15 50 5 C55 15 70 25 75 45 C80 65 70 85 50 95" />
+        <path d="M50 5 C50 25 50 45 50 95" />
+        <path d="M50 30 C35 35 25 45 25 45" />
+        <path d="M50 50 C35 55 25 65 25 65" />
+        <path d="M50 70 C35 75 25 85 25 85" />
+        <path d="M50 30 C65 35 75 45 75 45" />
+        <path d="M50 50 C65 55 75 65 75 65" />
+        <path d="M50 70 C65 75 75 85 75 85" />
+      </svg>
       
       <div className="relative z-10 px-4 py-20 max-w-7xl mx-auto text-center">
         <div className="animate-fade-in">
-          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-[#556B2F] leading-tight mb-6">
-            Vendemos prendas asombrosas
+          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold text-[#0F2A1A] leading-tight mb-6">
+            Vendemos prendas <span className="text-[#1F6B3C]">asombrosas</span>
           </h1>
-          <p className="font-serif text-lg sm:text-xl md:text-2xl text-[#6B8E23] mb-12 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg sm:text-xl md:text-2xl text-[#5C7A66] mb-12 max-w-3xl mx-auto leading-relaxed">
             Moda que inspira, calidad que enamora y precios que impulsan tu negocio.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-slide-up" style={{ animationDelay: '0.3s' }}>
             <Link 
               href="#categorias" 
-              className="px-8 py-4 bg-[#6B8E23] text-white font-serif font-semibold rounded-full hover:bg-[#556B2F] transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl text-center"
+              className="btn-primary px-8 py-4 text-white font-semibold text-center"
             >
               Ver Catálogo
             </Link>
@@ -27,7 +38,7 @@ export default function Hero() {
               href="https://wa.me/573000000000" 
               target="_blank"
               rel="noopener noreferrer"
-              className="px-8 py-4 bg-white text-[#6B8E23] border-2 border-[#6B8E23] font-serif font-semibold rounded-full hover:bg-[#F5F5DC] transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl text-center"
+              className="px-8 py-4 bg-white/80 backdrop-blur-sm text-[#1F6B3C] border border-[#6FCB8C] font-semibold rounded-14 hover:bg-white transition-all duration-300 shadow-sm text-center"
             >
               Contactar por WhatsApp
             </a>
@@ -37,7 +48,7 @@ export default function Hero() {
       
       {/* Scroll indicator */}
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <svg className="w-6 h-6 text-[#6B8E23]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-6 h-6 text-[#3E9A60]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
         </svg>
       </div>

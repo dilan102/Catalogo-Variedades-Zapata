@@ -4,18 +4,26 @@ import Link from 'next/link'
 
 export default function Footer() {
   return (
-    <footer className="bg-[#556B2F] text-white py-12 sm:py-16">
-      <div className="px-4 max-w-7xl mx-auto">
+    <footer className="bg-[#1F6B3C] text-white py-12 sm:py-16 relative overflow-hidden">
+      {/* Botanical pattern background */}
+      <svg className="absolute inset-0 opacity-5" viewBox="0 0 100 100" fill="none" stroke="#6FCB8C" strokeWidth="0.5">
+        <path d="M0 20 Q25 0 50 20 T100 20" />
+        <path d="M0 40 Q25 20 50 40 T100 40" />
+        <path d="M0 60 Q25 40 50 60 T100 60" />
+        <path d="M0 80 Q25 60 50 80 T100 80" />
+      </svg>
+      
+      <div className="px-4 max-w-7xl mx-auto relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12">
           {/* Logo y descripción */}
           <div className="text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-3 mb-4">
-              <div className="w-12 h-12 bg-[#F5F5DC] rounded-full flex items-center justify-center overflow-hidden">
-                <Image src="/logo.png" alt="Variedades Zapata" width={48} height={48} className="object-contain" />
+              <div className="w-12 h-12 bg-gradient-to-br from-[#BFEAC5] to-[#5FBE7B] rounded-full flex items-center justify-center overflow-hidden">
+                <Image src="/logo.jpg" alt="Variedades Zapata" width={48} height={48} className="object-contain" />
               </div>
-              <span className="font-serif font-bold text-xl">Variedades Zapata</span>
+              <span className="font-serif font-semibold text-xl">Variedades Zapata</span>
             </div>
-            <p className="font-sans text-sm text-white/80 leading-relaxed">
+            <p className="text-sm text-white/80 leading-relaxed">
               Distribuidora de ropa mayorista. Moda que inspira, calidad que enamora y precios que impulsan tu negocio.
             </p>
           </div>
@@ -28,13 +36,13 @@ export default function Footer() {
                 href="https://wa.me/573000000000" 
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block font-sans text-sm text-white/80 hover:text-white transition-colors"
+                className="block text-sm text-white/80 hover:text-white transition-colors"
               >
                 WhatsApp
               </a>
               <a 
                 href="mailto:info@variedadeszapata.com" 
-                className="block font-sans text-sm text-white/80 hover:text-white transition-colors"
+                className="block text-sm text-white/80 hover:text-white transition-colors"
               >
                 info@variedadeszapata.com
               </a>
@@ -68,7 +76,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-white/20 mt-8 sm:mt-12 pt-8 text-center">
-          <p className="font-sans text-sm text-white/60">
+          <p className="text-sm text-white/60">
             © {new Date().getFullYear()} Variedades Zapata. Todos los derechos reservados.
           </p>
         </div>

@@ -31,14 +31,14 @@ export default function HomePage() {
   }, [])
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-[#FAFCF9] min-h-screen">
       <Hero />
       <Benefits />
       
       <div className="px-4 py-12 sm:py-16 max-w-7xl mx-auto">
         <section id="categorias" className="mb-16">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#556B2F]">Categorías</h2>
+            <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-[#0F2A1A]">Categorías</h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {loading ? Array(4).fill(0).map((_, i) => <SectionCardSkeleton key={i} />) : sections.map((s, i) => (
@@ -51,7 +51,7 @@ export default function HomePage() {
         
         {(loading || featured.length > 0) && (
           <section className="animate-fade-in" style={{ animationDelay: '300ms' }}>
-            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#556B2F] mb-8">Destacados</h2>
+            <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-[#0F2A1A] mb-8">Destacados</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8 sm:gap-x-6 sm:gap-y-8">
               {loading ? Array(4).fill(0).map((_, i) => <ProductCardSkeleton key={i} />) : featured.map((p, i) => {
                 const sub = (p as any).subsection
