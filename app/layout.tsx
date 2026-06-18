@@ -3,7 +3,7 @@ import './globals.css'
 import Navbar from '@/components/layout/Navbar'
 import AdminButton from '@/components/ui/AdminButton'
 
-export const metadata: Metadata = { title: 'Catálogo de Ropa', description: 'Explora nuestra colección' }
+export const metadata: Metadata = { title: 'Catalogo Variedades Zapata', description: 'Catálogo de productos' }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
