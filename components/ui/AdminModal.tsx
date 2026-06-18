@@ -16,7 +16,7 @@ export default function AdminModal({ isOpen, onClose }: { isOpen: boolean; onClo
     setLoading(true)
 
     // Autenticación básica (puedes cambiar esto por tu sistema real)
-    if (username === 'admin' && password === 'admin123') {
+    if (username === 'VariedadesZ' && password === 'VZKZ') {
       // Guardar sesión en localStorage
       localStorage.setItem('adminAuth', 'true')
       setLoading(false)
@@ -100,7 +100,7 @@ export default function AdminModal({ isOpen, onClose }: { isOpen: boolean; onClo
 
         <div className="mt-6 text-center">
           <p className="text-xs text-[#5C7A66]">
-            Credenciales por defecto: admin / admin123
+            Credenciales: VariedadesZ / VZKZ
           </p>
         </div>
       </div>
