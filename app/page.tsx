@@ -5,6 +5,10 @@ import { getSections, getFeaturedProducts } from '@/lib/queries'
 import SectionCard from '@/components/catalog/SectionCard'
 import ProductCard from '@/components/catalog/ProductCard'
 import { SectionCardSkeleton, ProductCardSkeleton } from '@/components/ui/Skeletons'
+import Hero from '@/components/sections/Hero'
+import Benefits from '@/components/sections/Benefits'
+import Contact from '@/components/sections/Contact'
+import Footer from '@/components/sections/Footer'
 import type { Section, Product } from '@/types'
 
 export default function HomePage() {
@@ -27,39 +31,44 @@ export default function HomePage() {
   }, [])
 
   return (
-    <div className="px-4 py-6 sm:py-8 max-w-7xl mx-auto bg-white min-h-screen">
-      <div className="mb-8 animate-fade-in">
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-green-900 italic">Nueva colección</h1>
-        <p className="text-green-600 text-base mt-2 italic">Encuentra tu estilo</p>
-      </div>
-      <section className="mb-10">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg sm:text-xl font-semibold text-green-800 italic">Categorías</h2>
-        </div>
-        <div className="grid grid-cols-3 gap-4 sm:gap-5">
-          {loading ? Array(6).fill(0).map((_, i) => <SectionCardSkeleton key={i} />) : sections.map((s, i) => (
-            <div key={s.id} style={{ animationDelay: `${i * 100}ms` }} className="animate-slide-up">
-              <SectionCard section={s} />
-            </div>
-          ))}
-        </div>
-      </section>
-      {(loading || featured.length > 0) && (
-        <section className="animate-fade-in" style={{ animationDelay: '300ms' }}>
-          <h2 className="text-lg sm:text-xl font-semibold text-green-800 mb-4 italic">Destacados</h2>
-          <div className="grid grid-cols-3 gap-x-4 gap-y-8 sm:gap-x-5 sm:gap-y-8">
-            {loading ? Array(6).fill(0).map((_, i) => <ProductCardSkeleton key={i} />) : featured.map((p, i) => {
-              const sub = (p as any).subsection
-              const sec = sub?.section
-              return (
-                <div key={p.id} style={{ animationDelay: `${i * 100}ms` }} className="animate-slide-up">
-                  <ProductCard product={p} href={sec?.slug && sub?.slug ? `/${sec.slug}/${sub.slug}/${p.id}` : '#'} />
-                </div>
-              )
-            })}
+    <div className="bg-white min-h-screen">
+      <Hero />
+      <Benefits />
+      
+      <div className="px-4 py-12 sm:py-16 max-w-7xl mx-auto">
+        <section id="categorias" className="mb-16">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#556B2F]">Categorías</h2>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {loading ? Array(4).fill(0).map((_, i) => <SectionCardSkeleton key={i} />) : sections.map((s, i) => (
+              <div key={s.id} style={{ animationDelay: `${i * 100}ms` }} className="animate-slide-up">
+                <SectionCard section={s} />
+              </div>
+            ))}
           </div>
         </section>
-      )}
+        
+        {(loading || featured.length > 0) && (
+          <section className="animate-fade-in" style={{ animationDelay: '300ms' }}>
+            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#556B2F] mb-8">Destacados</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8 sm:gap-x-6 sm:gap-y-8">
+              {loading ? Array(4).fill(0).map((_, i) => <ProductCardSkeleton key={i} />) : featured.map((p, i) => {
+                const sub = (p as any).subsection
+                const sec = sub?.section
+                return (
+                  <div key={p.id} style={{ animationDelay: `${i * 100}ms` }} className="animate-slide-up">
+                    <ProductCard product={p} href={sec?.slug && sub?.slug ? `/${sec.slug}/${sub.slug}/${p.id}` : '#'} />
+                  </div>
+                )
+              })}
+            </div>
+          </section>
+        )}
+      </div>
+      
+      <Contact />
+      <Footer />
     </div>
   )
 }
