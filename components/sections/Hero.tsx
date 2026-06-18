@@ -1,7 +1,20 @@
 'use client'
+import { useState } from 'react'
 import Link from 'next/link'
 
 export default function Hero() {
+  const [scrolling, setScrolling] = useState(false)
+
+  const handleScroll = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault()
+    setScrolling(true)
+    const target = document.querySelector('#categorias')
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      setTimeout(() => setScrolling(false), 1000)
+    }
+  }
+
   return (
     <section className="relative min-h-screen flex items-center justify-center bg-[#FAFCF9] overflow-hidden">
       {/* Radial gradient natural */}
@@ -28,12 +41,13 @@ export default function Hero() {
             Moda que inspira, calidad que enamora y precios que impulsan tu negocio.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-slide-up" style={{ animationDelay: '0.3s' }}>
-            <Link 
+            <a 
               href="#categorias" 
-              className="btn-primary px-8 py-4 text-white font-semibold text-center"
+              onClick={handleScroll}
+              className={`btn-primary px-8 py-4 text-white font-semibold text-center transition-all duration-300 ${scrolling ? 'scale-95 opacity-80' : ''}`}
             >
-              Ver Catálogo
-            </Link>
+              {scrolling ? 'Deslizando...' : 'Ver Catálogo'}
+            </a>
             <a 
               href="https://wa.me/573000000000" 
               target="_blank"

@@ -9,25 +9,44 @@ import Hero from '@/components/sections/Hero'
 import Benefits from '@/components/sections/Benefits'
 import Contact from '@/components/sections/Contact'
 import Footer from '@/components/sections/Footer'
+import { initializeCategories } from '@/lib/init-categories'
 import type { Section, Product } from '@/types'
 
 export default function HomePage() {
   const [sections, setSections] = useState<Section[]>([])
   const [featured, setFeatured] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
+  const [initializing, setInitializing] = useState(false)
 
   useEffect(() => {
-    Promise.all([getSections(), getFeaturedProducts(6)])
-      .then(([s, f]) => { 
+    const loadData = async () => {
+      try {
+        const [s, f] = await Promise.all([getSections(), getFeaturedProducts(6)])
         console.log('Secciones cargadas:', s.length)
         console.log('Productos destacados cargados:', f.length)
-        setSections(s); 
-        setFeatured(f) 
-      })
-      .catch((error) => {
+        
+        // Si no hay secciones, inicializar automáticamente
+        if (s.length === 0) {
+          console.log('No hay secciones, inicializando categorías...')
+          setInitializing(true)
+          await initializeCategories()
+          setInitializing(false)
+          // Recargar datos después de inicializar
+          const [newSections, newFeatured] = await Promise.all([getSections(), getFeaturedProducts(6)])
+          setSections(newSections)
+          setFeatured(newFeatured)
+        } else {
+          setSections(s)
+          setFeatured(f)
+        }
+      } catch (error) {
         console.error('Error al cargar datos:', error)
-      })
-      .finally(() => setLoading(false))
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadData()
   }, [])
 
   return (
@@ -40,8 +59,13 @@ export default function HomePage() {
           <div className="flex items-center justify-between mb-8">
             <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-[#0F2A1A]">Nuestras Prendas</h2>
           </div>
+          {initializing && (
+            <div className="text-center py-8">
+              <p className="text-[#5C7A66]">Inicializando categorías...</p>
+            </div>
+          )}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {loading ? Array(4).fill(0).map((_, i) => <SectionCardSkeleton key={i} />) : sections.map((s, i) => (
+            {loading || initializing ? Array(4).fill(0).map((_, i) => <SectionCardSkeleton key={i} />) : sections.map((s, i) => (
               <div key={s.id} style={{ animationDelay: `${i * 100}ms` }} className="animate-slide-up">
                 <SectionCard section={s} />
               </div>
