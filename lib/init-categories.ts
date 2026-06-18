@@ -16,83 +16,77 @@ const categoriesWithSubsections: Record<string, string[]> = {
 export async function initializeCategories() {
   console.log('Inicializando categorías y subsecciones...')
   
+  // Primero eliminar todas las categorías y subsecciones existentes
+  console.log('Eliminando categorías y subsecciones existentes...')
+  
+  const { error: deleteSubsectionsError } = await supabase
+    .from('subsections')
+    .delete()
+    .neq('id', 0) // Hack para eliminar todos los registros
+  
+  if (deleteSubsectionsError) {
+    console.error('Error eliminando subsecciones:', deleteSubsectionsError)
+  } else {
+    console.log('Subsecciones eliminadas')
+  }
+  
+  const { error: deleteSectionsError } = await supabase
+    .from('sections')
+    .delete()
+    .neq('id', 0) // Hack para eliminar todos los registros
+  
+  if (deleteSectionsError) {
+    console.error('Error eliminando secciones:', deleteSectionsError)
+  } else {
+    console.log('Secciones eliminadas')
+  }
+  
+  // Ahora crear las nuevas categorías
   for (const [categoryName, subsections] of Object.entries(categoriesWithSubsections)) {
     // Generar slug para la sección
     const slug = categoryName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '-')
     
-    // Verificar si la sección ya existe
-    const { data: existingSection } = await supabase
+    // Crear nueva sección
+    const { data: newSection, error: sectionError } = await supabase
       .from('sections')
-      .select('id')
-      .eq('slug', slug)
+      .insert({
+        name: categoryName,
+        slug,
+        description: `Catálogo de ${categoryName.toLowerCase()}`,
+        order: Object.keys(categoriesWithSubsections).indexOf(categoryName),
+        is_active: true
+      })
+      .select()
       .single()
     
-    let sectionId: string
-    
-    if (existingSection) {
-      sectionId = existingSection.id
-      console.log(`Sección "${categoryName}" ya existe, actualizando...`)
-      
-      // Actualizar sección
-      await supabase
-        .from('sections')
-        .update({ name: categoryName, slug })
-        .eq('id', sectionId)
-    } else {
-      // Crear nueva sección
-      const { data: newSection, error: sectionError } = await supabase
-        .from('sections')
-        .insert({
-          name: categoryName,
-          slug,
-          description: `Catálogo de ${categoryName.toLowerCase()}`,
-          order: Object.keys(categoriesWithSubsections).indexOf(categoryName),
-          is_active: true
-        })
-        .select()
-        .single()
-      
-      if (sectionError) {
-        console.error(`Error creando sección "${categoryName}":`, sectionError)
-        continue
-      }
-      
-      sectionId = newSection.id
-      console.log(`Sección "${categoryName}" creada con ID: ${sectionId}`)
+    if (sectionError) {
+      console.error(`Error creando sección "${categoryName}":`, sectionError)
+      continue
     }
+    
+    const sectionId = newSection.id
+    console.log(`Sección "${categoryName}" creada con ID: ${sectionId}`)
     
     // Crear subsecciones si la categoría tiene subsecciones
     if (subsections.length > 0) {
       for (const subsectionName of subsections) {
         const subsectionSlug = subsectionName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '-')
         
-        // Verificar si la subsección ya existe
-        const { data: existingSubsection } = await supabase
+        const { error: subsectionError } = await supabase
           .from('subsections')
-          .select('id')
-          .eq('slug', subsectionSlug)
-          .eq('section_id', sectionId)
-          .single()
+          .insert({
+            section_id: sectionId,
+            name: subsectionName,
+            slug: subsectionSlug,
+            description: `${subsectionName} de ${categoryName}`,
+            order: subsections.indexOf(subsectionName),
+            is_active: true
+          })
         
-        if (!existingSubsection) {
-          const { error: subsectionError } = await supabase
-            .from('subsections')
-            .insert({
-              section_id: sectionId,
-              name: subsectionName,
-              slug: subsectionSlug,
-              description: `${subsectionName} de ${categoryName}`,
-              order: subsections.indexOf(subsectionName),
-              is_active: true
-            })
-          
-          if (subsectionError) {
-            console.error(`Error creando subsección "${subsectionName}":`, subsectionError)
-          } else {
-            console.log(`Subsección "${subsectionName}" creada para "${categoryName}"`)
-          }
+        if (subsectionError) {
+          console.error(`Error creando subsección "${subsectionName}":`, subsectionError)
         } else {
-          console.log(`Subsección "${subsectionName}" ya existe para "${categoryName}"`)
+          console.log(`Subsección "${subsectionName}" creada para "${categoryName}"`)
         }
       }
     }

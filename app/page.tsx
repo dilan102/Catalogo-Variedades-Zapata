@@ -21,24 +21,18 @@ export default function HomePage() {
   useEffect(() => {
     const loadData = async () => {
       try {
+        // Siempre inicializar categorías para asegurar que estén actualizadas
+        console.log('Inicializando categorías...')
+        setInitializing(true)
+        await initializeCategories()
+        setInitializing(false)
+        
+        // Cargar datos después de inicializar
         const [s, f] = await Promise.all([getSections(), getFeaturedProducts(6)])
         console.log('Secciones cargadas:', s.length)
         console.log('Productos destacados cargados:', f.length)
-        
-        // Si no hay secciones, inicializar automáticamente
-        if (s.length === 0) {
-          console.log('No hay secciones, inicializando categorías...')
-          setInitializing(true)
-          await initializeCategories()
-          setInitializing(false)
-          // Recargar datos después de inicializar
-          const [newSections, newFeatured] = await Promise.all([getSections(), getFeaturedProducts(6)])
-          setSections(newSections)
-          setFeatured(newFeatured)
-        } else {
-          setSections(s)
-          setFeatured(f)
-        }
+        setSections(s)
+        setFeatured(f)
       } catch (error) {
         console.error('Error al cargar datos:', error)
       } finally {
