@@ -30,7 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es" className={`${playfair.variable} ${cormorant.variable} ${spaceGrotesk.variable}`}>
       <body className="bg-[#FAFCF9] text-[#0F2A1A] font-sans">
         <Navbar />
-        <main className="pt-16 pb-20 sm:pb-0 min-h-screen">{children}</main>
+        <main className="pt-16 pb-20 sm:pb-0 sm:pt-16 min-h-screen">{children}</main>
       </body>
     </html>
   )

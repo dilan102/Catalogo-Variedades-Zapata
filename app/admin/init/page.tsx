@@ -1,6 +1,5 @@
 'use client'
 import { useState } from 'react'
-import { runInitialization } from '@/lib/init-categories'
 
 export default function InitCategoriesPage() {
   const [loading, setLoading] = useState(false)
@@ -10,9 +9,17 @@ export default function InitCategoriesPage() {
     setLoading(true)
     setResult(null)
     
-    const response = await runInitialization()
-    setResult(response)
-    setLoading(false)
+    try {
+      const response = await fetch('/api/reset-categories', {
+        method: 'POST',
+      })
+      const data = await response.json()
+      setResult(data)
+    } catch (error) {
+      setResult({ success: false, message: 'Error al comunicarse con el servidor' })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -38,7 +45,7 @@ export default function InitCategoriesPage() {
         disabled={loading}
         className="btn-primary px-6 py-3 text-white font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {loading ? 'Inicializando...' : 'Inicializar Categorías'}
+        {loading ? 'Inicializando...' : 'Resetear e Inicializar Categorías'}
       </button>
 
       {result && (
