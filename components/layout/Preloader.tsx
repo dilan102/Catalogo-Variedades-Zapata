@@ -10,8 +10,8 @@ export default function Preloader() {
   const [fadeOut, setFadeOut] = useState(false)
 
   const images = [
-    '/Fotos/Dama_elegante.png',
-    '/Fotos/Fondo_elegante.jpeg'
+    '/Dama_elegante.png',
+    '/Fondo_elegante.jpeg'
   ]
 
   useEffect(() => {
