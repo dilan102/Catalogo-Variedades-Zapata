@@ -12,7 +12,7 @@ export default function Contact() {
               Contáctanos por WhatsApp para información sobre catálogos y condiciones de venta mayorista.
             </p>
             <a 
-              href="https://wa.me/573000000000" 
+              href="https://wa.me/+573054110472" 
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary inline-flex items-center gap-3 px-8 py-4 text-white font-semibold text-lg"
@@ -25,7 +25,7 @@ export default function Contact() {
           </div>
           <div className="order-first md:order-last">
             <Image 
-              src="/Dama_elegante2.jpeg" 
+              src="/dama_elegante2.png" 
               alt="Variedades Zapata" 
               width={600} 
               height={400} 
