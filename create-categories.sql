@@ -2,7 +2,7 @@
 -- Ejecutar esto en el SQL Editor de Supabase
 
 -- Insertar categorías principales
-INSERT INTO sections (id, name, slug, description, order, is_active, created_at) VALUES
+INSERT INTO sections (id, name, slug, description, "order", is_active, created_at) VALUES
   (gen_random_uuid(), 'Dama', 'dama', 'Catálogo de dama', 0, true, NOW()),
   (gen_random_uuid(), 'Caballero', 'caballero', 'Catálogo de caballero', 1, true, NOW()),
   (gen_random_uuid(), 'Niño', 'nino', 'Catálogo de niño', 2, true, NOW()),
@@ -13,7 +13,7 @@ INSERT INTO sections (id, name, slug, description, order, is_active, created_at)
   (gen_random_uuid(), 'Avon', 'avon', 'Catálogo de Avon', 7, true, NOW());
 
 -- Insertar subsecciones para Dama
-INSERT INTO subsections (id, section_id, name, slug, description, order, is_active, created_at)
+INSERT INTO subsections (id, section_id, name, slug, description, "order", is_active, created_at)
 SELECT 
   gen_random_uuid(), 
   (SELECT id FROM sections WHERE slug = 'dama'),
@@ -25,7 +25,7 @@ SELECT
   NOW();
 
 -- Insertar subsecciones para Caballero
-INSERT INTO subsections (id, section_id, name, slug, description, order, is_active, created_at)
+INSERT INTO subsections (id, section_id, name, slug, description, "order", is_active, created_at)
 SELECT 
   gen_random_uuid(), 
   (SELECT id FROM sections WHERE slug = 'caballero'),
@@ -37,7 +37,7 @@ SELECT
   NOW();
 
 -- Insertar subsecciones para Niño
-INSERT INTO subsections (id, section_id, name, slug, description, order, is_active, created_at)
+INSERT INTO subsections (id, section_id, name, slug, description, "order", is_active, created_at)
 SELECT 
   gen_random_uuid(), 
   (SELECT id FROM sections WHERE slug = 'nino'),
@@ -49,7 +49,7 @@ SELECT
   NOW();
 
 -- Insertar subsecciones para Niña
-INSERT INTO subsections (id, section_id, name, slug, description, order, is_active, created_at)
+INSERT INTO subsections (id, section_id, name, slug, description, "order", is_active, created_at)
 SELECT 
   gen_random_uuid(), 
   (SELECT id FROM sections WHERE slug = 'nina'),
@@ -61,7 +61,7 @@ SELECT
   NOW();
 
 -- Insertar subsecciones para Accesorios
-INSERT INTO subsections (id, section_id, name, slug, description, order, is_active, created_at)
+INSERT INTO subsections (id, section_id, name, slug, description, "order", is_active, created_at)
 SELECT 
   gen_random_uuid(), 
   (SELECT id FROM sections WHERE slug = 'accesorios'),
@@ -73,7 +73,7 @@ SELECT
   NOW();
 
 -- Insertar subsecciones para Edredones
-INSERT INTO subsections (id, section_id, name, slug, description, order, is_active, created_at)
+INSERT INTO subsections (id, section_id, name, slug, description, "order", is_active, created_at)
 SELECT 
   gen_random_uuid(), 
   (SELECT id FROM sections WHERE slug = 'edredones'),
