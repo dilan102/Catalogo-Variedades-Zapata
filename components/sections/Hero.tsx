@@ -1,6 +1,5 @@
 'use client'
 import { useState } from 'react'
-import Link from 'next/link'
 
 export default function Hero() {
   const [scrolling, setScrolling] = useState(false)
@@ -16,7 +15,7 @@ export default function Hero() {
   }
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center bg-[#FAFCF9] overflow-hidden">
+    <section className="relative min-h-[75vh] flex items-center justify-center bg-[#FAFCF9] overflow-hidden">
       {/* Radial gradient natural */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_10%,rgba(111,203,140,0.15),transparent_55%)]" />
       
@@ -28,21 +27,13 @@ export default function Hero() {
           <p className="text-lg sm:text-xl md:text-2xl text-[#5C7A66] mb-12 max-w-3xl mx-auto leading-relaxed">
             Distribuidora mayorista de ropa para tu negocio.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-slide-up" style={{ animationDelay: '0.3s' }}>
+          <div className="flex justify-center items-center animate-slide-up" style={{ animationDelay: '0.3s' }}>
             <a 
               href="#categorias" 
               onClick={handleScroll}
               className={`btn-primary px-8 py-4 text-white font-semibold text-center transition-all duration-300 ${scrolling ? 'scale-95 opacity-80' : ''}`}
             >
               {scrolling ? 'Deslizando...' : 'Ver Catálogo'}
-            </a>
-            <a 
-              href="https://wa.me/573000000000" 
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-8 py-4 bg-white/80 backdrop-blur-sm text-[#1F6B3C] border border-[#DCEFDD] font-semibold rounded-14 hover:bg-white transition-all duration-300 shadow-sm text-center"
-            >
-              Contactar por WhatsApp
             </a>
           </div>
         </div>

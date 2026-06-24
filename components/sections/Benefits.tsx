@@ -21,21 +21,23 @@ export default function Benefits() {
   ]
 
   return (
-    <section className="py-20 sm:py-24 bg-[#EAF8EC]">
+    <section className="py-8">
       <div className="px-4 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12">
           {benefits.map((benefit, index) => {
             const Icon = benefit.icon
             return (
               <div 
                 key={index} 
-                className="text-center p-8"
+                className="flex items-center gap-3"
               >
-                <div className="w-16 h-16 mx-auto mb-4 bg-[rgba(62,154,96,0.1)] rounded-2xl flex items-center justify-center">
-                  <Icon size={32} className="text-[#3E9A60]" />
+                <div className="w-10 h-10 bg-[rgba(62,154,96,0.1)] rounded-xl flex items-center justify-center flex-shrink-0">
+                  <Icon size={20} className="text-[#3E9A60]" />
                 </div>
-                <h3 className="font-serif text-xl sm:text-2xl font-semibold text-[#0F2A1A] mb-4">{benefit.title}</h3>
-                <p className="text-base text-[#5C7A66] leading-relaxed">{benefit.description}</p>
+                <div>
+                  <h3 className="font-serif text-base font-semibold text-[#0F2A1A]">{benefit.title}</h3>
+                  <p className="text-sm text-[#5C7A66]">{benefit.description}</p>
+                </div>
               </div>
             )
           })}

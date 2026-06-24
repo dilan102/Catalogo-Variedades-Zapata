@@ -4,7 +4,7 @@ import type { Section } from '@/types'
 
 export default function SectionCard({ section }: { section: Section }) {
   return (
-    <Link href={`/${section.slug}`} className="group relative block aspect-square bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
+    <Link href={`/${section.slug}`} className="group relative block aspect-square bg-white rounded-2xl overflow-hidden border border-[#DCEFDD] shadow-sm hover:shadow-md transition-shadow duration-300">
       {section.image_url && (
         <Image src={section.image_url} alt={section.name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" sizes="50vw" />
       )}

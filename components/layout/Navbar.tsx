@@ -2,14 +2,12 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Menu, X, User } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { getSections } from '@/lib/queries'
-import AdminModal from '@/components/ui/AdminModal'
 import type { Section } from '@/types'
 
 export default function Navbar() {
   const [open, setOpen] = useState(false)
-  const [adminOpen, setAdminOpen] = useState(false)
   const [sections, setSections] = useState<Section[]>([])
 
   useEffect(() => { getSections().then(setSections).catch(() => {}) }, [])
@@ -24,12 +22,7 @@ export default function Navbar() {
             </div>
             <span className="font-semibold text-lg sm:text-xl tracking-tight text-[#0F2A1A]">Variedades Zapata</span>
           </Link>
-          <div className="flex items-center gap-2">
-            <button onClick={() => setAdminOpen(true)} className="p-2 text-[#3E9A60] hover:bg-[#EAF8EC] rounded-xl transition-all duration-200 hover:scale-105">
-              <User size={24} />
-            </button>
-            <button onClick={() => setOpen(true)} className="p-2 text-[#3E9A60] hover:bg-[#EAF8EC] rounded-xl transition-all duration-200 hover:scale-105"><Menu size={24} /></button>
-          </div>
+          <button onClick={() => setOpen(true)} className="p-2 text-[#3E9A60] hover:bg-[#EAF8EC] rounded-xl transition-all duration-200 hover:scale-105"><Menu size={24} /></button>
         </div>
       </header>
       {open && (
@@ -58,7 +51,6 @@ export default function Navbar() {
           ))}
         </nav>
       </aside>
-      <AdminModal isOpen={adminOpen} onClose={() => setAdminOpen(false)} />
     </>
   )
 }

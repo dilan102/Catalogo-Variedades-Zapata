@@ -40,8 +40,9 @@ export default function HomePage() {
       <Benefits />
       
       <div className="px-4 py-20 sm:py-24 max-w-7xl mx-auto">
-        <section id="categorias" className="mb-16">
-          <div className="flex items-center justify-between mb-8">
+        <section id="categorias" className="mb-16 border border-[#DCEFDD] rounded-3xl p-6 sm:p-10">
+          <div className="mb-8">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[#3E9A60] mb-2">CATÁLOGO</p>
             <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-[#0F2A1A]">Nuestras Prendas</h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
@@ -51,9 +52,16 @@ export default function HomePage() {
           </div>
         </section>
         
+        <div className="flex justify-center my-12">
+          <div className="w-20 h-0.5 bg-[#6FCB8C]"></div>
+        </div>
+        
         {(loading || featured.length > 0) && (
-          <section className="animate-fade-in">
-            <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-[#0F2A1A] mb-8">Lo nuevo</h2>
+          <section className="border border-[#DCEFDD] rounded-3xl p-6 sm:p-10 animate-fade-in">
+            <div className="mb-8">
+              <p className="text-xs font-semibold uppercase tracking-widest text-[#3E9A60] mb-2">NOVEDADES</p>
+              <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-[#0F2A1A]">Lo nuevo</h2>
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8 sm:gap-x-6 sm:gap-y-8">
               {loading ? Array(4).fill(0).map((_, i) => <ProductCardSkeleton key={i} />) : featured.map((p) => {
                 const sub = (p as any).subsection

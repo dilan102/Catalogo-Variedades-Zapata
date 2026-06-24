@@ -1,22 +1,20 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { formatPrice } from '@/lib/utils'
-import { Leaf } from 'lucide-react'
 import type { Product } from '@/types'
 
 export default function ProductCard({ product, href }: { product: Product; href: string }) {
   const image = product.images?.[0]
   return (
     <Link href={href} className="group block">
-      <div className="relative aspect-[3/4] bg-white rounded-2xl overflow-hidden mb-4 shadow-sm hover:shadow-md transition-shadow duration-300">
+      <div className="relative aspect-[3/4] bg-white rounded-2xl overflow-hidden mb-4 border border-[#DCEFDD] shadow-sm hover:shadow-md transition-shadow duration-300">
         {image ? (
           <Image src={image} alt={product.name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" sizes="50vw" />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-[#5C7A66]/30 text-xs">Sin imagen</div>
         )}
         {product.is_featured && (
-          <span className="absolute top-3 left-3 bg-[rgba(95,190,123,0.12)] border border-[#6FCB8C] text-[#1F6B3C] text-[10px] font-semibold px-3 py-1 rounded-full shadow-sm flex items-center gap-1">
-            <Leaf size={10} />
+          <span className="absolute top-3 left-3 bg-[rgba(95,190,123,0.12)] border border-[#6FCB8C] text-[#1F6B3C] text-[10px] font-semibold px-3 py-1 rounded-full shadow-sm">
             Destacado
           </span>
         )}
