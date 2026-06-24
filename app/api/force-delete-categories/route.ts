@@ -16,42 +16,53 @@ export async function POST() {
   try {
     const supabase = createClient()
 
-    console.log('Iniciando reset agresivo de categorías...')
+    console.log('Iniciando eliminación forzada de categorías...')
 
-    // Obtener todas las subsecciones existentes
-    const { data: existingSubsections } = await supabase.from('subsections').select('id')
+    // Primero eliminar todos los productos (para evitar referencias)
+    console.log('Eliminando productos...')
+    const { error: deleteProductsError } = await supabase
+      .from('products')
+      .delete()
+      .not('id', 'is', null)
     
-    if (existingSubsections && existingSubsections.length > 0) {
-      console.log(`Eliminando ${existingSubsections.length} subsecciones...`)
-      const subsectionIds = existingSubsections.map(s => s.id)
-      const { error: deleteSubsectionsError } = await supabase
-        .from('subsections')
-        .delete()
-        .in('id', subsectionIds)
-      
-      if (deleteSubsectionsError) {
-        console.error('Error eliminando subsecciones:', deleteSubsectionsError)
-      } else {
-        console.log('Subsecciones eliminadas correctamente')
-      }
+    if (deleteProductsError) {
+      console.error('Error eliminando productos:', deleteProductsError)
+    } else {
+      console.log('Productos eliminados')
     }
 
-    // Obtener todas las secciones existentes
-    const { data: existingSections } = await supabase.from('sections').select('id')
+    // Eliminar todas las subsecciones
+    console.log('Eliminando subsecciones...')
+    const { data: allSubsections } = await supabase.from('subsections').select('id')
     
-    if (existingSections && existingSections.length > 0) {
-      console.log(`Eliminando ${existingSections.length} secciones...`)
-      const sectionIds = existingSections.map(s => s.id)
-      const { error: deleteSectionsError } = await supabase
-        .from('sections')
-        .delete()
-        .in('id', sectionIds)
-      
-      if (deleteSectionsError) {
-        console.error('Error eliminando secciones:', deleteSectionsError)
-      } else {
-        console.log('Secciones eliminadas correctamente')
+    if (allSubsections && allSubsections.length > 0) {
+      for (const subsection of allSubsections) {
+        const { error } = await supabase
+          .from('subsections')
+          .delete()
+          .eq('id', subsection.id)
+        if (error) {
+          console.error(`Error eliminando subsección ${subsection.id}:`, error)
+        }
       }
+      console.log('Subsecciones eliminadas')
+    }
+
+    // Eliminar todas las secciones
+    console.log('Eliminando secciones...')
+    const { data: allSections } = await supabase.from('sections').select('id')
+    
+    if (allSections && allSections.length > 0) {
+      for (const section of allSections) {
+        const { error } = await supabase
+          .from('sections')
+          .delete()
+          .eq('id', section.id)
+        if (error) {
+          console.error(`Error eliminando sección ${section.id}:`, error)
+        }
+      }
+      console.log('Secciones eliminadas')
     }
 
     // Crear nuevas categorías
@@ -105,7 +116,7 @@ export async function POST() {
     }
     
     console.log('Reset de categorías completado exitosamente')
-    return NextResponse.json({ success: true, message: 'Categorías reseteadas e inicializadas correctamente' })
+    return NextResponse.json({ success: true, message: 'Categorías eliminadas forzadamente y creadas nuevas' })
   } catch (error) {
     console.error('Error reseteando categorías:', error)
     return NextResponse.json({ success: false, message: 'Error reseteando categorías' }, { status: 500 })

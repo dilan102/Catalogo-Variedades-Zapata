@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/client'
+import { createClient } from '@supabase/supabase-js'
 
 const categoriesWithSubsections: Record<string, string[]> = {
   'Dama': ['Pantalones', 'Camisas', 'Chaquetas', 'Sacos', 'Blusas', 'Vestidos', 'Ropa deportiva', 'Corsets', 'Ropa interior', 'Medias', 'Zapatos'],
@@ -14,16 +14,36 @@ const categoriesWithSubsections: Record<string, string[]> = {
 
 export async function POST() {
   try {
-    const supabase = createClient()
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
 
-    console.log('Iniciando reset agresivo de categorías...')
+    if (!supabaseUrl || !supabaseKey) {
+      return NextResponse.json({ success: false, message: 'Faltan credenciales de Supabase' }, { status: 500 })
+    }
 
-    // Obtener todas las subsecciones existentes
-    const { data: existingSubsections } = await supabase.from('subsections').select('id')
+    const supabase = createClient(supabaseUrl, supabaseKey)
+
+    console.log('Iniciando reset con servidor Supabase...')
+
+    // Eliminar todos los productos
+    console.log('Eliminando productos...')
+    const { error: deleteProductsError } = await supabase
+      .from('products')
+      .delete()
+      .not('id', 'is', null)
     
-    if (existingSubsections && existingSubsections.length > 0) {
-      console.log(`Eliminando ${existingSubsections.length} subsecciones...`)
-      const subsectionIds = existingSubsections.map(s => s.id)
+    if (deleteProductsError) {
+      console.error('Error eliminando productos:', deleteProductsError)
+    } else {
+      console.log('Productos eliminados')
+    }
+
+    // Eliminar todas las subsecciones
+    console.log('Eliminando subsecciones...')
+    const { data: allSubsections } = await supabase.from('subsections').select('id')
+    
+    if (allSubsections && allSubsections.length > 0) {
+      const subsectionIds = allSubsections.map(s => s.id)
       const { error: deleteSubsectionsError } = await supabase
         .from('subsections')
         .delete()
@@ -32,16 +52,16 @@ export async function POST() {
       if (deleteSubsectionsError) {
         console.error('Error eliminando subsecciones:', deleteSubsectionsError)
       } else {
-        console.log('Subsecciones eliminadas correctamente')
+        console.log('Subsecciones eliminadas')
       }
     }
 
-    // Obtener todas las secciones existentes
-    const { data: existingSections } = await supabase.from('sections').select('id')
+    // Eliminar todas las secciones
+    console.log('Eliminando secciones...')
+    const { data: allSections } = await supabase.from('sections').select('id')
     
-    if (existingSections && existingSections.length > 0) {
-      console.log(`Eliminando ${existingSections.length} secciones...`)
-      const sectionIds = existingSections.map(s => s.id)
+    if (allSections && allSections.length > 0) {
+      const sectionIds = allSections.map(s => s.id)
       const { error: deleteSectionsError } = await supabase
         .from('sections')
         .delete()
@@ -50,7 +70,7 @@ export async function POST() {
       if (deleteSectionsError) {
         console.error('Error eliminando secciones:', deleteSectionsError)
       } else {
-        console.log('Secciones eliminadas correctamente')
+        console.log('Secciones eliminadas')
       }
     }
 
