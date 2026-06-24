@@ -1,7 +1,5 @@
 import { createClient } from '@/utils/supabase/client'
 
-const supabase = createClient()
-
 const categoriesWithSubsections: Record<string, string[]> = {
   'Dama': ['Pantalones', 'Camisas', 'Chaquetas', 'Sacos', 'Blusas', 'Vestidos', 'Ropa deportiva', 'Corsets', 'Ropa interior', 'Medias', 'Zapatos'],
   'Caballero': ['Pantalones', 'Pantalonetas', 'Camisas', 'Sacos', 'Chaquetas', 'Medias', 'Zapatos', 'Ropa interior', 'Ropa deportiva'],
@@ -16,13 +14,15 @@ const categoriesWithSubsections: Record<string, string[]> = {
 export async function initializeCategories() {
   console.log('Inicializando categorías y subsecciones...')
   
+  const supabase = createClient()
+  
   // Primero eliminar todas las categorías y subsecciones existentes
   console.log('Eliminando categorías y subsecciones existentes...')
   
   const { error: deleteSubsectionsError } = await supabase
     .from('subsections')
     .delete()
-    .neq('id', 0) // Hack para eliminar todos los registros
+    .not('id', 'is', null)
   
   if (deleteSubsectionsError) {
     console.error('Error eliminando subsecciones:', deleteSubsectionsError)
@@ -33,7 +33,7 @@ export async function initializeCategories() {
   const { error: deleteSectionsError } = await supabase
     .from('sections')
     .delete()
-    .neq('id', 0) // Hack para eliminar todos los registros
+    .not('id', 'is', null)
   
   if (deleteSectionsError) {
     console.error('Error eliminando secciones:', deleteSectionsError)

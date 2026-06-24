@@ -35,7 +35,7 @@ export default function Hero() {
       <div className="relative z-10 px-4 py-20 max-w-7xl mx-auto text-center">
         <div className="animate-fade-in">
           <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold text-[#0F2A1A] leading-tight mb-6">
-            Vendemos prendas <span className="text-[#1F6B3C]">asombrosas</span>
+            No vendemos prendas <span className="text-[#1F6B3C]">Vendemos sueños</span>
           </h1>
           <p className="text-lg sm:text-xl md:text-2xl text-[#5C7A66] mb-12 max-w-3xl mx-auto leading-relaxed">
             Moda que inspira, calidad que enamora y precios que impulsan tu negocio.
