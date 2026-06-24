@@ -15,15 +15,25 @@ export default function AdminModal({ isOpen, onClose }: { isOpen: boolean; onClo
     setError('')
     setLoading(true)
 
-    // Autenticación básica (puedes cambiar esto por tu sistema real)
-    if (username === 'VariedadesZ' && password === 'VZKZ') {
-      // Guardar sesión en localStorage
-      localStorage.setItem('adminAuth', 'true')
-      setLoading(false)
-      onClose()
-      router.push('/admin')
-    } else {
-      setError('Credenciales incorrectas')
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setLoading(false)
+        onClose()
+        router.push('/admin')
+      } else {
+        setError(data.message || 'Credenciales incorrectas')
+        setLoading(false)
+      }
+    } catch (error) {
+      setError('Error al conectar con el servidor')
       setLoading(false)
     }
   }
@@ -97,12 +107,6 @@ export default function AdminModal({ isOpen, onClose }: { isOpen: boolean; onClo
             {loading ? 'Verificando...' : 'Ingresar'}
           </button>
         </form>
-
-        <div className="mt-6 text-center">
-          <p className="text-xs text-[#5C7A66]">
-            Credenciales: VariedadesZ / VZKZ
-          </p>
-        </div>
       </div>
     </div>
   )

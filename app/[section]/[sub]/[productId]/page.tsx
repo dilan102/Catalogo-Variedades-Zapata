@@ -23,12 +23,12 @@ export default function ProductPage({ params }: { params: { section: string; sub
 
   return (
     <div className="max-w-7xl mx-auto animate-fade-in">
-      <div className="relative bg-green-50 rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm">
+      <div className="relative bg-[#EAF8EC] rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm">
         <div className="aspect-[4/5] sm:aspect-[3/4] lg:aspect-[4/3] relative overflow-hidden">
           {images.length > 0 ? (
             <Image src={images[imgIndex]} alt={product.name} fill className="object-cover transition-opacity duration-300" priority />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center text-green-200 text-sm">Sin imagen</div>
+            <div className="absolute inset-0 flex items-center justify-center text-[#6FCB8C] text-sm">Sin imagen</div>
           )}
           {images.length > 1 && (
             <>
@@ -42,38 +42,38 @@ export default function ProductPage({ params }: { params: { section: string; sub
         </div>
       </div>
       <div className="px-4 py-6 sm:px-6 lg:px-8">
-        <p className="text-xs text-green-400 mb-2">
-          {section && <Link href={`/${section.slug}`} className="underline hover:text-green-600 transition-colors">{section.name}</Link>}
-          {subsection && <> / <Link href={`/${section?.slug}/${subsection.slug}`} className="underline hover:text-green-600 transition-colors">{subsection.name}</Link></>}
+        <p className="text-xs text-[#5C7A66] mb-2">
+          {section && <Link href={`/${section.slug}`} className="underline hover:text-[#3E9A60] transition-colors">{section.name}</Link>}
+          {subsection && <> / <Link href={`/${section?.slug}/${subsection.slug}`} className="underline hover:text-[#3E9A60] transition-colors">{subsection.name}</Link></>}
         </p>
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-green-900">{product.name}</h1>
-        {product.price !== null && <p className="text-xl sm:text-2xl lg:text-3xl font-semibold text-green-700 mt-2">{formatPrice(product.price)}</p>}
-        {product.description && <p className="text-base sm:text-lg text-green-600 mt-4 leading-relaxed">{product.description}</p>}
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#0F2A1A]">{product.name}</h1>
+        {product.price !== null && <p className="text-xl sm:text-2xl lg:text-3xl font-semibold text-[#1F6B3C] mt-2">{formatPrice(product.price)}</p>}
+        {product.description && <p className="text-base sm:text-lg text-[#5C7A66] mt-4 leading-relaxed">{product.description}</p>}
         {product.sizes.length > 0 && (
           <div className="mt-6">
-            <p className="text-xs font-semibold uppercase tracking-wider text-green-500 mb-3">Talla</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#5C7A66] mb-3">Talla</p>
             <div className="flex flex-wrap gap-2">
               {product.sizes.map((s) => (
-                <button key={s} onClick={() => setSelectedSize(s === selectedSize ? null : s)} className={`px-4 py-2 text-sm border rounded-xl transition-all duration-200 hover:scale-105 ${selectedSize === s ? 'bg-green-800 text-white border-green-800 shadow-md' : 'border-green-200 text-green-600 hover:border-green-300 bg-white'}`}>{s}</button>
+                <button key={s} onClick={() => setSelectedSize(s === selectedSize ? null : s)} className={`px-4 py-2 text-sm border rounded-xl transition-all duration-200 hover:scale-105 min-h-[44px] ${selectedSize === s ? 'bg-[#1F6B3C] text-white border-[#1F6B3C] shadow-md' : 'border-[#DCEFDD] text-[#0F2A1A] hover:border-[#3E9A60] bg-white'}`}>{s}</button>
               ))}
             </div>
           </div>
         )}
         {product.colors.length > 0 && (
           <div className="mt-5">
-            <p className="text-xs font-semibold uppercase tracking-wider text-green-500 mb-3">Color</p>
+            <p className="text-xs font-semibold uppercase tracking-wider text-[#5C7A66] mb-3">Color</p>
             <div className="flex flex-wrap gap-2">
               {product.colors.map((c) => (
-                <button key={c} onClick={() => setSelectedColor(c === selectedColor ? null : c)} className={`px-4 py-2 text-sm border rounded-xl transition-all duration-200 hover:scale-105 ${selectedColor === c ? 'bg-green-800 text-white border-green-800 shadow-md' : 'border-green-200 text-green-600 hover:border-green-300 bg-white'}`}>{c}</button>
+                <button key={c} onClick={() => setSelectedColor(c === selectedColor ? null : c)} className={`px-4 py-2 text-sm border rounded-xl transition-all duration-200 hover:scale-105 min-h-[44px] ${selectedColor === c ? 'bg-[#1F6B3C] text-white border-[#1F6B3C] shadow-md' : 'border-[#DCEFDD] text-[#0F2A1A] hover:border-[#3E9A60] bg-white'}`}>{c}</button>
               ))}
             </div>
           </div>
         )}
         <div className="mt-8 space-y-3">
-          <a href={`https://wa.me/?text=${encodeURIComponent(`Hola, me interesa: ${product.name}`)}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full py-4 bg-green-600 text-white font-semibold rounded-2xl text-sm hover:bg-green-700 transition-all duration-200 hover:scale-[1.02] shadow-md hover:shadow-lg">
+          <a href={`https://wa.me/?text=${encodeURIComponent(`Hola, me interesa: ${product.name}`)}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full py-4 bg-[#3E9A60] text-white font-semibold rounded-2xl text-sm hover:bg-[#1F6B3C] transition-all duration-200 hover:scale-[1.02] shadow-md hover:shadow-lg min-h-[44px]">
             Consultar por WhatsApp
           </a>
-          <Link href={`/${params.section}/${params.sub}`} className="flex items-center justify-center w-full py-3.5 border border-green-200 text-green-600 font-medium rounded-2xl text-sm hover:bg-green-50 transition-all duration-200 hover:scale-[1.02]">
+          <Link href={`/${params.section}/${params.sub}`} className="flex items-center justify-center w-full py-3.5 border border-[#DCEFDD] text-[#3E9A60] font-medium rounded-2xl text-sm hover:bg-[#EAF8EC] transition-all duration-200 hover:scale-[1.02] min-h-[44px]">
             Volver
           </Link>
         </div>

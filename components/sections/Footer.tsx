@@ -4,16 +4,8 @@ import Link from 'next/link'
 
 export default function Footer() {
   return (
-    <footer className="bg-[#1F6B3C] text-white py-12 sm:py-16 relative overflow-hidden">
-      {/* Botanical pattern background */}
-      <svg className="absolute inset-0 opacity-5" viewBox="0 0 100 100" fill="none" stroke="#6FCB8C" strokeWidth="0.5">
-        <path d="M0 20 Q25 0 50 20 T100 20" />
-        <path d="M0 40 Q25 20 50 40 T100 40" />
-        <path d="M0 60 Q25 40 50 60 T100 60" />
-        <path d="M0 80 Q25 60 50 80 T100 80" />
-      </svg>
-      
-      <div className="px-4 max-w-7xl mx-auto relative z-10">
+    <footer className="bg-[#1F6B3C] text-white py-12 sm:py-16">
+      <div className="px-4 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12">
           {/* Logo y descripción */}
           <div className="text-center md:text-left">
@@ -24,7 +16,7 @@ export default function Footer() {
               <span className="font-serif font-semibold text-xl">Variedades Zapata</span>
             </div>
             <p className="text-sm text-white/80 leading-relaxed">
-              Distribuidora de ropa mayorista. Moda que inspira, calidad que enamora y precios que impulsan tu negocio.
+              Distribuidora mayorista de ropa para negocios.
             </p>
           </div>
 

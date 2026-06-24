@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Playfair_Display, Cormorant_Garamond, Space_Grotesk } from 'next/font/google'
 import './globals.css'
 import Navbar from '@/components/layout/Navbar'
+import Preloader from '@/components/layout/Preloader'
 
 const playfair = Playfair_Display({ 
   subsets: ['latin'], 
@@ -29,8 +30,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es" className={`${playfair.variable} ${cormorant.variable} ${spaceGrotesk.variable}`}>
       <body className="bg-[#FAFCF9] text-[#0F2A1A] font-sans">
+        <Preloader />
         <Navbar />
-        <main className="pb-20 sm:pb-0 sm:pt-16 min-h-screen">{children}</main>
+        <main className="pt-16 min-h-screen">{children}</main>
       </body>
     </html>
   )

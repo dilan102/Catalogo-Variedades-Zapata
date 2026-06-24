@@ -17,29 +17,29 @@ export default function SectionPage({ params }: { params: { section: string } })
 
   return (
     <div className="px-4 py-6 sm:py-8 max-w-7xl mx-auto">
-      <p className="text-xs text-green-400 mb-2 animate-fade-in">
-        <Link href="/" className="underline hover:text-green-600 transition-colors">Inicio</Link> / {section?.name ?? '...'}
+      <p className="text-xs text-[#5C7A66] mb-2 animate-fade-in">
+        <Link href="/" className="underline hover:text-[#3E9A60] transition-colors">Inicio</Link> / {section?.name ?? '...'}
       </p>
-      <h1 className="text-2xl sm:text-3xl font-bold text-green-900 mb-6 animate-fade-in">{section?.name ?? '...'}</h1>
+      <h1 className="text-2xl sm:text-3xl font-bold text-[#0F2A1A] mb-6 animate-fade-in">{section?.name ?? '...'}</h1>
       {loading ? (
-        <div className="space-y-3 animate-fade-in">{Array(4).fill(0).map((_, i) => <div key={i} className="h-20 bg-green-50 rounded-2xl animate-pulse" />)}</div>
+        <div className="space-y-3 animate-fade-in">{Array(4).fill(0).map((_, i) => <div key={i} className="h-20 bg-[#EAF8EC] rounded-2xl animate-pulse" />)}</div>
       ) : (
-        <div className="divide-y divide-green-100 animate-fade-in">
+        <div className="divide-y divide-[#DCEFDD] animate-fade-in">
           {subsections.map((sub: any, i) => (
             <Link 
               key={sub.id} 
               href={`/${params.section}/${sub.slug}`} 
-              className="flex items-center justify-between py-5 hover:bg-green-50 transition-all duration-200 hover:pl-6 group animate-slide-up"
+              className="flex items-center justify-between py-5 hover:bg-[#EAF8EC] transition-all duration-200 hover:pl-6 group animate-slide-up"
               style={{ animationDelay: `${i * 50}ms` }}
             >
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-green-800 text-base sm:text-lg group-hover:text-green-700 transition-colors">{sub.name}</p>
-                {sub.description && <p className="text-sm text-green-500 mt-1">{sub.description}</p>}
+                <p className="font-medium text-[#0F2A1A] text-base sm:text-lg group-hover:text-[#3E9A60] transition-colors">{sub.name}</p>
+                {sub.description && <p className="text-sm text-[#5C7A66] mt-1">{sub.description}</p>}
               </div>
-              <ChevronRight size={18} className="text-green-300 flex-shrink-0 ml-3 group-hover:text-green-500 group-hover:translate-x-1 transition-all duration-200" />
+              <ChevronRight size={18} className="text-[#6FCB8C] flex-shrink-0 ml-3 group-hover:text-[#3E9A60] group-hover:translate-x-1 transition-all duration-200" />
             </Link>
           ))}
-          {subsections.length === 0 && <p className="text-center py-20 text-green-400 text-base animate-fade-in">No hay subcategorías aún.</p>}
+          {subsections.length === 0 && <p className="text-center py-20 text-[#5C7A66] text-base animate-fade-in">No hay subcategorías aún.</p>}
         </div>
       )}
     </div>

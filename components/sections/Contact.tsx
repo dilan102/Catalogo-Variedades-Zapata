@@ -6,7 +6,7 @@ export default function Contact() {
       <div className="px-4 max-w-4xl mx-auto text-center">
         <h2 className="font-serif text-3xl sm:text-4xl font-semibold text-[#0F2A1A] mb-6">¿Interesado en nuestros productos?</h2>
         <p className="text-lg text-[#5C7A66] mb-12 max-w-2xl mx-auto leading-relaxed">
-          Contáctanos por WhatsApp para obtener más información sobre nuestros catálogos, precios y condiciones de venta mayorista.
+          Contáctanos por WhatsApp para información sobre catálogos y condiciones de venta mayorista.
         </p>
         <a 
           href="https://wa.me/573000000000" 
