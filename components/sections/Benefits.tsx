@@ -21,7 +21,7 @@ export default function Benefits() {
   ]
 
   return (
-    <section className="py-16 sm:py-24 bg-[#EAF8EC]">
+    <section className="py-20 sm:py-24 bg-[#EAF8EC]">
       <div className="px-4 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12">
           {benefits.map((benefit, index) => {
@@ -29,8 +29,7 @@ export default function Benefits() {
             return (
               <div 
                 key={index} 
-                className="glass-card text-center p-8 animate-slide-up"
-                style={{ animationDelay: `${index * 150}ms` }}
+                className="text-center p-8"
               >
                 <div className="w-16 h-16 mx-auto mb-4 bg-[rgba(62,154,96,0.1)] rounded-2xl flex items-center justify-center">
                   <Icon size={32} className="text-[#3E9A60]" />

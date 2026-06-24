@@ -40,7 +40,7 @@ export default function Hero() {
               href="https://wa.me/573000000000" 
               target="_blank"
               rel="noopener noreferrer"
-              className="px-8 py-4 bg-white/80 backdrop-blur-sm text-[#1F6B3C] border border-[#6FCB8C] font-semibold rounded-14 hover:bg-white transition-all duration-300 shadow-sm text-center"
+              className="px-8 py-4 bg-white/80 backdrop-blur-sm text-[#1F6B3C] border border-[#DCEFDD] font-semibold rounded-14 hover:bg-white transition-all duration-300 shadow-sm text-center"
             >
               Contactar por WhatsApp
             </a>

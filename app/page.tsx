@@ -39,31 +39,27 @@ export default function HomePage() {
       <Hero />
       <Benefits />
       
-      <div className="px-4 py-12 sm:py-16 max-w-7xl mx-auto">
+      <div className="px-4 py-20 sm:py-24 max-w-7xl mx-auto">
         <section id="categorias" className="mb-16">
           <div className="flex items-center justify-between mb-8">
             <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-[#0F2A1A]">Nuestras Prendas</h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {loading ? Array(4).fill(0).map((_, i) => <SectionCardSkeleton key={i} />) : sections.map((s, i) => (
-              <div key={s.id} style={{ animationDelay: `${i * 100}ms` }} className="animate-slide-up">
-                <SectionCard section={s} />
-              </div>
+            {loading ? Array(4).fill(0).map((_, i) => <SectionCardSkeleton key={i} />) : sections.map((s) => (
+              <SectionCard key={s.id} section={s} />
             ))}
           </div>
         </section>
         
         {(loading || featured.length > 0) && (
-          <section className="animate-fade-in" style={{ animationDelay: '300ms' }}>
+          <section className="animate-fade-in">
             <h2 className="font-serif text-2xl sm:text-3xl font-semibold text-[#0F2A1A] mb-8">Lo nuevo</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8 sm:gap-x-6 sm:gap-y-8">
-              {loading ? Array(4).fill(0).map((_, i) => <ProductCardSkeleton key={i} />) : featured.map((p, i) => {
+              {loading ? Array(4).fill(0).map((_, i) => <ProductCardSkeleton key={i} />) : featured.map((p) => {
                 const sub = (p as any).subsection
                 const sec = sub?.section
                 return (
-                  <div key={p.id} style={{ animationDelay: `${i * 100}ms` }} className="animate-slide-up">
-                    <ProductCard product={p} href={sec?.slug && sub?.slug ? `/${sec.slug}/${sub.slug}/${p.id}` : '#'} />
-                  </div>
+                  <ProductCard key={p.id} product={p} href={sec?.slug && sub?.slug ? `/${sec.slug}/${sub.slug}/${p.id}` : '#'} />
                 )
               })}
             </div>

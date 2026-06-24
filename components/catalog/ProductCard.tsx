@@ -8,9 +8,9 @@ export default function ProductCard({ product, href }: { product: Product; href:
   const image = product.images?.[0]
   return (
     <Link href={href} className="group block">
-      <div className="glass-card relative aspect-[3/4] bg-white/65 rounded-2xl overflow-hidden mb-4">
+      <div className="relative aspect-[3/4] bg-white rounded-2xl overflow-hidden mb-4 shadow-sm hover:shadow-md transition-shadow duration-300">
         {image ? (
-          <Image src={image} alt={product.name} fill className="object-cover transition-transform duration-700 group-hover:scale-110" sizes="50vw" />
+          <Image src={image} alt={product.name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" sizes="50vw" />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-[#5C7A66]/30 text-xs">Sin imagen</div>
         )}
@@ -20,13 +20,12 @@ export default function ProductCard({ product, href }: { product: Product; href:
             Destacado
           </span>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-[rgba(62,154,96,0.1)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
       <p className="text-base font-serif font-semibold text-[#0F2A1A] leading-tight line-clamp-2 group-hover:text-[#3E9A60] transition-colors duration-300">{product.name}</p>
       {product.price !== null && <p className="text-lg text-[#1F6B3C] mt-2 font-medium">{formatPrice(product.price)}</p>}
       <div className="flex gap-1.5 mt-2 flex-wrap">
         {product.sizes.slice(0, 4).map((s) => (
-          <span key={s} className="text-[10px] border border-[#DCEFDD] rounded-full px-2 py-1 text-[#0F2A1A] bg-white/60 backdrop-blur-sm">{s}</span>
+          <span key={s} className="text-[10px] border border-[#DCEFDD] rounded-full px-2 py-1 text-[#0F2A1A] bg-white">{s}</span>
         ))}
       </div>
     </Link>

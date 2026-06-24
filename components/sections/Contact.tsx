@@ -2,7 +2,7 @@
 
 export default function Contact() {
   return (
-    <section className="py-16 sm:py-24 bg-gradient-to-br from-[#EAF8EC] to-[#FAFCF9]">
+    <section className="py-20 sm:py-24 bg-[#EAF8EC]">
       <div className="px-4 max-w-4xl mx-auto text-center">
         <h2 className="font-serif text-3xl sm:text-4xl font-semibold text-[#0F2A1A] mb-6">¿Interesado en nuestros productos?</h2>
         <p className="text-lg text-[#5C7A66] mb-12 max-w-2xl mx-auto leading-relaxed">

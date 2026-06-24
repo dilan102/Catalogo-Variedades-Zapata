@@ -36,30 +36,26 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.85);
   border: 1px solid var(--border-soft);
   border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(62, 154, 96, 0.08);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.3s ease;
 }
 
 .glass-card:hover {
-  border-color: var(--primary-light);
-  box-shadow: 0 8px 24px rgba(62, 154, 96, 0.12);
-  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .btn-primary {
   background: linear-gradient(135deg, #6FCB8C, #3E9A60);
   border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(62, 154, 96, 0.2);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(62, 154, 96, 0.15);
+  transition: box-shadow 0.3s ease;
 }
 
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(62, 154, 96, 0.3);
+  box-shadow: 0 4px 12px rgba(62, 154, 96, 0.25);
 }
 
 @keyframes fade-in {
