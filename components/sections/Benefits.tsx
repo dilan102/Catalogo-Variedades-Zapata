@@ -23,13 +23,13 @@ export default function Benefits() {
   return (
     <section className="py-8">
       <div className="px-4 max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {benefits.map((benefit, index) => {
             const Icon = benefit.icon
             return (
               <div 
                 key={index} 
-                className="flex items-center gap-3 w-full md:w-auto justify-center md:justify-start"
+                className="flex items-center gap-3 justify-center md:justify-start"
               >
                 <div className="w-10 h-10 bg-[rgba(62,154,96,0.1)] rounded-xl flex items-center justify-center flex-shrink-0">
                   <Icon size={20} className="text-[#3E9A60]" />
