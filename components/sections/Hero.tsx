@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import Image from 'next/image'
 
 export default function Hero() {
   const [scrolling, setScrolling] = useState(false)
@@ -18,6 +19,17 @@ export default function Hero() {
     <section className="relative min-h-[75vh] flex items-center justify-center bg-[#FAFCF9] overflow-hidden">
       {/* Radial gradient natural */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_10%,rgba(111,203,140,0.15),transparent_55%)]" />
+      
+      {/* Imagen de fondo elegante */}
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[50%] opacity-30">
+        <Image 
+          src="/Fondo_elegante.jpeg" 
+          alt="Fondo elegante" 
+          fill 
+          className="object-cover object-center"
+          priority
+        />
+      </div>
       
       <div className="relative z-10 px-4 py-20 max-w-7xl mx-auto text-center">
         <div className="animate-fade-in">
