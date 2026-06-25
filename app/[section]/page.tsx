@@ -5,19 +5,19 @@ import { ChevronRight } from 'lucide-react'
 import { getSectionBySlug } from '@/lib/queries'
 import type { Section } from '@/types'
 
-export default function SectionPage({ params }: { params: { section: string } }) {
+export default function SectionPage({ params }: { params: Promise<{ section: string }> }) {
   const [section, setSection] = useState<Section | null>(null)
   const [loading, setLoading] = useState(true)
+  const [sectionSlug, setSectionSlug] = useState<string>('')
 
   useEffect(() => {
-    getSectionBySlug(params.section).then(setSection).finally(() => setLoading(false))
-  }, [params.section])
+    params.then((resolvedParams) => {
+      setSectionSlug(resolvedParams.section)
+      getSectionBySlug(resolvedParams.section).then(setSection).finally(() => setLoading(false))
+    })
+  }, [params])
 
-  // Mostrar todas las subsecciones sin filtrar por is_active para depuración
   const subsections = (section?.subsections ?? []).sort((a: any, b: any) => a.order - b.order)
-
-  console.log('Subsections in component:', subsections)
-  console.log('Subsections length:', subsections.length)
 
   return (
     <div className="px-4 py-6 sm:py-8 max-w-7xl mx-auto">
@@ -32,7 +32,7 @@ export default function SectionPage({ params }: { params: { section: string } })
           {subsections.map((sub: any, i) => (
             <Link 
               key={sub.id} 
-              href={`/${params.section}/${sub.slug}`} 
+              href={`/${sectionSlug}/${sub.slug}`} 
               className="flex items-center justify-between py-5 hover:bg-[#EAF8EC] transition-all duration-200 hover:pl-6 group animate-slide-up"
               style={{ animationDelay: `${i * 50}ms` }}
             >
