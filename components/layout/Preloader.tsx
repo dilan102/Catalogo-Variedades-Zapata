@@ -131,12 +131,12 @@ export default function Preloader() {
 
         {/* Slide de logo */}
         {currentSlideData.type === 'logo' && (
-          <div className="w-20 h-20 bg-gradient-to-br from-[#BFEAC5] to-[#5FBE7B] rounded-full flex items-center justify-center overflow-hidden shadow-lg">
+          <div className="w-24 h-24 sm:w-28 sm:h-28 bg-gradient-to-br from-[#BFEAC5] to-[#5FBE7B] rounded-full flex items-center justify-center overflow-hidden shadow-lg">
             <Image 
               src="/logo.jpg" 
               alt="Variedades Zapata" 
-              width={80} 
-              height={80} 
+              width={112} 
+              height={112} 
               className="object-contain"
               priority
             />
