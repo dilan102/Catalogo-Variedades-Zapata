@@ -23,7 +23,7 @@ export default function Hero() {
       {/* Imagen de fondo elegante */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-full max-w-3xl h-[70%] opacity-30">
         <Image 
-          src="/Fondo_elegante.jpeg" 
+          src="/fondo_elegante.png" 
           alt="Fondo elegante" 
           fill 
           className="object-contain object-center"
