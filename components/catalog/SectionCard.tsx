@@ -2,12 +2,23 @@ import Image from 'next/image'
 import Link from 'next/link'
 import type { Section } from '@/types'
 
+const sectionImages: Record<string, string> = {
+  'dama': '/Dama.avif',
+  'caballero': '/Caballero.jpg',
+  'nino': '/Niño.webp',
+  'nina': '/Niña.jpg',
+  'accesorios': '/Accesorios.avif',
+  'edredones': '/edredon.jpeg',
+  'esika': '/Esika.png',
+  'avon': '/Avon.png',
+}
+
 export default function SectionCard({ section }: { section: Section }) {
-  console.log('SectionCard rendering:', { name: section.name, image_url: section.image_url })
+  const imageUrl = section.image_url || sectionImages[section.slug]
   return (
     <Link href={`/${section.slug}`} className="group relative block aspect-square bg-white rounded-2xl overflow-hidden border border-[#DCEFDD] shadow-sm hover:shadow-md transition-shadow duration-300">
-      {section.image_url ? (
-        <Image src={section.image_url} alt={section.name} fill className="object-contain transition-transform duration-500 group-hover:scale-105" sizes="50vw" />
+      {imageUrl ? (
+        <Image src={imageUrl} alt={section.name} fill className="object-contain transition-transform duration-500 group-hover:scale-105" sizes="50vw" />
       ) : (
         <div className="absolute inset-0 flex items-center justify-center bg-[#FAFCF9]">
           <span className="text-[#5C7A66] text-xs">Sin imagen</span>
