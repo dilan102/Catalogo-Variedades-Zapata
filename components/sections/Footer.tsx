@@ -38,12 +38,12 @@ export default function Footer() {
               >
                 info@variedadeszapata.com
               </a>
-              <a 
+              <Link 
                 href="/admin/login"
                 className="block text-sm text-white/60 hover:text-white transition-colors cursor-pointer"
               >
                 Acceso interno
-              </a>
+              </Link>
             </div>
             <div className="flex justify-center md:justify-end gap-4">
               <a 
