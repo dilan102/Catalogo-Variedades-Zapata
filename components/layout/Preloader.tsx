@@ -121,7 +121,7 @@ export default function Preloader() {
             <img
               src={currentSlideData.src}
               alt=""
-              className="w-full h-full object-contain"
+              className="w-full h-full object-contain mix-blend-multiply"
               style={{ backgroundColor: 'transparent' }}
             />
           </div>
