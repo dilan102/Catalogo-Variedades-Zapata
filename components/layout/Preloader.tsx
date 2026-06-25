@@ -117,12 +117,12 @@ export default function Preloader() {
 
         {/* Slide de foto */}
         {currentSlideData.type === 'photo' && currentSlideData.src && (
-          <div className="relative w-[260px] sm:w-[320px] aspect-[3/4] rounded-2xl overflow-hidden bg-[#FAFCF9]">
+          <div className="relative w-[260px] sm:w-[320px] aspect-[3/4] overflow-hidden">
             <Image
               src={currentSlideData.src}
               alt=""
               fill
-              className="object-contain"
+              className="object-cover"
               priority={currentSlide === 0}
               quality={85}
             />
