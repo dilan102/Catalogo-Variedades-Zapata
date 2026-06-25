@@ -50,6 +50,33 @@ export default function SectionsAdmin() {
     }
   }
 
+  const updateAllSectionImages = async () => {
+    const sectionImages = {
+      'dama': '/Dama.avif',
+      'caballero': '/Caballero.jpg',
+      'nino': '/Niño.webp',
+      'nina': '/Niña.jpg',
+      'accesorios': '/Accesorios.avif',
+      'edredones': '/edredon.jpeg',
+      'esika': '/Esika.png',
+      'avon': '/Avon.png',
+    }
+
+    try {
+      for (const section of sections) {
+        const imageUrl = sectionImages[section.slug as keyof typeof sectionImages]
+        if (imageUrl) {
+          await upsertSection({ ...section, image_url: imageUrl })
+        }
+      }
+      loadData()
+      alert('Imágenes actualizadas correctamente')
+    } catch (error) {
+      console.error('Error updating section images:', error)
+      alert('Error al actualizar imágenes')
+    }
+  }
+
   const handleEdit = (section: Section) => {
     setEditing(section)
     setFormData({ name: section.name, slug: section.slug, description: section.description || '', image_url: section.image_url || '', order: section.order, is_active: section.is_active })
@@ -144,10 +171,15 @@ export default function SectionsAdmin() {
             <span className="font-medium">Volver</span>
           </Link>
           <h1 className="text-lg font-bold text-green-900">Secciones</h1>
-          <button onClick={() => { setEditing(null); setFormData({ name: '', slug: '', description: '', image_url: '', order: sections.length, is_active: true }); setShowModal(true) }} className="flex items-center gap-1.5 bg-green-800 text-white px-3 py-2 rounded-lg text-sm font-medium">
-            <Plus size={18} />
-            <span className="hidden sm:inline">Nueva</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={updateAllSectionImages} className="flex items-center gap-1.5 bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium">
+              <span className="hidden sm:inline">Actualizar Imágenes</span>
+            </button>
+            <button onClick={() => { setEditing(null); setFormData({ name: '', slug: '', description: '', image_url: '', order: sections.length, is_active: true }); setShowModal(true) }} className="flex items-center gap-1.5 bg-green-800 text-white px-3 py-2 rounded-lg text-sm font-medium">
+              <Plus size={18} />
+              <span className="hidden sm:inline">Nueva</span>
+            </button>
+          </div>
         </div>
       </div>
 
