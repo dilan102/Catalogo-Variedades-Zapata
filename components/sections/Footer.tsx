@@ -39,7 +39,7 @@ export default function Footer() {
                 info@variedadeszapata.com
               </a>
               <a 
-                href="/admin/login"
+                href="/admin"
                 className="block text-sm text-white/60 hover:text-white transition-colors cursor-pointer"
               >
                 Acceso interno
