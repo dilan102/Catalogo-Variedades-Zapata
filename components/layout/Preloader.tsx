@@ -13,7 +13,7 @@ const slides: Slide[] = [
   { type: 'photo', src: '/Dama_elegante.png', word: 'ELEGANCIA' },
   { type: 'photo', src: '/Fondo_elegante.jpeg', word: 'ESTILO' },
   { type: 'photo', src: '/Dama_elegante2.jpeg', word: 'DISTINCIÓN' },
-  { type: 'logo' },
+  { type: 'logo', src: '/variedades_zapata.png', word: 'VARIEDADES ZAPATA' },
 ]
 
 export default function Preloader() {
