@@ -27,11 +27,6 @@ export async function getSectionBySlug(slug: string): Promise<Section | null> {
       console.error('Supabase error loading subsections:', subsectionsError)
     }
     
-    console.log('Section ID:', section.id)
-    console.log('Section name:', section.name)
-    console.log('Raw subsections from DB:', subsections)
-    console.log('Subsections count:', subsections?.length ?? 0)
-    
     const sectionWithSubsections = { ...section, subsections: subsections ?? [] }
     return sectionWithSubsections
   } catch (error) {
