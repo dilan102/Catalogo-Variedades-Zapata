@@ -117,14 +117,15 @@ export default function Preloader() {
 
         {/* Slide de foto */}
         {currentSlideData.type === 'photo' && currentSlideData.src && (
-          <div className="relative w-[260px] sm:w-[320px] aspect-[3/4] overflow-hidden bg-[#FAFCF9]">
-            <img
-              src={currentSlideData.src}
-              alt=""
-              className="w-full h-full object-contain mix-blend-multiply"
-              style={{ backgroundColor: 'transparent' }}
-            />
-          </div>
+          <div 
+            className="relative w-[260px] sm:w-[320px] aspect-[3/4] overflow-hidden bg-[#FAFCF9]"
+            style={{ 
+              backgroundImage: `url(${currentSlideData.src})`,
+              backgroundSize: 'contain',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat'
+            }}
+          />
         )}
 
         {/* Slide de logo */}
