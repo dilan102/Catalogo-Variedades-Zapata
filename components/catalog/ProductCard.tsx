@@ -9,7 +9,7 @@ export default function ProductCard({ product, href }: { product: Product; href:
     <Link href={href} className="group block">
       <div className="relative aspect-[3/4] bg-white rounded-2xl overflow-hidden mb-4 border border-[#DCEFDD] shadow-sm hover:shadow-md transition-shadow duration-300">
         {image ? (
-          <Image src={image} alt={product.name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" sizes="50vw" />
+          <Image src={image} alt={product.name} fill className="object-contain transition-transform duration-500 group-hover:scale-105" sizes="50vw" />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-[#5C7A66]/30 text-xs">Sin imagen</div>
         )}
