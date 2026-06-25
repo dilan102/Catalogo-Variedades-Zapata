@@ -6,6 +6,7 @@ export async function getSections(): Promise<Section[]> {
     const supabase = createClient()
     const { data, error } = await supabase.from('sections').select('*').eq('is_active', true).order('order')
     if (error) throw new Error(`Error al cargar secciones: ${error.message}`)
+    console.log('Secciones cargadas:', data?.map(s => ({ name: s.name, slug: s.slug, image_url: s.image_url })))
     return data ?? []
   } catch (error) {
     console.error('Error in getSections:', error)

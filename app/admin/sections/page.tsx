@@ -63,10 +63,14 @@ export default function SectionsAdmin() {
     }
 
     try {
+      console.log('Updating section images for', sections.length, 'sections')
       for (const section of sections) {
         const imageUrl = sectionImages[section.slug as keyof typeof sectionImages]
         if (imageUrl) {
+          console.log(`Updating ${section.slug} with ${imageUrl}`)
           await upsertSection({ ...section, image_url: imageUrl })
+        } else {
+          console.log(`No image found for slug: ${section.slug}`)
         }
       }
       loadData()
