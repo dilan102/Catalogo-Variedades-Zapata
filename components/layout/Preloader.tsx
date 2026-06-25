@@ -108,6 +108,13 @@ export default function Preloader() {
 
       {/* Contenedor principal centrado */}
       <div className={`relative flex flex-col items-center gap-6 transition-opacity duration-200 ${hideContent ? 'opacity-0' : 'opacity-100'}`}>
+        {/* Palabra de fondo grande y transparente */}
+        {currentSlideData.type === 'photo' && currentSlideData.word && (
+          <p className="absolute inset-0 flex items-center justify-center font-display text-[15vw] sm:text-[20vw] text-[#3E9A60]/5 tracking-[0.2em] uppercase font-bold pointer-events-none">
+            {currentSlideData.word}
+          </p>
+        )}
+
         {/* Slide de foto */}
         {currentSlideData.type === 'photo' && currentSlideData.src && (
           <div className="relative w-[260px] sm:w-[320px] aspect-[3/4] rounded-2xl border border-[#DCEFDD] shadow-sm overflow-hidden">
