@@ -21,7 +21,7 @@ export default function Hero() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_10%,rgba(111,203,140,0.15),transparent_55%)]" />
       
       {/* Imagen de fondo elegante */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-full max-w-2xl h-[35%] opacity-30">
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-full max-w-3xl h-[45%] opacity-30">
         <Image 
           src="/Fondo_elegante.jpeg" 
           alt="Fondo elegante" 
