@@ -12,7 +12,7 @@ interface Slide {
 const slides: Slide[] = [
   { type: 'photo', src: '/Dama_elegante.png', word: 'ELEGANCIA' },
   { type: 'photo', src: '/Fondo_elegante.jpeg', word: 'ESTILO' },
-  { type: 'photo', src: '/Dama_elegante2.jpeg', word: 'DISTINCIÓN' },
+  { type: 'photo', src: '/Dama_sentada.png', word: 'DISTINCIÓN' },
   { type: 'logo', src: '/variedades_zapata.png', word: 'VARIEDADES ZAPATA' },
 ]
 
@@ -89,51 +89,46 @@ export default function Preloader() {
       }`}
       aria-hidden="true"
     >
+      {/* Barrido de transición (pantalla completa) */}
+      {!prefersReducedMotion && sweepPosition !== 'idle' && (
+        <div 
+          className="fixed inset-0 z-[110] bg-gradient-to-r from-[#3E9A60] to-[#1F6B3C] transition-transform ease-in-out"
+          style={{ 
+            transform: sweepPosition === 'entering' ? 'translateX(-100%)' : 'translateX(100%)',
+            transitionDuration: `${sweepDuration}ms`
+          }}
+        />
+      )}
+
       {/* Contenedor principal centrado */}
       <div className="relative flex flex-col items-center gap-6">
-        {/* Slide actual */}
-        <div className="relative">
-          {/* Barrido de transición */}
-          {!prefersReducedMotion && sweepPosition !== 'idle' && (
-            <div 
-              className={`absolute inset-0 bg-gradient-to-r from-[#3E9A60] to-[#1F6B3C] rounded-2xl transition-transform duration-[${sweepDuration}ms] ease-in-out ${
-                sweepPosition === 'entering' ? '-translate-x-full' : 'translate-x-full'
-              }`}
-              style={{ 
-                transform: sweepPosition === 'entering' ? 'translateX(-100%)' : 'translateX(100%)',
-                transitionDuration: `${sweepDuration}ms`
-              }}
+        {/* Slide de foto */}
+        {currentSlideData.type === 'photo' && currentSlideData.src && (
+          <div className="relative w-[260px] sm:w-[320px] aspect-[3/4] rounded-2xl border border-[#DCEFDD] shadow-sm overflow-hidden">
+            <Image
+              src={currentSlideData.src}
+              alt=""
+              fill
+              className="object-cover"
+              priority={currentSlide === 0}
+              quality={85}
             />
-          )}
+          </div>
+        )}
 
-          {/* Slide de foto */}
-          {currentSlideData.type === 'photo' && currentSlideData.src && (
-            <div className="relative w-[260px] sm:w-[320px] aspect-[3/4] rounded-2xl border border-[#DCEFDD] shadow-sm overflow-hidden">
-              <Image
-                src={currentSlideData.src}
-                alt=""
-                fill
-                className="object-cover"
-                priority={currentSlide === 0}
-                quality={85}
-              />
-            </div>
-          )}
-
-          {/* Slide de logo */}
-          {currentSlideData.type === 'logo' && (
-            <div className="w-20 h-20 bg-gradient-to-br from-[#BFEAC5] to-[#5FBE7B] rounded-full flex items-center justify-center overflow-hidden shadow-lg">
-              <Image 
-                src="/logo.jpg" 
-                alt="Variedades Zapata" 
-                width={80} 
-                height={80} 
-                className="object-contain"
-                priority
-              />
-            </div>
-          )}
-        </div>
+        {/* Slide de logo */}
+        {currentSlideData.type === 'logo' && (
+          <div className="w-20 h-20 bg-gradient-to-br from-[#BFEAC5] to-[#5FBE7B] rounded-full flex items-center justify-center overflow-hidden shadow-lg">
+            <Image 
+              src="/logo.jpg" 
+              alt="Variedades Zapata" 
+              width={80} 
+              height={80} 
+              className="object-contain"
+              priority
+            />
+          </div>
+        )}
 
         {/* Palabra debajo de la foto */}
         {currentSlideData.type === 'photo' && currentSlideData.word && (
