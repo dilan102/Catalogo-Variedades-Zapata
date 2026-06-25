@@ -17,7 +17,12 @@ export async function getSectionBySlug(slug: string): Promise<Section | null> {
   try {
     const supabase = createClient()
     const { data, error } = await supabase.from('sections').select('*, subsections(*)').eq('slug', slug).eq('is_active', true).single()
-    if (error) return null
+    if (error) {
+      console.error('Supabase error in getSectionBySlug:', error)
+      return null
+    }
+    console.log('Section data:', data)
+    console.log('Subsections:', data?.subsections)
     return data
   } catch (error) {
     console.error('Error in getSectionBySlug:', error)
