@@ -122,7 +122,7 @@ export default function Preloader() {
             style={{ 
               backgroundColor: '#FAFCF9',
               backgroundImage: `url(${currentSlideData.src})`,
-              backgroundSize: 'cover',
+              backgroundSize: 'contain',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat'
             }}
