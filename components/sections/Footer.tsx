@@ -54,12 +54,6 @@ export default function Footer() {
                 >
                   info@variedadeszapata.com
                 </a>
-                <button 
-                  onClick={handleAdminAccess}
-                  className="block text-sm text-white/60 hover:text-white transition-colors cursor-pointer text-left w-full"
-                >
-                  Acceso interno
-                </button>
               </div>
               <div className="flex justify-center md:justify-end gap-4">
                 <a 
@@ -82,6 +76,12 @@ export default function Footer() {
                   </svg>
                 </a>
               </div>
+              <button 
+                onClick={handleAdminAccess}
+                className="block text-sm text-white/60 hover:text-white transition-colors cursor-pointer text-right w-full mt-4"
+              >
+                Acceso interno
+              </button>
             </div>
           </div>
 
