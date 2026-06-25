@@ -109,7 +109,7 @@ export default function Preloader() {
               src={currentSlideData.src}
               alt=""
               fill
-              className="object-cover"
+              className="object-contain"
               priority={currentSlide === 0}
               quality={85}
             />
@@ -133,7 +133,7 @@ export default function Preloader() {
         {/* Palabra debajo de la foto */}
         {currentSlideData.type === 'photo' && currentSlideData.word && (
           <p 
-            className={`font-display text-sm sm:text-base text-[#1F6B3C] tracking-[0.3em] uppercase transition-all duration-300 ${
+            className={`font-display text-base sm:text-lg text-[#1F6B3C] tracking-[0.3em] uppercase transition-all duration-300 ${
               showWord ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
           >
