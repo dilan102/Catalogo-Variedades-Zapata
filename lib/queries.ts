@@ -16,14 +16,21 @@ export async function getSections(): Promise<Section[]> {
 export async function getSectionBySlug(slug: string): Promise<Section | null> {
   try {
     const supabase = createClient()
-    const { data, error } = await supabase.from('sections').select('*, subsections(*)').eq('slug', slug).eq('is_active', true).single()
-    if (error) {
-      console.error('Supabase error in getSectionBySlug:', error)
+    const { data: section, error: sectionError } = await supabase.from('sections').select('*').eq('slug', slug).eq('is_active', true).single()
+    if (sectionError || !section) {
+      console.error('Supabase error loading section:', sectionError)
       return null
     }
-    console.log('Section data:', data)
-    console.log('Subsections:', data?.subsections)
-    return data
+    
+    const { data: subsections, error: subsectionsError } = await supabase.from('subsections').select('*').eq('section_id', section.id).order('order')
+    if (subsectionsError) {
+      console.error('Supabase error loading subsections:', subsectionsError)
+    }
+    
+    const sectionWithSubsections = { ...section, subsections: subsections ?? [] }
+    console.log('Section data:', sectionWithSubsections)
+    console.log('Subsections:', subsections)
+    return sectionWithSubsections
   } catch (error) {
     console.error('Error in getSectionBySlug:', error)
     return null
