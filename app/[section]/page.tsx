@@ -13,7 +13,11 @@ export default function SectionPage({ params }: { params: { section: string } })
     getSectionBySlug(params.section).then(setSection).finally(() => setLoading(false))
   }, [params.section])
 
-  const subsections = (section?.subsections ?? []).filter((s: any) => s.is_active).sort((a: any, b: any) => a.order - b.order)
+  // Mostrar todas las subsecciones sin filtrar por is_active para depuración
+  const subsections = (section?.subsections ?? []).sort((a: any, b: any) => a.order - b.order)
+
+  console.log('Subsections in component:', subsections)
+  console.log('Subsections length:', subsections.length)
 
   return (
     <div className="px-4 py-6 sm:py-8 max-w-7xl mx-auto">
