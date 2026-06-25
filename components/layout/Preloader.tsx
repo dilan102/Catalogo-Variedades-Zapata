@@ -11,7 +11,7 @@ interface Slide {
 
 const slides: Slide[] = [
   { type: 'photo', src: '/Dama_elegante.png', word: 'ELEGANCIA' },
-  { type: 'photo', src: '/Fondo_elegante.jpeg', word: 'ESTILO' },
+  { type: 'photo', src: '/Dama_rojo.jpeg', word: 'ESTILO' },
   { type: 'photo', src: '/Dama_sentada.png', word: 'DISTINCIÓN' },
   { type: 'logo', src: '/variedades_zapata.png', word: 'VARIEDADES ZAPATA' },
 ]
@@ -118,10 +118,11 @@ export default function Preloader() {
         {/* Slide de foto */}
         {currentSlideData.type === 'photo' && currentSlideData.src && (
           <div 
-            className="relative w-[260px] sm:w-[320px] aspect-[3/4] overflow-hidden bg-[#FAFCF9]"
+            className="relative w-[260px] sm:w-[320px] aspect-[3/4] overflow-hidden"
             style={{ 
+              backgroundColor: '#FAFCF9',
               backgroundImage: `url(${currentSlideData.src})`,
-              backgroundSize: 'contain',
+              backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat'
             }}
