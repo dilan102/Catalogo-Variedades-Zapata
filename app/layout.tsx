@@ -3,6 +3,7 @@ import { Playfair_Display, Cormorant_Garamond, Space_Grotesk } from 'next/font/g
 import './globals.css'
 import Navbar from '@/components/layout/Navbar'
 import Preloader from '@/components/layout/Preloader'
+import { Analytics } from '@vercel/analytics/next'
 
 const playfair = Playfair_Display({ 
   subsets: ['latin'], 
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Preloader />
         <Navbar />
         <main className="pt-16 min-h-screen">{children}</main>
+        <Analytics />
       </body>
     </html>
   )
