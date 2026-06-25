@@ -23,6 +23,7 @@ export default function Preloader() {
   const [fadeOut, setFadeOut] = useState(false)
   const [showWord, setShowWord] = useState(false)
   const [sweepPosition, setSweepPosition] = useState<'idle' | 'entering' | 'exiting'>('idle')
+  const [hideContent, setHideContent] = useState(false)
 
   const prefersReducedMotion = typeof window !== 'undefined' 
     ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
@@ -44,6 +45,7 @@ export default function Preloader() {
       for (let i = 0; i < slides.length; i++) {
         setCurrentSlide(i)
         setShowWord(false)
+        setHideContent(false)
 
         // Mostrar palabra después de la foto
         if (slides[i].type === 'photo') {
@@ -57,11 +59,15 @@ export default function Preloader() {
         // Barrido hacia el siguiente slide (excepto el último)
         if (i < slides.length - 1) {
           if (!prefersReducedMotion) {
+            setHideContent(true)
             setSweepPosition('entering')
             await new Promise(resolve => setTimeout(resolve, sweepDuration / 2))
+            setCurrentSlide(i + 1)
+            setShowWord(false)
             setSweepPosition('exiting')
             await new Promise(resolve => setTimeout(resolve, sweepDuration / 2))
             setSweepPosition('idle')
+            setHideContent(false)
           } else {
             // Fade simple para reduced motion
             await new Promise(resolve => setTimeout(resolve, 200))
@@ -101,7 +107,7 @@ export default function Preloader() {
       )}
 
       {/* Contenedor principal centrado */}
-      <div className="relative flex flex-col items-center gap-6">
+      <div className={`relative flex flex-col items-center gap-6 transition-opacity duration-200 ${hideContent ? 'opacity-0' : 'opacity-100'}`}>
         {/* Slide de foto */}
         {currentSlideData.type === 'photo' && currentSlideData.src && (
           <div className="relative w-[260px] sm:w-[320px] aspect-[3/4] rounded-2xl border border-[#DCEFDD] shadow-sm overflow-hidden">
@@ -133,7 +139,7 @@ export default function Preloader() {
         {/* Palabra debajo de la foto */}
         {currentSlideData.type === 'photo' && currentSlideData.word && (
           <p 
-            className={`font-display text-base sm:text-lg text-[#1F6B3C] tracking-[0.3em] uppercase transition-all duration-300 ${
+            className={`font-display text-lg sm:text-xl text-[#0F2A1A] tracking-[0.3em] uppercase transition-all duration-300 ${
               showWord ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}
           >
