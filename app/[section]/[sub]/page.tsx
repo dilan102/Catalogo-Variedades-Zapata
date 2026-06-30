@@ -19,7 +19,7 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
     }).finally(() => setLoading(false))
   }, [sectionSlug, subSlug])
 
-  const section = (subsection as any)?.section
+  const section = subsection?.section
 
   return (
     <div className="px-4 py-6 sm:py-8 max-w-7xl mx-auto">
@@ -34,7 +34,7 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
         <h1 className="text-2xl sm:text-3xl font-bold text-[#0F2A1A]">{subsection?.name ?? '...'}</h1>
         {!loading && <span className="text-sm text-[#5C7A66]">{products.length} productos</span>}
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8 sm:gap-x-5 sm:gap-y-8">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4">
         {loading
           ? Array(4).fill(0).map((_, i) => <ProductCardSkeleton key={i} />)
           : products.map((p, i) => (

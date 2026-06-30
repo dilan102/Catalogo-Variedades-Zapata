@@ -1,6 +1,10 @@
 -- Script SQL para crear las nuevas categorías y subsecciones
 -- Ejecutar esto en el SQL Editor de Supabase
 
+-- Revisión recomendada de seguridad: activar RLS en Supabase para sections, subsections y products.
+-- Lectura pública solo para filas con is_active = true; escritura y borrado solo por service_role key.
+-- Nunca exponer la anon/publishable key del cliente para operaciones de escritura o borrado.
+
 -- Insertar categorías principales
 INSERT INTO sections (id, name, slug, description, "order", is_active, created_at) VALUES
   (gen_random_uuid(), 'Dama', 'dama', 'Catálogo de dama', 0, true, NOW()),

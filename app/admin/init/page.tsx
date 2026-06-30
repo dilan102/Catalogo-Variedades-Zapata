@@ -10,12 +10,12 @@ export default function InitCategoriesPage() {
     setResult(null)
     
     try {
-      const response = await fetch('/api/reset-categories', {
+      const response = await fetch('/api/admin/reset-categories', {
         method: 'POST',
       })
       const data = await response.json()
       setResult(data)
-    } catch (error) {
+    } catch {
       setResult({ success: false, message: 'Error al comunicarse con el servidor' })
     } finally {
       setLoading(false)

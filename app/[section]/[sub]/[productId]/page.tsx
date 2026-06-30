@@ -18,7 +18,7 @@ export default function ProductPage({ params }: { params: { section: string; sub
   if (!product) return <div className="px-4 py-10 text-center text-stone-400 text-sm">Cargando...</div>
 
   const images = product.images ?? []
-  const subsection = (product as any).subsection
+  const subsection = product.subsection
   const section = subsection?.section
 
   return (

@@ -1,7 +1,6 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Lock } from 'lucide-react'
-import { login, logout, isAuthenticated } from '@/lib/auth'
 
 export default function AdminButton() {
   const [showLogin, setShowLogin] = useState(false)
@@ -9,36 +8,81 @@ export default function AdminButton() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isChecking, setIsChecking] = useState(true)
 
   useEffect(() => {
-    setIsLoggedIn(isAuthenticated())
+    let active = true
+
+    const verifySession = async () => {
+      try {
+        const response = await fetch('/api/me')
+        const data = await response.json()
+
+        if (active) {
+          setIsLoggedIn(Boolean(data.authenticated))
+        }
+      } catch {
+        if (active) {
+          setIsLoggedIn(false)
+        }
+      } finally {
+        if (active) {
+          setIsChecking(false)
+        }
+      }
+    }
+
+    void verifySession()
+
+    return () => {
+      active = false
+    }
   }, [])
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (login(username, password)) {
-      setIsLoggedIn(true)
-      setShowLogin(false)
-      setUsername('')
-      setPassword('')
-      setError('')
-      window.location.href = '/admin'
-    } else {
-      setError('Credenciales incorrectas')
+  const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setIsLoggedIn(true)
+        setShowLogin(false)
+        setUsername('')
+        setPassword('')
+        setError('')
+        window.location.assign('/admin')
+        return
+      }
+
+      setError(data.message || 'Credenciales incorrectas')
+    } catch {
+      setError('No se pudo completar el inicio de sesión')
     }
   }
 
-  const handleLogout = () => {
-    logout()
-    setIsLoggedIn(false)
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/logout', { method: 'POST' })
+    } finally {
+      setIsLoggedIn(false)
+      setShowLogin(false)
+    }
   }
 
   return (
     <>
       <button
-        onClick={() => isLoggedIn ? window.location.href = '/admin' : setShowLogin(true)}
+        onClick={() => isLoggedIn ? window.location.assign('/admin') : setShowLogin(true)}
         className="fixed bottom-4 right-4 z-30 opacity-30 hover:opacity-100 transition-opacity bg-green-800 text-white p-2 rounded-full shadow-lg"
         title="Administrador"
+        disabled={isChecking}
       >
         <Lock size={16} />
       </button>
@@ -53,7 +97,7 @@ export default function AdminButton() {
                 <input
                   type="text"
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  onChange={(event) => setUsername(event.target.value)}
                   className="w-full px-3 py-2 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
                 />
@@ -63,7 +107,7 @@ export default function AdminButton() {
                 <input
                   type="password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(event) => setPassword(event.target.value)}
                   className="w-full px-3 py-2 border border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
                 />
@@ -87,6 +131,15 @@ export default function AdminButton() {
             </form>
           </div>
         </div>
+      )}
+
+      {isLoggedIn && (
+        <button
+          onClick={handleLogout}
+          className="fixed bottom-4 right-16 z-30 opacity-30 hover:opacity-100 transition-opacity bg-white text-green-800 border border-green-200 px-3 py-2 rounded-full shadow-lg text-sm"
+        >
+          Salir
+        </button>
       )}
     </>
   )

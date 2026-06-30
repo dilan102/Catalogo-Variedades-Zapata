@@ -1,64 +1,80 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/client'
+import { requireAdminSession } from '@/lib/requireAdmin'
 
 const categoriesWithSubsections: Record<string, string[]> = {
-  'Dama': ['Pantalones', 'Camisas', 'Chaquetas', 'Sacos', 'Blusas', 'Vestidos', 'Ropa deportiva', 'Corsets', 'Ropa interior', 'Medias', 'Zapatos'],
-  'Caballero': ['Pantalones', 'Pantalonetas', 'Camisas', 'Sacos', 'Chaquetas', 'Medias', 'Zapatos', 'Ropa interior', 'Ropa deportiva'],
-  'Niño': ['Pantalones', 'Zapatos', 'Camisas', 'Sacos', 'Chaquetas', 'Medias', 'Ropa interior', 'Ropa deportiva'],
-  'Niña': ['Pantalones', 'Camisas', 'Chaquetas', 'Sacos', 'Blusas', 'Zapatos', 'Vestidos', 'Ropa deportiva', 'Corsets', 'Ropa interior', 'Medias'],
-  'Accesorios': ['Gafas', 'Relojería', 'Joyería', 'Tecnología'],
-  'Edredones': ['Sábanas', 'Almohadas', 'Cobijas', 'Cubrelechos', 'Fundas'],
-  'Esika': [],
-  'Avon': []
+  Dama: ['Pantalones', 'Camisas', 'Chaquetas', 'Sacos', 'Blusas', 'Vestidos', 'Ropa deportiva', 'Corsets', 'Ropa interior', 'Medias', 'Zapatos'],
+  Caballero: ['Pantalones', 'Pantalonetas', 'Camisas', 'Sacos', 'Chaquetas', 'Medias', 'Zapatos', 'Ropa interior', 'Ropa deportiva'],
+  Niño: ['Pantalones', 'Zapatos', 'Camisas', 'Sacos', 'Chaquetas', 'Medias', 'Ropa interior', 'Ropa deportiva'],
+  Niña: ['Pantalones', 'Camisas', 'Chaquetas', 'Sacos', 'Blusas', 'Zapatos', 'Vestidos', 'Ropa deportiva', 'Corsets', 'Ropa interior', 'Medias'],
+  Accesorios: ['Gafas', 'Relojería', 'Joyería', 'Tecnología'],
+  Edredones: ['Sábanas', 'Almohadas', 'Cobijas', 'Cubrelechos', 'Fundas'],
+  Esika: [],
+  Avon: [],
+}
+
+function toSlug(value: string) {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]/g, '-')
 }
 
 export async function POST() {
   try {
+    const isAuthenticated = await requireAdminSession()
+
+    if (!isAuthenticated) {
+      return NextResponse.json({ success: false, message: 'No autorizado' }, { status: 401 })
+    }
+
     const supabase = createClient()
 
-    console.log('Iniciando reset agresivo de categorías...')
+    console.log('Iniciando reset administrativo de categorías...')
 
-    // Obtener todas las subsecciones existentes
+    const { error: deleteProductsError } = await supabase
+      .from('products')
+      .delete()
+      .not('id', 'is', null)
+
+    if (deleteProductsError) {
+      console.error('Error eliminando productos:', deleteProductsError)
+    }
+
     const { data: existingSubsections } = await supabase.from('subsections').select('id')
-    
+
     if (existingSubsections && existingSubsections.length > 0) {
-      console.log(`Eliminando ${existingSubsections.length} subsecciones...`)
-      const subsectionIds = existingSubsections.map(s => s.id)
+      const subsectionIds = existingSubsections.map((subsection) => subsection.id)
       const { error: deleteSubsectionsError } = await supabase
         .from('subsections')
         .delete()
         .in('id', subsectionIds)
-      
+
       if (deleteSubsectionsError) {
         console.error('Error eliminando subsecciones:', deleteSubsectionsError)
-      } else {
-        console.log('Subsecciones eliminadas correctamente')
       }
     }
 
-    // Obtener todas las secciones existentes
     const { data: existingSections } = await supabase.from('sections').select('id')
-    
+
     if (existingSections && existingSections.length > 0) {
-      console.log(`Eliminando ${existingSections.length} secciones...`)
-      const sectionIds = existingSections.map(s => s.id)
+      const sectionIds = existingSections.map((section) => section.id)
       const { error: deleteSectionsError } = await supabase
         .from('sections')
         .delete()
         .in('id', sectionIds)
-      
+
       if (deleteSectionsError) {
         console.error('Error eliminando secciones:', deleteSectionsError)
-      } else {
-        console.log('Secciones eliminadas correctamente')
       }
     }
 
-    // Crear nuevas categorías
     console.log('Creando nuevas categorías...')
+
     for (const [categoryName, subsections] of Object.entries(categoriesWithSubsections)) {
-      const slug = categoryName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '-')
-      
+      const slug = toSlug(categoryName)
+
       const { data: newSection, error: sectionError } = await supabase
         .from('sections')
         .insert({
@@ -66,24 +82,23 @@ export async function POST() {
           slug,
           description: `Catálogo de ${categoryName.toLowerCase()}`,
           order: Object.keys(categoriesWithSubsections).indexOf(categoryName),
-          is_active: true
+          is_active: true,
         })
         .select()
         .single()
-      
+
       if (sectionError) {
         console.error(`Error creando sección "${categoryName}":`, sectionError)
         continue
       }
-      
+
       const sectionId = newSection.id
       console.log(`Sección "${categoryName}" creada con ID: ${sectionId}`)
-      
-      // Crear subsecciones
+
       if (subsections.length > 0) {
         for (const subsectionName of subsections) {
-          const subsectionSlug = subsectionName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '-')
-          
+          const subsectionSlug = toSlug(subsectionName)
+
           const { error: subsectionError } = await supabase
             .from('subsections')
             .insert({
@@ -92,19 +107,16 @@ export async function POST() {
               slug: subsectionSlug,
               description: `${subsectionName} de ${categoryName}`,
               order: subsections.indexOf(subsectionName),
-              is_active: true
+              is_active: true,
             })
-          
+
           if (subsectionError) {
             console.error(`Error creando subsección "${subsectionName}":`, subsectionError)
-          } else {
-            console.log(`Subsección "${subsectionName}" creada para "${categoryName}"`)
           }
         }
       }
     }
-    
-    console.log('Reset de categorías completado exitosamente')
+
     return NextResponse.json({ success: true, message: 'Categorías reseteadas e inicializadas correctamente' })
   } catch (error) {
     console.error('Error reseteando categorías:', error)
