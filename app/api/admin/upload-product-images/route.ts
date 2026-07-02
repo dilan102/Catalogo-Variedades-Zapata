@@ -13,7 +13,7 @@ function sanitizeFileName(value: string) {
     .toLowerCase()
 }
 
-async function ensureBucketExists(supabase: ReturnType<typeof createSupabaseClient>) {
+async function ensureBucketExists(supabase: any) {
   const { error } = await supabase.storage.createBucket(bucketName, {
     public: true,
   })
@@ -74,12 +74,14 @@ export async function POST(request: Request) {
         return NextResponse.json({ success: false, message: uploadError.message }, { status: 500 })
       }
 
-      const { data: publicUrlData, error: publicUrlError } = await supabase.storage
+      const publicUrlResponse: any = await supabase.storage
         .from(bucketName)
         .getPublicUrl(filePath)
 
-      if (publicUrlError || !publicUrlData?.publicUrl) {
-        console.error('Supabase public URL error:', publicUrlError)
+      const publicUrlData = publicUrlResponse?.data
+
+      if (!publicUrlData?.publicUrl) {
+        console.error('Supabase public URL error:', publicUrlResponse)
         return NextResponse.json({ success: false, message: 'No se pudo obtener la URL pública' }, { status: 500 })
       }
 
