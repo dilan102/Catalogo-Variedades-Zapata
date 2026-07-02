@@ -12,7 +12,7 @@ const sectionImages: Record<string, string> = {
   accesorios: '/Accesorios.avif',
   edredones: '/edredon.jpeg',
   esika: '/Esika.png',
-  avon: '/Avon.png',
+  joven: '/Dama.avif',
 }
 
 export default function SectionCard({ section }: { section: Section }) {

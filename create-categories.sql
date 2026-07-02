@@ -14,7 +14,7 @@ INSERT INTO sections (id, name, slug, description, "order", is_active, created_a
   (gen_random_uuid(), 'Accesorios', 'accesorios', 'Catálogo de accesorios', 4, true, NOW()),
   (gen_random_uuid(), 'Edredones', 'edredones', 'Catálogo de edredones', 5, true, NOW()),
   (gen_random_uuid(), 'Esika', 'esika', 'Catálogo de Esika', 6, true, NOW()),
-  (gen_random_uuid(), 'Avon', 'avon', 'Catálogo de Avon', 7, true, NOW());
+  (gen_random_uuid(), 'Joven', 'joven', 'Catálogo de joven', 7, true, NOW());
 
 -- Insertar subsecciones para Dama
 INSERT INTO subsections (id, section_id, name, slug, description, "order", is_active, created_at)
@@ -24,6 +24,18 @@ SELECT
   unnest(ARRAY['Pantalones', 'Camisas', 'Chaquetas', 'Sacos', 'Blusas', 'Vestidos', 'Ropa deportiva', 'Corsets', 'Ropa interior', 'Medias', 'Zapatos']),
   unnest(ARRAY['pantalones', 'camisas', 'chaquetas', 'sacos', 'blusas', 'vestidos', 'ropa-deportiva', 'corsets', 'ropa-interior', 'medias', 'zapatos']),
   unnest(ARRAY['Pantalones de dama', 'Camisas de dama', 'Chaquetas de dama', 'Sacos de dama', 'Blusas de dama', 'Vestidos de dama', 'Ropa deportiva de dama', 'Corsets de dama', 'Ropa interior de dama', 'Medias de dama', 'Zapatos de dama']),
+  generate_series(0, 10),
+  true,
+  NOW();
+
+-- Insertar subsecciones para Joven
+INSERT INTO subsections (id, section_id, name, slug, description, "order", is_active, created_at)
+SELECT 
+  gen_random_uuid(),
+  (SELECT id FROM sections WHERE slug = 'joven'),
+  unnest(ARRAY['Pantalones', 'Camisas', 'Chaquetas', 'Sacos', 'Blusas', 'Vestidos', 'Ropa deportiva', 'Corsets', 'Ropa interior', 'Medias', 'Zapatos']),
+  unnest(ARRAY['pantalones', 'camisas', 'chaquetas', 'sacos', 'blusas', 'vestidos', 'ropa-deportiva', 'corsets', 'ropa-interior', 'medias', 'zapatos']),
+  unnest(ARRAY['Pantalones de joven', 'Camisas de joven', 'Chaquetas de joven', 'Sacos de joven', 'Blusas de joven', 'Vestidos de joven', 'Ropa deportiva de joven', 'Corsets de joven', 'Ropa interior de joven', 'Medias de joven', 'Zapatos de joven']),
   generate_series(0, 10),
   true,
   NOW();

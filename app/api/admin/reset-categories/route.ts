@@ -10,7 +10,7 @@ const categoriesWithSubsections: Record<string, string[]> = {
   Accesorios: ['Gafas', 'Relojería', 'Joyería', 'Tecnología'],
   Edredones: ['Sábanas', 'Almohadas', 'Cobijas', 'Cubrelechos', 'Fundas'],
   Esika: [],
-  Avon: [],
+  Joven: ['Pantalones', 'Camisas', 'Chaquetas', 'Sacos', 'Blusas', 'Vestidos', 'Ropa deportiva', 'Corsets', 'Ropa interior', 'Medias', 'Zapatos'],
 }
 
 function toSlug(value: string) {

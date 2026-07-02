@@ -1,13 +1,10 @@
 'use client'
 import { useState } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
 import AdminModal from '@/components/ui/AdminModal'
-import { useRouter } from 'next/navigation'
 
 export default function Footer() {
   const [showAdminModal, setShowAdminModal] = useState(false)
-  const router = useRouter()
 
   const handleAdminAccess = () => {
     setShowAdminModal(true)
@@ -15,7 +12,6 @@ export default function Footer() {
 
   const handleModalClose = () => {
     setShowAdminModal(false)
-    router.push('/admin')
   }
 
   return (

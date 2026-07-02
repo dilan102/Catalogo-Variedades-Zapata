@@ -57,7 +57,6 @@ export default function AdminButton() {
         setUsername('')
         setPassword('')
         setError('')
-        window.location.assign('/admin')
         return
       }
 
@@ -79,7 +78,7 @@ export default function AdminButton() {
   return (
     <>
       <button
-        onClick={() => isLoggedIn ? window.location.assign('/admin') : setShowLogin(true)}
+        onClick={() => setShowLogin(true)}
         className="fixed bottom-4 right-4 z-30 opacity-30 hover:opacity-100 transition-opacity bg-green-800 text-white p-2 rounded-full shadow-lg"
         title="Administrador"
         disabled={isChecking}

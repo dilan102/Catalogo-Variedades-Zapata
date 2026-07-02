@@ -10,7 +10,7 @@ const sectionImages = {
   accesorios: '/Accesorios.avif',
   edredones: '/edredon.jpeg',
   esika: '/Esika.png',
-  avon: '/Avon.png',
+  joven: '/Dama.avif',
 }
 
 export async function GET() {

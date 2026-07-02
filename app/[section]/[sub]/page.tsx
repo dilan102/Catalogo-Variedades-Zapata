@@ -2,11 +2,10 @@
 import { use, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { getSubsectionBySlug, getProductsBySubsection, upsertProduct } from '@/lib/queries'
+import { getAvailableSizes } from '@/lib/sizes'
 import ProductCard from '@/components/catalog/ProductCard'
 import { ProductCardSkeleton } from '@/components/ui/Skeletons'
 import type { Subsection, Product } from '@/types'
-
-const AVAILABLE_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
 
 export default function SubsectionPage({ params }: { params: Promise<{ section: string; sub: string }> }) {
   const { section: sectionSlug, sub: subSlug } = use(params)
@@ -16,12 +15,15 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
   const [adminMode, setAdminMode] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+  const [isUploadingImages, setIsUploadingImages] = useState(false)
+  const [primaryImageFile, setPrimaryImageFile] = useState<File | null>(null)
+  const [otherImageFiles, setOtherImageFiles] = useState<File[]>([])
+  const [primaryPreview, setPrimaryPreview] = useState('')
+  const [otherPreviews, setOtherPreviews] = useState<string[]>([])
   const [formState, setFormState] = useState({
     name: '',
     description: '',
     price: '',
-    primaryImage: '',
-    otherImages: '',
     sizes: [] as string[],
     colors: '',
     is_active: true,
@@ -45,7 +47,21 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
 
   const section = subsection?.section
 
+  const availableSizes = useMemo(
+    () => getAvailableSizes(section?.slug ?? '', subsection?.slug ?? ''),
+    [section?.slug, subsection?.slug]
+  )
+
   const selectedSizes = useMemo(() => new Set(formState.sizes), [formState.sizes])
+
+  useEffect(() => {
+    return () => {
+      if (primaryPreview) {
+        URL.revokeObjectURL(primaryPreview)
+      }
+      otherPreviews.forEach((preview) => URL.revokeObjectURL(preview))
+    }
+  }, [primaryPreview, otherPreviews])
 
   const toggleSize = (size: string) => {
     setFormState((current) => {
@@ -61,14 +77,16 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
       name: '',
       description: '',
       price: '',
-      primaryImage: '',
-      otherImages: '',
       sizes: [],
       colors: '',
       is_active: true,
       is_featured: false,
       order: products.length,
     })
+    setPrimaryImageFile(null)
+    setOtherImageFiles([])
+    setPrimaryPreview('')
+    setOtherPreviews([])
     setErrorMessage('')
   }
 
@@ -76,25 +94,41 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
     event.preventDefault()
     if (!subsection) return
 
-    const primaryImage = formState.primaryImage.trim()
-    const additionalImages = formState.otherImages
-      .split('\n')
-      .map((value) => value.trim())
-      .filter(Boolean)
-
-    if (!primaryImage) {
+    if (!primaryImageFile) {
       setErrorMessage('La foto principal es obligatoria.')
       return
     }
 
-    const images = [primaryImage, ...additionalImages]
     const colors = formState.colors
       .split(',')
       .map((value) => value.trim())
       .filter(Boolean)
 
     try {
+      setErrorMessage('')
       setLoading(true)
+      setIsUploadingImages(true)
+
+      const uploadData = new FormData()
+      uploadData.append('sectionSlug', sectionSlug)
+      uploadData.append('primaryImage', primaryImageFile)
+      otherImageFiles.forEach((file) => uploadData.append('otherImages', file))
+
+      const uploadResponse = await fetch('/api/admin/upload-product-images', {
+        method: 'POST',
+        body: uploadData,
+      })
+
+      const uploadResult = await uploadResponse.json()
+
+      if (!uploadResponse.ok || !uploadResult.success) {
+        console.error('Error subiendo imágenes:', uploadResult)
+        setErrorMessage(uploadResult?.message || 'Error subiendo las imágenes.')
+        return
+      }
+
+      const images = uploadResult.urls ?? []
+
       await upsertProduct({
         subsection_id: subsection.id,
         name: formState.name,
@@ -107,6 +141,7 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
         is_featured: formState.is_featured,
         order: Number(formState.order) || products.length,
       })
+
       const refreshedProducts = await getProductsBySubsection(subsection.id)
       setProducts(refreshedProducts)
       setShowForm(false)
@@ -116,6 +151,7 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
       setErrorMessage('No se pudo guardar el producto. Revisa los datos e intenta de nuevo.')
     } finally {
       setLoading(false)
+      setIsUploadingImages(false)
     }
   }
 
@@ -194,42 +230,72 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
               <label className="block">
                 <span className="text-sm font-medium text-[#0F2A1A]">Foto principal</span>
                 <input
-                  value={formState.primaryImage}
-                  onChange={(event) => setFormState({ ...formState, primaryImage: event.target.value })}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0] ?? null
+                    setPrimaryImageFile(file)
+                    setPrimaryPreview(file ? URL.createObjectURL(file) : '')
+                  }}
                   required
                   className="mt-2 w-full rounded-2xl border border-[#E4E8E3] bg-[#FBFDF8] px-4 py-3 text-sm text-[#10221E] outline-none transition focus:border-[#3E9A60] focus:ring-2 focus:ring-[#D7F0DA]"
-                  placeholder="URL de la foto principal"
                 />
+                {primaryPreview && (
+                  <div className="mt-3 rounded-3xl overflow-hidden border border-[#E4E8E3] bg-[#F7F9F6]">
+                    <img src={primaryPreview} alt="Preview foto principal" className="w-full h-52 object-cover" />
+                  </div>
+                )}
               </label>
               <label className="block">
                 <span className="text-sm font-medium text-[#0F2A1A]">Fotos de otros colores/estilos</span>
-                <textarea
-                  value={formState.otherImages}
-                  onChange={(event) => setFormState({ ...formState, otherImages: event.target.value })}
-                  rows={4}
-                  className="mt-2 w-full rounded-3xl border border-[#E4E8E3] bg-[#FBFDF8] px-4 py-3 text-sm text-[#10221E] outline-none transition focus:border-[#3E9A60] focus:ring-2 focus:ring-[#D7F0DA]"
-                  placeholder="Una URL por línea"
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  multiple
+                  onChange={(event) => {
+                    const files = Array.from(event.target.files ?? [])
+                    setOtherImageFiles(files)
+                    setOtherPreviews(files.map((file) => URL.createObjectURL(file)))
+                  }}
+                  className="mt-2 w-full rounded-2xl border border-[#E4E8E3] bg-[#FBFDF8] px-4 py-3 text-sm text-[#10221E] outline-none transition focus:border-[#3E9A60] focus:ring-2 focus:ring-[#D7F0DA]"
                 />
+                {otherPreviews.length > 0 && (
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    {otherPreviews.map((preview, index) => (
+                      <div key={preview} className="overflow-hidden rounded-3xl border border-[#E4E8E3] bg-[#F7F9F6]">
+                        <img src={preview} alt={`Preview adicional ${index + 1}`} className="w-full h-28 object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </label>
             </div>
 
+            {isUploadingImages && (
+              <p className="text-sm text-[#3E9A60]">Subiendo imagen...</p>
+            )}
+
             <div className="grid gap-4 lg:grid-cols-[1fr_auto]">
-              <div className="space-y-3">
-                <span className="text-sm font-medium text-[#0F2A1A]">Tallas disponibles</span>
-                <div className="flex flex-wrap gap-2">
-                  {AVAILABLE_SIZES.map((size) => (
-                    <label key={size} className="inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm transition hover:border-[#3E9A60]">
-                      <input
-                        type="checkbox"
-                        checked={selectedSizes.has(size)}
-                        onChange={() => toggleSize(size)}
-                        className="h-4 w-4 rounded border-[#BCCFBC] text-[#3E9A60] focus:ring-[#3E9A60]"
-                      />
-                      <span>{size}</span>
-                    </label>
-                  ))}
+              {availableSizes.length > 0 && (
+                <div className="space-y-3">
+                  <span className="text-sm font-medium text-[#0F2A1A]">Tallas disponibles</span>
+                  <div className="flex flex-wrap gap-2">
+                    {availableSizes.map((size) => (
+                      <label key={size} className="inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm transition hover:border-[#3E9A60]">
+                        <input
+                          type="checkbox"
+                          checked={selectedSizes.has(size)}
+                          onChange={() => toggleSize(size)}
+                          className="h-4 w-4 rounded border-[#BCCFBC] text-[#3E9A60] focus:ring-[#3E9A60]"
+                        />
+                        <span>{size}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
               <label className="block">
                 <span className="text-sm font-medium text-[#0F2A1A]">Colores</span>
                 <input

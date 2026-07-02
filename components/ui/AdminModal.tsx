@@ -1,6 +1,5 @@
 'use client'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { X, Lock, User as UserIcon } from 'lucide-react'
 
 export default function AdminModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
@@ -8,7 +7,6 @@ export default function AdminModal({ isOpen, onClose }: { isOpen: boolean; onClo
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -27,12 +25,11 @@ export default function AdminModal({ isOpen, onClose }: { isOpen: boolean; onClo
       if (data.success) {
         setLoading(false)
         onClose()
-        router.push('/admin')
       } else {
         setError(data.message || 'Credenciales incorrectas')
         setLoading(false)
       }
-    } catch (error) {
+    } catch {
       setError('Error al conectar con el servidor')
       setLoading(false)
     }
