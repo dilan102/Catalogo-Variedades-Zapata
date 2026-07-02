@@ -1,11 +1,12 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { getProductById } from '@/lib/queries'
 import { formatPrice } from '@/lib/utils'
 import type { Product } from '@/types'
+import ImagePlaceholder from '@/components/ui/ImagePlaceholder'
 
 export default function ProductPage({ params }: { params: { section: string; sub: string; productId: string } }) {
   const [product, setProduct] = useState<Product | null>(null)
@@ -13,70 +14,129 @@ export default function ProductPage({ params }: { params: { section: string; sub
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
   const [selectedColor, setSelectedColor] = useState<string | null>(null)
 
-  useEffect(() => { getProductById(params.productId).then(setProduct) }, [params.productId])
+  useEffect(() => {
+    setProduct(null)
+    setImgIndex(0)
+    void getProductById(params.productId).then((result) => {
+      if (result) {
+        setProduct(result)
+      }
+    })
+  }, [params.productId])
 
   if (!product) return <div className="px-4 py-10 text-center text-stone-400 text-sm">Cargando...</div>
 
   const images = product.images ?? []
   const subsection = product.subsection
   const section = subsection?.section
+  const selectedImage = images[imgIndex] ?? null
+  const otherImages = useMemo(() => images.filter((_, index) => index !== imgIndex), [images, imgIndex])
 
   return (
-    <div className="max-w-7xl mx-auto animate-fade-in">
-      <div className="relative bg-[#EAF8EC] rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm">
-        <div className="aspect-[4/5] sm:aspect-[3/4] lg:aspect-[4/3] relative overflow-hidden">
-          {images.length > 0 ? (
-            <Image src={images[imgIndex]} alt={product.name} fill className="object-cover transition-opacity duration-300" priority />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center text-[#6FCB8C] text-sm">Sin imagen</div>
-          )}
-          {images.length > 1 && (
-            <>
-              <button onClick={() => setImgIndex((i) => (i - 1 + images.length) % images.length)} className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg hover:bg-white hover:scale-110 transition-all duration-200"><ChevronLeft size={20} /></button>
-              <button onClick={() => setImgIndex((i) => (i + 1) % images.length)} className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg hover:bg-white hover:scale-110 transition-all duration-200"><ChevronRight size={20} /></button>
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                {images.map((_, i) => <button key={i} onClick={() => setImgIndex(i)} className={`w-2 h-2 rounded-full transition-all duration-200 ${i === imgIndex ? 'bg-white scale-125' : 'bg-white/40 hover:bg-white/60'}`} />)}
+    <div className="px-4 py-8 sm:py-10 max-w-7xl mx-auto">
+      <p className="text-xs text-[#5C7A66] mb-2">
+        <Link href="/" className="underline hover:text-[#3E9A60] transition-colors">Inicio</Link>
+        {' / '}
+        {section && <Link href={`/${section.slug}`} className="underline hover:text-[#3E9A60] transition-colors">{section.name}</Link>}
+        {' / '}
+        {subsection && <Link href={`/${section?.slug}/${subsection.slug}`} className="underline hover:text-[#3E9A60] transition-colors">{subsection.name}</Link>}
+        {' / '}
+        {product.name}
+      </p>
+
+      <div className="grid gap-8 lg:grid-cols-[1.3fr_0.7fr]">
+        <section className="space-y-6">
+          <div className="rounded-[32px] border border-[#DCEFDD] bg-white shadow-sm">
+            <div className="relative aspect-[4/5] overflow-hidden rounded-[32px] bg-[#F8FBF7]">
+              {selectedImage ? (
+                <Image src={selectedImage} alt={product.name} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 800px" />
+              ) : (
+                <ImagePlaceholder className="absolute inset-0" />
+              )}
+            </div>
+            {images.length > 1 && (
+              <div className="mt-4 grid grid-cols-4 gap-3 px-4 pb-4">
+                {images.map((src, index) => (
+                  <button
+                    key={`${src}-${index}`}
+                    type="button"
+                    onClick={() => setImgIndex(index)}
+                    className={`overflow-hidden rounded-[24px] border ${index === imgIndex ? 'border-[#3E9A60]' : 'border-[#E4E8E3]'} bg-[#F8FBF7] focus:outline-none`}
+                  >
+                    <div className="relative h-24 w-full">
+                      <Image src={src} alt={`${product.name} variante ${index + 1}`} fill className="object-cover" sizes="80px" />
+                    </div>
+                  </button>
+                ))}
               </div>
-            </>
+            )}
+          </div>
+
+          <div className="rounded-[32px] border border-[#DCEFDD] bg-white p-6 shadow-sm">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <h1 className="text-3xl font-semibold text-[#0F2A1A]">{product.name}</h1>
+                {product.price !== null && <p className="mt-3 text-3xl font-bold text-[#1F6B3C]">{formatPrice(product.price)}</p>}
+              </div>
+              {product.is_featured && (
+                <span className="inline-flex rounded-full border border-[#6FCB8C] bg-[#ECF9EE] px-4 py-2 text-sm font-semibold text-[#1F6B3C]">Destacado</span>
+              )}
+            </div>
+
+            {product.description && <p className="mt-6 text-sm leading-7 text-[#334D41]">{product.description}</p>}
+
+            <div className="mt-8 grid gap-4 sm:grid-cols-2">
+              <div className="rounded-3xl bg-[#F4FBF5] p-5">
+                <p className="text-xs uppercase tracking-[0.24em] text-[#5C7A66]">Tallas</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {product.sizes.length > 0 ? product.sizes.map((size) => (
+                    <span key={size} className="rounded-full border border-[#CDE8D2] bg-white px-3 py-2 text-sm text-[#0F2A1A]">{size}</span>
+                  )) : <span className="text-sm text-[#5C7A66]">Sin tallas definidas</span>}
+                </div>
+              </div>
+              <div className="rounded-3xl bg-[#F4FBF5] p-5">
+                <p className="text-xs uppercase tracking-[0.24em] text-[#5C7A66]">Colores</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {product.colors.length > 0 ? product.colors.map((color) => (
+                    <button key={color} type="button" onClick={() => setSelectedColor(color === selectedColor ? null : color)} className={`rounded-full border px-3 py-2 text-sm transition ${selectedColor === color ? 'border-[#1F6B3C] bg-[#1F6B3C] text-white shadow-sm' : 'border-[#DCEFDD] bg-white text-[#0F2A1A] hover:border-[#3E9A60]'}`}>{color}</button>
+                  )) : <span className="text-sm text-[#5C7A66]">Sin variantes</span>}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 grid gap-3 sm:grid-cols-2">
+              <Link href={`https://wa.me/?text=${encodeURIComponent(`Hola, me interesa: ${product.name}`)}`} className="inline-flex items-center justify-center rounded-3xl bg-[#3E9A60] px-5 py-4 text-sm font-semibold text-white transition hover:bg-[#1F6B3C]">Consultar por WhatsApp</Link>
+              <Link href={`/${params.section}/${params.sub}`} className="inline-flex items-center justify-center rounded-3xl border border-[#DCEFDD] bg-white px-5 py-4 text-sm font-semibold text-[#3E9A60] transition hover:bg-[#EAF8EC]">Volver a la subsección</Link>
+            </div>
+          </div>
+        </section>
+
+        <aside className="space-y-6">
+          <div className="rounded-[32px] border border-[#DCEFDD] bg-white p-6 shadow-sm">
+            <p className="text-sm font-semibold text-[#0F2A1A]">Información</p>
+            <div className="mt-4 space-y-3 text-sm text-[#5C7A66]">
+              <p><span className="font-semibold text-[#0F2A1A]">Sección:</span> {product.subsection?.section?.name || params.section}</p>
+              <p><span className="font-semibold text-[#0F2A1A]">Subsección:</span> {product.subsection?.name || params.sub}</p>
+              <p><span className="font-semibold text-[#0F2A1A]">Estado:</span> {product.is_active ? 'Activo' : 'No activo'}</p>
+              <p><span className="font-semibold text-[#0F2A1A]">Orden:</span> {product.order}</p>
+            </div>
+          </div>
+
+          {product.images.length > 1 && (
+            <div className="rounded-[32px] border border-[#DCEFDD] bg-white p-6 shadow-sm">
+              <p className="text-sm font-semibold text-[#0F2A1A]">Otros colores / estilos</p>
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                {otherImages.map((src, index) => (
+                  <button key={`${src}-${index}`} type="button" onClick={() => setImgIndex(images.indexOf(src))} className="overflow-hidden rounded-3xl border border-[#E4E8E3] bg-[#F8FBF7] focus:outline-none">
+                    <div className="relative h-32 w-full">
+                      <Image src={src} alt={`${product.name} variante ${index + 2}`} fill className="object-cover" sizes="220px" />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
-        </div>
-      </div>
-      <div className="px-4 py-6 sm:px-6 lg:px-8">
-        <p className="text-xs text-[#5C7A66] mb-2">
-          {section && <Link href={`/${section.slug}`} className="underline hover:text-[#3E9A60] transition-colors">{section.name}</Link>}
-          {subsection && <> / <Link href={`/${section?.slug}/${subsection.slug}`} className="underline hover:text-[#3E9A60] transition-colors">{subsection.name}</Link></>}
-        </p>
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#0F2A1A]">{product.name}</h1>
-        {product.price !== null && <p className="text-xl sm:text-2xl lg:text-3xl font-semibold text-[#1F6B3C] mt-2">{formatPrice(product.price)}</p>}
-        {product.description && <p className="text-base sm:text-lg text-[#5C7A66] mt-4 leading-relaxed">{product.description}</p>}
-        {product.sizes.length > 0 && (
-          <div className="mt-6">
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#5C7A66] mb-3">Talla</p>
-            <div className="flex flex-wrap gap-2">
-              {product.sizes.map((s) => (
-                <button key={s} onClick={() => setSelectedSize(s === selectedSize ? null : s)} className={`px-4 py-2 text-sm border rounded-xl transition-all duration-200 hover:scale-105 min-h-[44px] ${selectedSize === s ? 'bg-[#1F6B3C] text-white border-[#1F6B3C] shadow-md' : 'border-[#DCEFDD] text-[#0F2A1A] hover:border-[#3E9A60] bg-white'}`}>{s}</button>
-              ))}
-            </div>
-          </div>
-        )}
-        {product.colors.length > 0 && (
-          <div className="mt-5">
-            <p className="text-xs font-semibold uppercase tracking-wider text-[#5C7A66] mb-3">Color</p>
-            <div className="flex flex-wrap gap-2">
-              {product.colors.map((c) => (
-                <button key={c} onClick={() => setSelectedColor(c === selectedColor ? null : c)} className={`px-4 py-2 text-sm border rounded-xl transition-all duration-200 hover:scale-105 min-h-[44px] ${selectedColor === c ? 'bg-[#1F6B3C] text-white border-[#1F6B3C] shadow-md' : 'border-[#DCEFDD] text-[#0F2A1A] hover:border-[#3E9A60] bg-white'}`}>{c}</button>
-              ))}
-            </div>
-          </div>
-        )}
-        <div className="mt-8 space-y-3">
-          <a href={`https://wa.me/?text=${encodeURIComponent(`Hola, me interesa: ${product.name}`)}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full py-4 bg-[#3E9A60] text-white font-semibold rounded-2xl text-sm hover:bg-[#1F6B3C] transition-all duration-200 hover:scale-[1.02] shadow-md hover:shadow-lg min-h-[44px]">
-            Consultar por WhatsApp
-          </a>
-          <Link href={`/${params.section}/${params.sub}`} className="flex items-center justify-center w-full py-3.5 border border-[#DCEFDD] text-[#3E9A60] font-medium rounded-2xl text-sm hover:bg-[#EAF8EC] transition-all duration-200 hover:scale-[1.02] min-h-[44px]">
-            Volver
-          </Link>
-        </div>
+        </aside>
       </div>
     </div>
   )
