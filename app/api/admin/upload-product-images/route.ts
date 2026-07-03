@@ -53,7 +53,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, message: 'Falta sección' }, { status: 400 })
   }
 
-  if (!isUploadFile(primaryFile)) {
+  const validatedPrimaryFile = isUploadFile(primaryFile) ? primaryFile : null
+  if (!validatedPrimaryFile) {
     return NextResponse.json({ success: false, message: 'La foto principal es obligatoria' }, { status: 400 })
   }
 
@@ -66,7 +67,7 @@ export async function POST(request: Request) {
 
     const uploadedUrls: string[] = []
     const filesToUpload: UploadFile[] = [
-      primaryFile,
+      validatedPrimaryFile,
       ...otherFiles.filter(isUploadFile)
     ]
 
