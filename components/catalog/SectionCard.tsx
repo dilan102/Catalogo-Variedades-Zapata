@@ -5,14 +5,14 @@ import type { Section } from '@/types'
 import ImagePlaceholder from '@/components/ui/ImagePlaceholder'
 
 const sectionImages: Record<string, string> = {
-  dama: '/Dama.avif',
-  caballero: '/Caballero.jpg',
-  nino: '/Niño.webp',
-  nina: '/Niña.jpg',
-  accesorios: '/Accesorios.avif',
-  edredones: '/edredon.jpeg',
-  esika: '/Esika.png',
-  joven: '/Dama.avif',
+  dama: '/Silueta_dama_seccion.jpg',
+  caballero: '/silueta_caballero_seccion.jpeg',
+  joven: '/silueta_joven_seccion.jpg',
+  nino: '/silueta_niño_seccion.jpg',
+  nina: '/silueta_niña_seccion.jpeg',
+  accesorios: '/silueta_accesorios_seccion.jpeg',
+  edredones: '/silueta_edredones_seccion.jpg',
+  esika: '/silueta_esika_seccion.jpg',
 }
 
 export default function SectionCard({ section }: { section: Section }) {

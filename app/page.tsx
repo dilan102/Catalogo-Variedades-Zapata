@@ -22,7 +22,11 @@ export default function HomePage() {
         const [s, f] = await Promise.all([getSections(), getFeaturedProducts(6)])
         console.log('Secciones cargadas:', s.length)
         console.log('Productos destacados cargados:', f.length)
-        setSections(s)
+        const orderedSections = s.slice().sort((a, b) => {
+          const order = ['dama', 'caballero', 'joven', 'nino', 'nina', 'accesorios', 'edredones', 'esika']
+          return order.indexOf(a.slug) - order.indexOf(b.slug)
+        })
+        setSections(orderedSections)
         setFeatured(f)
       } catch (error) {
         console.error('Error al cargar datos:', error)
