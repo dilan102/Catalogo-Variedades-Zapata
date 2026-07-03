@@ -62,6 +62,19 @@ const imagesBySlug: Record<string, Record<string, string>> = {
     medias: '/medias_niño.jpeg',
     'ropa-interior': '/ropa_interior_niño.png',
   },
+  accesorios: {
+    gafas: '/gafas_accesorios.jpeg',
+    relojeria: '/joyeria_accesorio.jpeg',
+    joyeria: '/joyeria_accesorio.jpeg',
+    tecnologia: '/tecnologia_accesorios.png',
+  },
+  edredones: {
+    sabanas: '/sabana_edredones.png',
+    almohadas: '/almohada_edredones.jpeg',
+    cobijas: '/cobijas_edredones.jpeg',
+    cubrelechos: '/cubrelecho_edredones.png',
+    fundas: '/fundas_edredones.png',
+  },
 }
 
 export default function SubsectionCard({ subsection, sectionSlug }: { subsection: Subsection; sectionSlug: string }) {
