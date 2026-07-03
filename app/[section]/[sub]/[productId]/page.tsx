@@ -2,26 +2,26 @@
 import { useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { getProductById } from '@/lib/queries'
 import type { Product } from '@/types'
 import ImagePlaceholder from '@/components/ui/ImagePlaceholder'
 
 export default function ProductPage({ params }: { params: { section: string; sub: string; productId: string } }) {
   const [product, setProduct] = useState<Product | null>(null)
-  const [imgIndex, setImgIndex] = useState(0)
+  const [loading, setLoading] = useState(true)
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
   const [selectedColor, setSelectedColor] = useState<string | null>(null)
   const [adminMode, setAdminMode] = useState(false)
 
   useEffect(() => {
+    setLoading(true)
     setProduct(null)
-    setImgIndex(0)
-    void getProductById(params.productId).then((result) => {
-      if (result) {
-        setProduct(result)
-      }
-    })
+    void getProductById(params.productId)
+      .then((result) => {
+        if (result) setProduct(result)
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
   }, [params.productId])
 
   useEffect(() => {
@@ -31,13 +31,14 @@ export default function ProductPage({ params }: { params: { section: string; sub
       .catch(() => setAdminMode(false))
   }, [])
 
-  if (!product) return <div className="px-4 py-10 text-center text-stone-400 text-sm">Cargando...</div>
+  if (loading) return <div className="px-4 py-10 text-center text-stone-400 text-sm">Cargando...</div>
+  if (!product) return <div className="px-4 py-10 text-center text-stone-400 text-sm">Producto no encontrado</div>
 
   const images = product.images ?? []
   const subsection = product.subsection
   const section = subsection?.section
-  const selectedImage = images[imgIndex] ?? null
-  const otherImages = useMemo(() => images.filter((_, index) => index !== imgIndex), [images, imgIndex])
+  const selectedImage = images[0] ?? null
+  const otherImages = useMemo(() => images.slice(1), [images])
 
   return (
     <div className="px-4 py-8 sm:py-10 max-w-7xl mx-auto">
@@ -54,29 +55,13 @@ export default function ProductPage({ params }: { params: { section: string; sub
       <div className="grid gap-8 lg:grid-cols-[1.3fr_0.7fr]">
         <section className="space-y-6">
           <div className="rounded-[32px] border border-[#DCEFDD] bg-white shadow-sm">
-            <div className="relative aspect-[4/5] overflow-hidden rounded-[32px] bg-[#F8FBF7]">
+            <div className="relative w-full max-w-md mx-auto aspect-square sm:aspect-[4/5] overflow-hidden rounded-[32px] bg-[#F8FBF7]">
               {selectedImage ? (
-                <Image src={selectedImage} alt={product.name} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 800px" />
+                <Image src={selectedImage} alt={product.name} fill className="object-contain" sizes="(max-width: 640px) 80vw, 480px" />
               ) : (
                 <ImagePlaceholder className="absolute inset-0" />
               )}
             </div>
-            {images.length > 1 && (
-              <div className="mt-4 grid grid-cols-4 gap-3 px-4 pb-4">
-                {images.map((src, index) => (
-                  <button
-                    key={`${src}-${index}`}
-                    type="button"
-                    onClick={() => setImgIndex(index)}
-                    className={`overflow-hidden rounded-[24px] border ${index === imgIndex ? 'border-[#3E9A60]' : 'border-[#E4E8E3]'} bg-[#F8FBF7] focus:outline-none`}
-                  >
-                    <div className="relative h-24 w-full">
-                      <Image src={src} alt={`${product.name} variante ${index + 1}`} fill className="object-cover" sizes="80px" />
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
 
           <div className="rounded-[32px] border border-[#DCEFDD] bg-white p-6 shadow-sm">
