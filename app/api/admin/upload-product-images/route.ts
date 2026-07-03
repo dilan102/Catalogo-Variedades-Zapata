@@ -66,9 +66,10 @@ export async function POST(request: Request) {
     await ensureBucketExists(supabase)
 
     const uploadedUrls: string[] = []
+    const otherUploadFiles = otherFiles.filter(isUploadFile) as UploadFile[]
     const filesToUpload: UploadFile[] = [
       validatedPrimaryFile,
-      ...otherFiles.filter(isUploadFile)
+      ...otherUploadFiles,
     ]
 
     for (const file of filesToUpload) {
