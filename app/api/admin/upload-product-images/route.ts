@@ -13,13 +13,10 @@ function sanitizeFileName(value: string) {
     .toLowerCase()
 }
 
-type UploadFile = File | (Blob & { name: string })
+type UploadFile = File | Blob
 
 function isUploadFile(value: unknown): value is UploadFile {
-  return (
-    value instanceof File ||
-    (typeof value === 'object' && value !== null && 'name' in value && 'arrayBuffer' in value)
-  )
+  return value instanceof Blob
 }
 
 async function ensureBucketExists(supabase: any) {
@@ -73,7 +70,7 @@ export async function POST(request: Request) {
     ]
 
     for (const file of filesToUpload) {
-      const name = 'name' in file && typeof file.name === 'string' ? file.name : `upload-${crypto.randomUUID()}`
+      const name = file instanceof File ? file.name : `upload-${crypto.randomUUID()}`
       const fileName = `${crypto.randomUUID()}-${sanitizeFileName(name)}`
       const filePath = `${sectionSlug}/${fileName}`
 
@@ -106,6 +103,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, urls: uploadedUrls })
   } catch (error) {
     console.error('Error en upload-product-images:', error)
-    return NextResponse.json({ success: false, message: 'Error al subir las imágenes' }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Error al subir las imágenes'
+    return NextResponse.json({ success: false, message }, { status: 500 })
   }
 }
