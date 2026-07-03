@@ -42,6 +42,15 @@ const imagesBySlug: Record<string, Record<string, string>> = {
     medias: '/medias_joven.jpeg',
     zapatos: '/zapatos_joven.png',
   },
+  niño: {
+    pantalones: '/pantalon_niño.avif',
+    zapatos: '/zapatos_niño.jpeg',
+    camisas: '/camisa_niño.jpeg',
+    sacos: '/saco_niño.jpeg',
+    chaquetas: '/chaqueta_niño.jpeg',
+    medias: '/medias_niño.jpeg',
+    'ropa-interior': '/ropa_interior_niño.png',
+  },
 }
 
 export default function SubsectionCard({ subsection, sectionSlug }: { subsection: Subsection; sectionSlug: string }) {
