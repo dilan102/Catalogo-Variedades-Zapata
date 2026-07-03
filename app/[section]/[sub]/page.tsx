@@ -1,5 +1,5 @@
-'use client'
-import { use, useEffect, useMemo, useState } from 'react'
+ 'use client'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { getSubsectionBySlug, getProductsBySubsection } from '@/lib/queries'
 import { getAvailableSizes } from '@/lib/sizes'
@@ -7,8 +7,8 @@ import ProductCard from '@/components/catalog/ProductCard'
 import { ProductCardSkeleton } from '@/components/ui/Skeletons'
 import type { Subsection, Product } from '@/types'
 
-export default function SubsectionPage({ params }: { params: Promise<{ section: string; sub: string }> }) {
-  const { section: sectionSlug, sub: subSlug } = use(params)
+export default function SubsectionPage({ params }: { params: { section: string; sub: string } }) {
+  const { section: sectionSlug, sub: subSlug } = params
   const [subsection, setSubsection] = useState<Subsection | null>(null)
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
