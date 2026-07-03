@@ -42,6 +42,17 @@ const imagesBySlug: Record<string, Record<string, string>> = {
     medias: '/medias_joven.jpeg',
     zapatos: '/zapatos_joven.png',
   },
+  nina: {
+    pantalones: '/pantalon_niña.jpeg',
+    camisas: '/camisa_niña.jpeg',
+    chaquetas: '/chaqueta_niña.jpeg',
+    sacos: '/saco_niña.jpeg',
+    blusas: '/blusa_niña.webp',
+    vestidos: '/vestido_niña.avif',
+    'ropa-interior': '/ropa_interior_niña.jpeg',
+    medias: '/medias_niña.jpeg',
+    zapatos: '/zapatos_niña.jpeg',
+  },
   nino: {
     pantalones: '/pantalon_niño.avif',
     zapatos: '/zapatos_niño.jpeg',
