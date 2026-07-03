@@ -29,6 +29,18 @@ const imagesBySlug: Record<string, Record<string, string>> = {
     'ropa-interior': '/ropa_interior_caballero.jpeg',
     'ropa-deportiva': '/ropa_deportiva_caballero.jpeg',
   },
+  joven: {
+    pantalones: '/pantalon_joven.jpeg',
+    camisas: '/camisa_joven.jpg',
+    chaquetas: '/chaqueta_joven.jpeg',
+    sacos: '/saco_joven.jpeg',
+    blusas: '/blusas_joven.jpeg',
+    vestidos: '/vestido_joven.jpg',
+    'ropa-deportiva': '/ropa_deportiva_joven.webp',
+    'ropa-interior': '/ropa_interior_joven.jpeg',
+    medias: '/medias_joven.jpeg',
+    zapatos: '/zapatos_joven.png',
+  },
 }
 
 export default function SubsectionCard({ subsection, sectionSlug }: { subsection: Subsection; sectionSlug: string }) {
