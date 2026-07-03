@@ -91,8 +91,8 @@ export default function ProductPage() {
                 ))}
               </div>
               <div className="mt-4 text-sm text-[#5C7A66]">
-                <p><span className="font-semibold text-[#0F2A1A]">Sección:</span> {product.subsection?.section?.name || params.section}</p>
-                <p><span className="font-semibold text-[#0F2A1A]">Subsección:</span> {product.subsection?.name || params.sub}</p>
+                <p><span className="font-semibold text-[#0F2A1A]">Sección:</span> {product.subsection?.section?.name || params?.section}</p>
+                <p><span className="font-semibold text-[#0F2A1A]">Subsección:</span> {product.subsection?.name || params?.sub}</p>
               </div>
             </div>
           </div>
@@ -102,8 +102,8 @@ export default function ProductPage() {
           <div className="rounded-[32px] border border-[#DCEFDD] bg-white p-6 shadow-sm">
             <p className="text-sm font-semibold text-[#0F2A1A]">Información</p>
             <div className="mt-4 space-y-3 text-sm text-[#5C7A66]">
-              <p><span className="font-semibold text-[#0F2A1A]">Sección:</span> {product.subsection?.section?.name || params.section}</p>
-              <p><span className="font-semibold text-[#0F2A1A]">Subsección:</span> {product.subsection?.name || params.sub}</p>
+              <p><span className="font-semibold text-[#0F2A1A]">Sección:</span> {product.subsection?.section?.name || params?.section}</p>
+              <p><span className="font-semibold text-[#0F2A1A]">Subsección:</span> {product.subsection?.name || params?.sub}</p>
               <p><span className="font-semibold text-[#0F2A1A]">Estado:</span> {product.is_active ? 'Activo' : 'No activo'}</p>
               <p><span className="font-semibold text-[#0F2A1A]">Orden:</span> {product.order}</p>
             </div>
