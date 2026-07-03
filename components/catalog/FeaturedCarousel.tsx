@@ -56,7 +56,7 @@ export default function FeaturedCarousel({ products, loading }: FeaturedCarousel
     return () => window.clearInterval(interval)
   }, [])
 
-  const handleToggle = (id: number) => {
+  const handleToggle = (id: string) => {
     setActiveId((current) => (current === id ? null : id))
   }
 
