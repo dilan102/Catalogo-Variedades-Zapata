@@ -7,8 +7,9 @@ import ProductCard from '@/components/catalog/ProductCard'
 import { ProductCardSkeleton } from '@/components/ui/Skeletons'
 import type { Subsection, Product } from '@/types'
 
-export default function SubsectionPage({ params }: { params: { section: string; sub: string } }) {
-  const { section: sectionSlug, sub: subSlug } = params
+export default function SubsectionPage({ params }: { params: Promise<{ section: string; sub: string }> }) {
+  const [sectionSlug, setSectionSlug] = useState<string>('')
+  const [subSlug, setSubSlug] = useState<string>('')
   const [subsection, setSubsection] = useState<Subsection | null>(null)
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
@@ -40,13 +41,19 @@ export default function SubsectionPage({ params }: { params: { section: string; 
   }
 
   useEffect(() => {
-    console.log('SubsectionPage params:', { sectionSlug, subSlug })
+    params.then((resolved) => {
+      setSectionSlug(resolved.section)
+      setSubSlug(resolved.sub)
+    })
+  }, [params])
+
+  useEffect(() => {
+    if (!sectionSlug || !subSlug) return
+    setLoading(true)
     getSubsectionBySlug(sectionSlug, subSlug).then(async (sub) => {
-      console.log('getSubsectionBySlug result:', sub)
       setSubsection(sub)
       if (sub) {
         const prods = await getProductsBySubsection(sub.id)
-        console.log('getProductsBySubsection length:', prods?.length)
         setProducts(prods)
       }
     }).finally(() => setLoading(false))

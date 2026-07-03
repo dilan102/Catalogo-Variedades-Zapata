@@ -35,6 +35,12 @@ export default function ProductPage() {
       .catch(() => setAdminMode(false))
   }, [])
 
+  const images = useMemo(() => product?.images ?? [], [product])
+  const subsection = product?.subsection
+  const section = subsection?.section
+  const selectedImage = images[0] ?? null
+  const otherImages = useMemo(() => images.slice(1), [images])
+
   if (loading) return <div className="px-4 py-10 text-center text-stone-400 text-sm">Cargando...</div>
   if (!product) return (
     <div className="px-4 py-10 text-center text-stone-400 text-sm">
@@ -53,12 +59,6 @@ export default function ProductPage() {
       </div>
     </div>
   )
-
-  const images = product.images ?? []
-  const subsection = product.subsection
-  const section = subsection?.section
-  const selectedImage = images[0] ?? null
-  const otherImages = useMemo(() => images.slice(1), [images])
 
   return (
     <div className="px-4 py-8 sm:py-10 max-w-7xl mx-auto">
@@ -85,6 +85,9 @@ export default function ProductPage() {
 
             <div className="px-4 pb-4">
               <p className="text-base font-serif font-semibold leading-tight text-[#0F2A1A] line-clamp-2">{product.name}</p>
+              {product.description && (
+                <p className="mt-3 text-sm leading-6 text-[#5C7A66]">{product.description}</p>
+              )}
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {product.sizes.slice(0, 4).map((size) => (
                   <span key={size} className="rounded-full border border-[#DCEFDD] bg-white px-2 py-1 text-[10px] text-[#0F2A1A]">{size}</span>
