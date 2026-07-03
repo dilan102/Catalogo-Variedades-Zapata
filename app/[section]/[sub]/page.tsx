@@ -1,7 +1,7 @@
 'use client'
 import { use, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { getSubsectionBySlug, getProductsBySubsection, upsertProduct, deleteProduct } from '@/lib/queries'
+import { getSubsectionBySlug, getProductsBySubsection } from '@/lib/queries'
 import { getAvailableSizes } from '@/lib/sizes'
 import ProductCard from '@/components/catalog/ProductCard'
 import { ProductCardSkeleton } from '@/components/ui/Skeletons'
@@ -25,7 +25,6 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
   const [formState, setFormState] = useState({
     name: '',
     description: '',
-    price: '',
     sizes: [] as string[],
     colors: '',
     is_active: true,
@@ -86,7 +85,6 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
     setFormState({
       name: '',
       description: '',
-      price: '',
       sizes: [],
       colors: '',
       is_active: true,
@@ -106,7 +104,6 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
     setFormState({
       name: product.name,
       description: product.description ?? '',
-      price: product.price !== null && product.price !== undefined ? String(product.price) : '',
       sizes: product.sizes ?? [] ,
       colors: product.colors.join(', '),
       is_active: product.is_active,
@@ -143,7 +140,20 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
         })
       }
 
-      await deleteProduct(product.id)
+      const deleteResponse = await fetch('/api/admin/delete-product', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: product.id }),
+      })
+
+      const deleteResult = await deleteResponse.json()
+
+      if (!deleteResponse.ok || !deleteResult.success) {
+        console.error('Error eliminando producto:', deleteResult)
+        setErrorMessage(deleteResult?.message || 'No se pudo eliminar el producto. Intenta de nuevo.')
+        return
+      }
+
       setProducts((current) => current.filter((item) => item.id !== product.id))
       setSuccessMessage('Producto eliminado correctamente.')
       if (editingProduct?.id === product.id) {
@@ -151,7 +161,8 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
       }
     } catch (error) {
       console.error('Error eliminando producto:', error)
-      setErrorMessage('No se pudo eliminar el producto. Intenta de nuevo.')
+      const errorMessage = error instanceof Error ? error.message : 'No se pudo eliminar el producto. Intenta de nuevo.'
+      setErrorMessage(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -209,19 +220,30 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
         images = uploadResult.urls ?? []
       }
 
-      await upsertProduct({
-        id: editingProduct?.id,
-        subsection_id: subsection.id,
-        name: formState.name,
-        description: formState.description || null,
-        price: formState.price ? Number(formState.price) : null,
-        images,
-        sizes: formState.sizes,
-        colors,
-        is_active: formState.is_active,
-        is_featured: formState.is_featured,
-        order: Number(formState.order) || products.length,
+      const saveResponse = await fetch('/api/admin/save-product', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: editingProduct?.id,
+          subsection_id: subsection.id,
+          name: formState.name,
+          description: formState.description || null,
+          images,
+          sizes: formState.sizes,
+          colors,
+          is_active: formState.is_active,
+          is_featured: formState.is_featured,
+          order: Number(formState.order) || products.length,
+        }),
       })
+
+      const saveResult = await saveResponse.json()
+
+      if (!saveResponse.ok || !saveResult.success) {
+        console.error('Error guardando producto:', saveResult)
+        setErrorMessage(saveResult?.message || 'No se pudo guardar el producto. Revisa los datos e intenta de nuevo.')
+        return
+      }
 
       const refreshedProducts = await getProductsBySubsection(subsection.id)
       setProducts(refreshedProducts)
@@ -229,7 +251,8 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
       resetForm()
     } catch (error) {
       console.error('Error guardando producto:', error)
-      setErrorMessage('No se pudo guardar el producto. Revisa los datos e intenta de nuevo.')
+      const errorMessage = error instanceof Error ? error.message : 'No se pudo guardar el producto. Revisa los datos e intenta de nuevo.'
+      setErrorMessage(errorMessage)
     } finally {
       setLoading(false)
       setIsUploadingImages(false)
@@ -281,17 +304,6 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
                   required
                   className="mt-2 w-full rounded-2xl border border-[#E4E8E3] bg-[#FBFDF8] px-4 py-3 text-sm text-[#10221E] outline-none transition focus:border-[#3E9A60] focus:ring-2 focus:ring-[#D7F0DA]"
                   placeholder="Ej: Blusa deportiva"
-                />
-              </label>
-              <label className="block">
-                <span className="text-sm font-medium text-[#0F2A1A]">Precio</span>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={formState.price}
-                  onChange={(event) => setFormState({ ...formState, price: event.target.value })}
-                  className="mt-2 w-full rounded-2xl border border-[#E4E8E3] bg-[#FBFDF8] px-4 py-3 text-sm text-[#10221E] outline-none transition focus:border-[#3E9A60] focus:ring-2 focus:ring-[#D7F0DA]"
-                  placeholder="Ej: 49.99"
                 />
               </label>
             </div>

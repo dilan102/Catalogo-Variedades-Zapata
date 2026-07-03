@@ -4,7 +4,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { getProductById } from '@/lib/queries'
-import { formatPrice } from '@/lib/utils'
 import type { Product } from '@/types'
 import ImagePlaceholder from '@/components/ui/ImagePlaceholder'
 
@@ -84,7 +83,6 @@ export default function ProductPage({ params }: { params: { section: string; sub
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <h1 className="text-3xl font-semibold text-[#0F2A1A]">{product.name}</h1>
-                {adminMode && product.price !== null && <p className="mt-3 text-3xl font-bold text-[#1F6B3C]">{formatPrice(product.price)}</p>}
               </div>
               {product.is_featured && (
                 <span className="inline-flex rounded-full border border-[#6FCB8C] bg-[#ECF9EE] px-4 py-2 text-sm font-semibold text-[#1F6B3C]">Destacado</span>

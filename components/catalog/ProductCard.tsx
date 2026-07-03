@@ -1,7 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
-import { formatPrice } from '@/lib/utils'
 import type { Product } from '@/types'
 import ImagePlaceholder from '@/components/ui/ImagePlaceholder'
 
@@ -66,7 +65,6 @@ export default function ProductCard({ product, href, adminMode, onEdit, onDelete
 
       <div className="px-4 pb-4">
         <p className="text-base font-serif font-semibold leading-tight text-[#0F2A1A] line-clamp-2 transition-colors duration-300 group-hover:text-[#3E9A60]">{product.name}</p>
-        {adminMode && product.price !== null && <p className="mt-2 text-lg font-medium text-[#1F6B3C]">{formatPrice(product.price)}</p>}
         <div className="mt-3 flex flex-wrap gap-1.5">
           {product.sizes.slice(0, 4).map((size) => (
             <span key={size} className="rounded-full border border-[#DCEFDD] bg-white px-2 py-1 text-[10px] text-[#0F2A1A]">{size}</span>
