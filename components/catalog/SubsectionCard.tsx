@@ -23,7 +23,7 @@ const imagesBySlug: Record<string, Record<string, string>> = {
     pantalonetas: '/pantaloneta_caballero.jpeg',
     camisas: '/camisa_caballero.jpeg',
     sacos: '/saco_caballero.jpg',
-    chaquetas: '/chaqueta_caballero.jpeg',
+    chaquetas: '/Chaqueta_caballero.jpeg',
     medias: '/media_caballero.avif',
     zapatos: '/zapatos_caballero.jpeg',
     'ropa-interior': '/ropa_interior_caballero.jpeg',
