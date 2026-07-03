@@ -29,12 +29,12 @@ export default function Benefits() {
             return (
               <div 
                 key={index} 
-                className="flex items-center gap-3 justify-center md:justify-start"
+                className="flex w-full items-center gap-3 justify-start"
               >
                 <div className="w-10 h-10 bg-[rgba(62,154,96,0.1)] rounded-xl flex items-center justify-center flex-shrink-0">
                   <Icon size={20} className="text-[#3E9A60]" />
                 </div>
-                <div className="text-center md:text-left">
+                <div className="text-left">
                   <h3 className="font-serif text-base font-semibold text-[#0F2A1A]">{benefit.title}</h3>
                   <p className="text-sm text-[#5C7A66]">{benefit.description}</p>
                 </div>
