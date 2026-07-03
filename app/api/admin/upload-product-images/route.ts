@@ -13,6 +13,13 @@ function sanitizeFileName(value: string) {
     .toLowerCase()
 }
 
+function isUploadFile(value: unknown): value is File {
+  return (
+    value instanceof File ||
+    (typeof value === 'object' && value !== null && 'name' in value && 'arrayBuffer' in value)
+  )
+}
+
 async function ensureBucketExists(supabase: any) {
   const { error } = await supabase.storage.createBucket(bucketName, {
     public: true,
@@ -44,7 +51,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, message: 'Falta sección' }, { status: 400 })
   }
 
-  if (!(primaryFile instanceof File)) {
+  if (!isUploadFile(primaryFile)) {
     return NextResponse.json({ success: false, message: 'La foto principal es obligatoria' }, { status: 400 })
   }
 
@@ -56,10 +63,14 @@ export async function POST(request: Request) {
     await ensureBucketExists(supabase)
 
     const uploadedUrls: string[] = []
-    const filesToUpload: File[] = [primaryFile, ...otherFiles.filter((item): item is File => item instanceof File)]
+    const filesToUpload: Array<File | Blob & { name: string }> = [
+      primaryFile,
+      ...otherFiles.filter((item): item is File | Blob & { name: string } => isUploadFile(item))
+    ]
 
     for (const file of filesToUpload) {
-      const fileName = `${crypto.randomUUID()}-${sanitizeFileName(file.name)}`
+      const name = 'name' in file && typeof file.name === 'string' ? file.name : `upload-${crypto.randomUUID()}`
+      const fileName = `${crypto.randomUUID()}-${sanitizeFileName(name)}`
       const filePath = `${sectionSlug}/${fileName}`
 
       const { error: uploadError } = await supabase.storage

@@ -274,19 +274,6 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
 
   return (
     <div className="px-4 py-6 sm:py-8 max-w-7xl mx-auto">
-      <div className="mb-6 p-4 rounded border border-dashed text-sm text-[#5C7A66] bg-[#FAFDF9]">
-        <p className="font-semibold text-[#0F2A1A]">Debug: Productos en esta subsección</p>
-        <p>Encontrados: {products.length}</p>
-        {products.length > 0 ? (
-          <ul className="mt-2 text-xs list-disc list-inside text-[#5C7A66]">
-            {products.map((p) => (
-              <li key={p.id}>{p.name} — {p.id}</li>
-            ))}
-          </ul>
-        ) : (
-          <p className="mt-2 text-xs">No se encontraron productos activos para esta subsección.</p>
-        )}
-      </div>
       <p className="text-xs text-[#5C7A66] mb-2 animate-fade-in">
         <Link href="/" className="underline hover:text-[#3E9A60] transition-colors">Inicio</Link>
         {' / '}
