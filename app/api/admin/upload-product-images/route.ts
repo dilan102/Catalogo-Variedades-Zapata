@@ -24,8 +24,12 @@ async function ensureBucketExists(supabase: any) {
     public: true,
   })
 
-  if (error && error.status !== 409) {
-    throw error
+  if (error) {
+    const message = String(error?.message ?? '')
+    const alreadyExists = error.status === 409 || /already exists|resource already exists|duplicate/i.test(message)
+    if (!alreadyExists) {
+      throw error
+    }
   }
 }
 
