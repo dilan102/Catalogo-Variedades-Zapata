@@ -118,7 +118,7 @@ export default function ProductPage({ params }: { params: { section: string; sub
               <p className="text-sm font-semibold text-[#0F2A1A]">Otros colores / estilos</p>
               <div className="mt-4 grid grid-cols-2 gap-3">
                 {otherImages.map((src, index) => (
-                  <button key={`${src}-${index}`} type="button" onClick={() => setImgIndex(images.indexOf(src))} className="overflow-hidden rounded-3xl border border-[#E4E8E3] bg-[#F8FBF7] focus:outline-none">
+                  <button key={`${src}-${index}`} type="button" onClick={() => window.open(src, '_blank', 'noopener')} className="overflow-hidden rounded-3xl border border-[#E4E8E3] bg-[#F8FBF7] focus:outline-none">
                     <div className="relative h-32 w-full">
                       <Image src={src} alt={`${product.name} variante ${index + 2}`} fill className="object-cover" sizes="220px" />
                     </div>
