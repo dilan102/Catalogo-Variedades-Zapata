@@ -47,7 +47,7 @@ export default function SectionCard({ section }: { section: Section }) {
         )}
       </div>
 
-      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#0F2A1A]/90 via-[#0F2A1A]/55 to-transparent p-5">
+      <div className="absolute inset-x-0 bottom-0 bg-black/30 p-5">
         <p className="font-serif text-lg font-semibold leading-tight text-white sm:text-xl">{section.name}</p>
         {section.description && <p className="mt-2 text-xs text-white/80 sm:text-sm">{section.description}</p>}
       </div>
