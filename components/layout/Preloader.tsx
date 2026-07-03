@@ -11,7 +11,7 @@ interface Slide {
 
 const slides: Slide[] = [
   { type: 'photo', src: '/Dama_elegante.png', word: 'ELEGANCIA' },
-  { type: 'photo', src: '/Dama_rojo.jpeg', word: 'ESTILO' },
+  { type: 'photo', src: '/Dama_rojo.png', word: 'ESTILO' },
   { type: 'photo', src: '/Dama_sentada.png', word: 'DISTINCIÓN' },
   { type: 'logo', src: '/variedades_zapata.png', word: 'VARIEDADES ZAPATA' },
 ]
