@@ -40,9 +40,15 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
   }
 
   useEffect(() => {
+    console.log('SubsectionPage params:', { sectionSlug, subSlug })
     getSubsectionBySlug(sectionSlug, subSlug).then(async (sub) => {
+      console.log('getSubsectionBySlug result:', sub)
       setSubsection(sub)
-      if (sub) setProducts(await getProductsBySubsection(sub.id))
+      if (sub) {
+        const prods = await getProductsBySubsection(sub.id)
+        console.log('getProductsBySubsection length:', prods?.length)
+        setProducts(prods)
+      }
     }).finally(() => setLoading(false))
   }, [sectionSlug, subSlug])
 
