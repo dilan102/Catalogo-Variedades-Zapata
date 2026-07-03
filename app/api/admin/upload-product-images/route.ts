@@ -13,7 +13,9 @@ function sanitizeFileName(value: string) {
     .toLowerCase()
 }
 
-function isUploadFile(value: unknown): value is File {
+type UploadFile = File | (Blob & { name: string })
+
+function isUploadFile(value: unknown): value is UploadFile {
   return (
     value instanceof File ||
     (typeof value === 'object' && value !== null && 'name' in value && 'arrayBuffer' in value)
@@ -63,9 +65,9 @@ export async function POST(request: Request) {
     await ensureBucketExists(supabase)
 
     const uploadedUrls: string[] = []
-    const filesToUpload: Array<File | Blob & { name: string }> = [
+    const filesToUpload: UploadFile[] = [
       primaryFile,
-      ...otherFiles.filter((item): item is File | Blob & { name: string } => isUploadFile(item))
+      ...otherFiles.filter(isUploadFile)
     ]
 
     for (const file of filesToUpload) {
