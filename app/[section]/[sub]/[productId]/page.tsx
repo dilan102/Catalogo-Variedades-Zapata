@@ -8,12 +8,13 @@ import ImagePlaceholder from '@/components/ui/ImagePlaceholder'
 
 export default function ProductPage({ params }: { params: { section: string; sub: string; productId: string } }) {
   const [product, setProduct] = useState<Product | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
   const [selectedColor, setSelectedColor] = useState<string | null>(null)
   const [adminMode, setAdminMode] = useState(false)
 
   useEffect(() => {
+    if (!params?.productId) return
     setLoading(true)
     setProduct(null)
     void getProductById(params.productId)
@@ -34,11 +35,12 @@ export default function ProductPage({ params }: { params: { section: string; sub
   if (loading) return <div className="px-4 py-10 text-center text-stone-400 text-sm">Cargando...</div>
   if (!product) return (
     <div className="px-4 py-10 text-center text-stone-400 text-sm">
-      <p>Producto no encontrado (id: {params.productId}). Revisa la consola para más detalles.</p>
+      <p>Producto no encontrado (id: {params.productId ?? 'no definido'}). Revisa la consola para más detalles.</p>
       <div className="mt-4">
         <button
           type="button"
           onClick={() => {
+            if (!params?.productId) return
             setLoading(true)
             void getProductById(params.productId).then((r) => { if (r) setProduct(r) }).finally(() => setLoading(false))
           }}
