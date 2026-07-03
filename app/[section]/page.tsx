@@ -17,6 +17,10 @@ export default function SectionPage({ params }: { params: Promise<{ section: str
     })
   }, [params])
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' })
+  }, [sectionSlug])
+
   const subsections = [...(section?.subsections ?? [])].sort((a: Subsection, b: Subsection) => a.order - b.order)
 
   return (
