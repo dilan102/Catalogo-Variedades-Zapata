@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import Image from 'next/image'
 
 interface Slide {
@@ -19,6 +19,7 @@ const slides: Slide[] = [
 export default function Preloader() {
   const [mounted, setMounted] = useState(false)
   const [visible, setVisible] = useState(true)
+  const [shouldShowPreloader, setShouldShowPreloader] = useState(true)
   const [currentSlide, setCurrentSlide] = useState(0)
   const [fadeOut, setFadeOut] = useState(false)
   const [showWord, setShowWord] = useState(false)
@@ -34,12 +35,22 @@ export default function Preloader() {
   const sweepDuration = 400
   const wordDelay = 200
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const alreadyShown = window.sessionStorage.getItem('preloaderShown') === '1'
+    if (alreadyShown) {
+      setShouldShowPreloader(false)
+      setVisible(false)
+    } else {
+      window.sessionStorage.setItem('preloaderShown', '1')
+    }
+
     setMounted(true)
   }, [])
 
   useEffect(() => {
-    if (!mounted) return
+    if (!mounted || !shouldShowPreloader) return
 
     const runSequence = async () => {
       for (let i = 0; i < slides.length; i++) {
@@ -84,7 +95,7 @@ export default function Preloader() {
     runSequence()
   }, [mounted, prefersReducedMotion])
 
-  if (!mounted || !visible) return null
+  if (!mounted || !visible || !shouldShowPreloader) return null
 
   const currentSlideData = slides[currentSlide]
 
