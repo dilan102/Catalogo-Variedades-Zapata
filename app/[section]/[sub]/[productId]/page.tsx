@@ -32,7 +32,21 @@ export default function ProductPage({ params }: { params: { section: string; sub
   }, [])
 
   if (loading) return <div className="px-4 py-10 text-center text-stone-400 text-sm">Cargando...</div>
-  if (!product) return <div className="px-4 py-10 text-center text-stone-400 text-sm">Producto no encontrado</div>
+  if (!product) return (
+    <div className="px-4 py-10 text-center text-stone-400 text-sm">
+      <p>Producto no encontrado (id: {params.productId}). Revisa la consola para más detalles.</p>
+      <div className="mt-4">
+        <button
+          type="button"
+          onClick={() => {
+            setLoading(true)
+            void getProductById(params.productId).then((r) => { if (r) setProduct(r) }).finally(() => setLoading(false))
+          }}
+          className="inline-flex items-center justify-center rounded-3xl border border-[#DCEFDD] bg-white px-4 py-2 text-sm font-semibold text-[#3E9A60]"
+        >Reintentar</button>
+      </div>
+    </div>
+  )
 
   const images = product.images ?? []
   const subsection = product.subsection

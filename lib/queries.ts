@@ -150,7 +150,11 @@ export async function getProductById(id: string): Promise<Product | null> {
   try {
     const supabase = createClient()
     const { data, error } = await supabase.from('products').select('*, subsection:subsections(*, section:sections(*))').eq('id', id).single()
-    if (error) return null
+    console.log('getProductById', { id, data, error })
+    if (error) {
+      console.error(`getProductById error for id=${id}:`, error)
+      return null
+    }
     return data
   } catch (error) {
     console.error('Error in getProductById:', error)
