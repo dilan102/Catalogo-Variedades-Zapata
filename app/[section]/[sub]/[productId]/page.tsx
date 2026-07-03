@@ -54,50 +54,26 @@ export default function ProductPage({ params }: { params: { section: string; sub
 
       <div className="grid gap-8 lg:grid-cols-[1.3fr_0.7fr]">
         <section className="space-y-6">
-          <div className="rounded-[32px] border border-[#DCEFDD] bg-white shadow-sm">
-            <div className="relative w-full max-w-md mx-auto aspect-square sm:aspect-[4/5] overflow-hidden rounded-[32px] bg-[#F8FBF7]">
+          <div className="overflow-hidden rounded-2xl border border-[#DCEFDD] bg-white shadow-sm max-w-sm">
+            <div className="relative mb-3 aspect-[3/4] overflow-hidden bg-[#FAFCF9]">
               {selectedImage ? (
-                <Image src={selectedImage} alt={product.name} fill className="object-contain" sizes="(max-width: 640px) 80vw, 480px" />
+                <Image src={selectedImage} alt={product.name} fill className="object-cover" sizes="(max-width: 640px) 50vw, 25vw" />
               ) : (
                 <ImagePlaceholder className="absolute inset-0" />
               )}
             </div>
-          </div>
 
-          <div className="rounded-[32px] border border-[#DCEFDD] bg-white p-6 shadow-sm">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <h1 className="text-3xl font-semibold text-[#0F2A1A]">{product.name}</h1>
+            <div className="px-4 pb-4">
+              <p className="text-base font-serif font-semibold leading-tight text-[#0F2A1A] line-clamp-2">{product.name}</p>
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {product.sizes.slice(0, 4).map((size) => (
+                  <span key={size} className="rounded-full border border-[#DCEFDD] bg-white px-2 py-1 text-[10px] text-[#0F2A1A]">{size}</span>
+                ))}
               </div>
-              {product.is_featured && (
-                <span className="inline-flex rounded-full border border-[#6FCB8C] bg-[#ECF9EE] px-4 py-2 text-sm font-semibold text-[#1F6B3C]">Destacado</span>
-              )}
-            </div>
-
-            {product.description && <p className="mt-6 text-sm leading-7 text-[#334D41]">{product.description}</p>}
-
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-3xl bg-[#F4FBF5] p-5">
-                <p className="text-xs uppercase tracking-[0.24em] text-[#5C7A66]">Tallas</p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {product.sizes.length > 0 ? product.sizes.map((size) => (
-                    <span key={size} className="rounded-full border border-[#CDE8D2] bg-white px-3 py-2 text-sm text-[#0F2A1A]">{size}</span>
-                  )) : <span className="text-sm text-[#5C7A66]">Sin tallas definidas</span>}
-                </div>
+              <div className="mt-4 text-sm text-[#5C7A66]">
+                <p><span className="font-semibold text-[#0F2A1A]">Sección:</span> {product.subsection?.section?.name || params.section}</p>
+                <p><span className="font-semibold text-[#0F2A1A]">Subsección:</span> {product.subsection?.name || params.sub}</p>
               </div>
-              <div className="rounded-3xl bg-[#F4FBF5] p-5">
-                <p className="text-xs uppercase tracking-[0.24em] text-[#5C7A66]">Colores</p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {product.colors.length > 0 ? product.colors.map((color) => (
-                    <button key={color} type="button" onClick={() => setSelectedColor(color === selectedColor ? null : color)} className={`rounded-full border px-3 py-2 text-sm transition ${selectedColor === color ? 'border-[#1F6B3C] bg-[#1F6B3C] text-white shadow-sm' : 'border-[#DCEFDD] bg-white text-[#0F2A1A] hover:border-[#3E9A60]'}`}>{color}</button>
-                  )) : <span className="text-sm text-[#5C7A66]">Sin variantes</span>}
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-8 grid gap-3 sm:grid-cols-2">
-              <Link href={`https://wa.me/?text=${encodeURIComponent(`Hola, me interesa: ${product.name}`)}`} className="inline-flex items-center justify-center rounded-3xl bg-[#3E9A60] px-5 py-4 text-sm font-semibold text-white transition hover:bg-[#1F6B3C]">Consultar por WhatsApp</Link>
-              <Link href={`/${params.section}/${params.sub}`} className="inline-flex items-center justify-center rounded-3xl border border-[#DCEFDD] bg-white px-5 py-4 text-sm font-semibold text-[#3E9A60] transition hover:bg-[#EAF8EC]">Volver a la subsección</Link>
             </div>
           </div>
         </section>
