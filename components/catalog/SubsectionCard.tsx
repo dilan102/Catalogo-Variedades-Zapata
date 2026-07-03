@@ -1,13 +1,35 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import type { Subsection } from '@/types'
 import ImagePlaceholder from '@/components/ui/ImagePlaceholder'
+
+const imagesBySlug: Record<string, Record<string, string>> = {
+  dama: {
+    pantalones: '/pantalon_dama.webp',
+    camisas: '/camisa_dama.jpeg',
+    chaquetas: '/chaqueta_dama.jpeg',
+    sacos: '/saco_dama.jpg',
+    blusas: '/blusa_dama.jpeg',
+    vestidos: '/vestido_dama.jpeg',
+    'ropa-deportiva': '/ropa_deportiva_dama.jpeg',
+    corsets: '/corset_dama.jpg',
+    'ropa-interior': '/ropa_interior_dama.jpeg',
+    medias: '/medias_dama.jpg',
+    zapatos: '/zapatos_dama.jpg',
+  },
+}
 
 export default function SubsectionCard({ subsection, sectionSlug }: { subsection: Subsection; sectionSlug: string }) {
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageError, setImageError] = useState(false)
-  const hasImage = Boolean(subsection.image_url) && !imageError
+
+  const imageUrl = useMemo(() => {
+    const sectionImages = imagesBySlug[sectionSlug]
+    return sectionImages?.[subsection.slug] || subsection.image_url
+  }, [sectionSlug, subsection.slug, subsection.image_url])
+
+  const hasImage = Boolean(imageUrl) && !imageError
 
   return (
     <Link
@@ -19,7 +41,7 @@ export default function SubsectionCard({ subsection, sectionSlug }: { subsection
           <>
             <div className={`absolute inset-0 transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}>
               <Image
-                src={subsection.image_url!}
+                src={imageUrl!}
                 alt={subsection.name}
                 fill
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
