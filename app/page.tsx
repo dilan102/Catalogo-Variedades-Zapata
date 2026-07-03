@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { getSections, getFeaturedProducts } from '@/lib/queries'
+import { getSections, getLatestProducts } from '@/lib/queries'
 import SectionCard from '@/components/catalog/SectionCard'
 import FeaturedCarousel from '@/components/catalog/FeaturedCarousel'
 import { SectionCardSkeleton } from '@/components/ui/Skeletons'
@@ -12,21 +12,21 @@ import type { Section, Product } from '@/types'
 
 export default function HomePage() {
   const [sections, setSections] = useState<Section[]>([])
-  const [featured, setFeatured] = useState<Product[]>([])
+  const [latestProducts, setLatestProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [s, f] = await Promise.all([getSections(), getFeaturedProducts(6)])
+        const [s, latest] = await Promise.all([getSections(), getLatestProducts(5)])
         console.log('Secciones cargadas:', s.length)
-        console.log('Productos destacados cargados:', f.length)
+        console.log('Últimos productos cargados:', latest.length)
         const orderedSections = s.slice().sort((a, b) => {
           const order = ['dama', 'caballero', 'joven', 'nino', 'nina', 'accesorios', 'edredones', 'esika']
           return order.indexOf(a.slug) - order.indexOf(b.slug)
         })
         setSections(orderedSections)
-        setFeatured(f)
+        setLatestProducts(latest)
       } catch (error) {
         console.error('Error al cargar datos:', error)
       } finally {
@@ -59,7 +59,7 @@ export default function HomePage() {
           <div className="w-20 h-0.5 bg-[#6FCB8C]"></div>
         </div>
 
-        <FeaturedCarousel products={featured} loading={loading} />
+        <FeaturedCarousel products={latestProducts} loading={loading} />
       </div>
       
       <Contact />

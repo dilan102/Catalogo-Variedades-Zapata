@@ -403,15 +403,6 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
                   </div>
                 </div>
               )}
-              <label className="block">
-                <span className="text-sm font-medium text-[#0F2A1A]">Colores</span>
-                <input
-                  value={formState.colors}
-                  onChange={(event) => setFormState({ ...formState, colors: event.target.value })}
-                  className="mt-2 w-full rounded-2xl border border-[#E4E8E3] bg-[#FBFDF8] px-4 py-3 text-sm text-[#10221E] outline-none transition focus:border-[#3E9A60] focus:ring-2 focus:ring-[#D7F0DA]"
-                  placeholder="Ej: Rojo, Azul, Verde"
-                />
-              </label>
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

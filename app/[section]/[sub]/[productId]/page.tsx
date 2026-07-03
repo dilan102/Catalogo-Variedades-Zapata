@@ -75,7 +75,7 @@ export default function ProductPage() {
 
         {product.images.length > 1 && (
           <div className="rounded-[32px] border border-[#DCEFDD] bg-white p-6 shadow-sm">
-            <p className="text-sm font-semibold text-[#0F2A1A]">Otras imágenes</p>
+            <p className="text-sm font-semibold text-[#0F2A1A]">Otros Modelos/Colores</p>
             <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
               {otherImages.map((src, index) => (
                 <button key={`${src}-${index}`} type="button" onClick={() => window.open(src, '_blank', 'noopener')} className="overflow-hidden rounded-3xl border border-[#E4E8E3] bg-[#F8FBF7] focus:outline-none">

@@ -174,6 +174,18 @@ export async function getFeaturedProducts(limit = 8): Promise<Product[]> {
   }
 }
 
+export async function getLatestProducts(limit = 5): Promise<Product[]> {
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase.from('products').select('*, subsection:subsections(slug, name, section:sections(slug, name))').eq('is_active', true).order('created_at', { ascending: false }).limit(limit)
+    if (error) throw new Error(`Error al cargar los productos más recientes: ${error.message}`)
+    return data ?? []
+  } catch (error) {
+    console.error('Error in getLatestProducts:', error)
+    throw error
+  }
+}
+
 export async function getAllProductsAdmin(): Promise<Product[]> {
   try {
     const supabase = createClient()

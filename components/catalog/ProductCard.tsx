@@ -40,11 +40,6 @@ export default function ProductCard({ product, href, adminMode, onEdit, onDelete
         ) : (
           <ImagePlaceholder className="absolute inset-0" />
         )}
-        {product.is_featured && (
-          <span className="absolute left-3 top-3 rounded-full border border-[#6FCB8C] bg-[rgba(95,190,123,0.12)] px-3 py-1 text-[10px] font-semibold text-[#1F6B3C] shadow-sm">
-            Destacado
-          </span>
-        )}
       </div>
 
       {otherImages.length > 0 && (
