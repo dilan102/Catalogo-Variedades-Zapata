@@ -14,7 +14,6 @@ type FeaturedCarouselProps = {
 
 export default function FeaturedCarousel({ products, loading }: FeaturedCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [activeId, setActiveId] = useState<string | null>(null)
 
   const items = useMemo(() => products, [products])
 
@@ -44,10 +43,6 @@ export default function FeaturedCarousel({ products, loading }: FeaturedCarousel
       setCurrentIndex(0)
     }
   }, [items.length, currentIndex])
-
-  const handleToggle = (id: string) => {
-    setActiveId((current) => (current === id ? null : id))
-  }
 
   return (
     <div className="relative rounded-3xl bg-white p-6 sm:p-10 animate-fade-in">
@@ -85,22 +80,11 @@ export default function FeaturedCarousel({ products, loading }: FeaturedCarousel
             : items.map((product) => {
                 const image = product.images?.[0]
                 const hasImage = Boolean(image)
-                const isActive = activeId === product.id
+                const href = `/${(product as any).subsection?.section?.slug || ''}/${(product as any).subsection?.slug || ''}/${product.id}`
 
                 return (
                   <article key={product.id} className="min-w-full shrink-0 px-2 sm:px-4">
-                    <div
-                      className="group overflow-hidden rounded-[28px] bg-[#FAFCF9] shadow-sm"
-                      onClick={() => handleToggle(product.id)}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(event) => {
-                        if (event.key === 'Enter' || event.key === ' ') {
-                          event.preventDefault()
-                          handleToggle(product.id)
-                        }
-                      }}
-                    >
+                    <Link href={href} className="group block overflow-hidden rounded-[28px] bg-[#FAFCF9] shadow-sm">
                       <div className="relative aspect-[3/4] overflow-hidden bg-[#FAFCF9]">
                         {hasImage ? (
                           <Image
@@ -114,30 +98,7 @@ export default function FeaturedCarousel({ products, loading }: FeaturedCarousel
                           <ImagePlaceholder className="absolute inset-0" />
                         )}
                       </div>
-
-                      <div className={`transition-all duration-300 ${isActive ? 'max-h-[240px] py-5 px-4' : 'max-h-0 px-4'} overflow-hidden bg-white`}>
-                        <div className="space-y-3">
-                          <p className="text-base font-semibold text-[#0F2A1A] line-clamp-2">{product.name}</p>
-                          <div className="flex flex-wrap gap-2">
-                            {product.sizes.slice(0, 4).map((size) => (
-                              <span
-                                key={size}
-                                className="rounded-full border border-[#DCEFDD] bg-[#F8FBF7] px-2 py-1 text-[10px] text-[#0F2A1A]"
-                              >
-                                {size}
-                              </span>
-                            ))}
-                          </div>
-                          <Link
-                            href={`/${(product as any).subsection?.section?.slug || ''}/${(product as any).subsection?.slug || ''}/${product.id}`}
-                            className="inline-flex items-center justify-center rounded-full bg-[#3E9A60] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#2F7A53]"
-                            onClick={(event) => event.stopPropagation()}
-                          >
-                            Ver producto
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
+                    </Link>
                   </article>
                 )
               })}
