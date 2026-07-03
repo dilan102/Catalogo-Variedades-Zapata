@@ -42,7 +42,7 @@ const imagesBySlug: Record<string, Record<string, string>> = {
     medias: '/medias_joven.jpeg',
     zapatos: '/zapatos_joven.png',
   },
-  niño: {
+  nino: {
     pantalones: '/pantalon_niño.avif',
     zapatos: '/zapatos_niño.jpeg',
     camisas: '/camisa_niño.jpeg',
