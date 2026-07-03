@@ -13,6 +13,7 @@ export default function ProductPage({ params }: { params: { section: string; sub
   const [imgIndex, setImgIndex] = useState(0)
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
   const [selectedColor, setSelectedColor] = useState<string | null>(null)
+  const [adminMode, setAdminMode] = useState(false)
 
   useEffect(() => {
     setProduct(null)
@@ -23,6 +24,13 @@ export default function ProductPage({ params }: { params: { section: string; sub
       }
     })
   }, [params.productId])
+
+  useEffect(() => {
+    void fetch('/api/me')
+      .then((res) => res.json())
+      .then((data) => setAdminMode(Boolean(data.authenticated)))
+      .catch(() => setAdminMode(false))
+  }, [])
 
   if (!product) return <div className="px-4 py-10 text-center text-stone-400 text-sm">Cargando...</div>
 
@@ -76,7 +84,7 @@ export default function ProductPage({ params }: { params: { section: string; sub
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <h1 className="text-3xl font-semibold text-[#0F2A1A]">{product.name}</h1>
-                {product.price !== null && <p className="mt-3 text-3xl font-bold text-[#1F6B3C]">{formatPrice(product.price)}</p>}
+                {adminMode && product.price !== null && <p className="mt-3 text-3xl font-bold text-[#1F6B3C]">{formatPrice(product.price)}</p>}
               </div>
               {product.is_featured && (
                 <span className="inline-flex rounded-full border border-[#6FCB8C] bg-[#ECF9EE] px-4 py-2 text-sm font-semibold text-[#1F6B3C]">Destacado</span>

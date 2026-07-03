@@ -1,7 +1,7 @@
 'use client'
 import { use, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { getSubsectionBySlug, getProductsBySubsection, upsertProduct } from '@/lib/queries'
+import { getSubsectionBySlug, getProductsBySubsection, upsertProduct, deleteProduct } from '@/lib/queries'
 import { getAvailableSizes } from '@/lib/sizes'
 import ProductCard from '@/components/catalog/ProductCard'
 import { ProductCardSkeleton } from '@/components/ui/Skeletons'
@@ -15,11 +15,13 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
   const [adminMode, setAdminMode] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
   const [isUploadingImages, setIsUploadingImages] = useState(false)
   const [primaryImageFile, setPrimaryImageFile] = useState<File | null>(null)
   const [otherImageFiles, setOtherImageFiles] = useState<File[]>([])
   const [primaryPreview, setPrimaryPreview] = useState('')
   const [otherPreviews, setOtherPreviews] = useState<string[]>([])
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [formState, setFormState] = useState({
     name: '',
     description: '',
@@ -30,6 +32,13 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
     is_featured: false,
     order: 0,
   })
+
+  const parseSupabaseImagePath = (url: string) => {
+    const marker = '/object/public/product-images/'
+    const index = url.indexOf(marker)
+    if (index === -1) return null
+    return url.substring(index + marker.length)
+  }
 
   useEffect(() => {
     getSubsectionBySlug(sectionSlug, subSlug).then(async (sub) => {
@@ -73,6 +82,7 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
   }
 
   const resetForm = () => {
+    setEditingProduct(null)
     setFormState({
       name: '',
       description: '',
@@ -88,48 +98,119 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
     setPrimaryPreview('')
     setOtherPreviews([])
     setErrorMessage('')
+    setSuccessMessage('')
+  }
+
+  const handleEditProduct = (product: Product) => {
+    setEditingProduct(product)
+    setFormState({
+      name: product.name,
+      description: product.description ?? '',
+      price: product.price !== null && product.price !== undefined ? String(product.price) : '',
+      sizes: product.sizes ?? [] ,
+      colors: product.colors.join(', '),
+      is_active: product.is_active,
+      is_featured: product.is_featured,
+      order: product.order ?? products.length,
+    })
+    setPrimaryImageFile(null)
+    setOtherImageFiles([])
+    setPrimaryPreview('')
+    setOtherPreviews([])
+    setErrorMessage('')
+    setSuccessMessage('')
+    setShowForm(true)
+  }
+
+  const handleDeleteProduct = async (product: Product) => {
+    const confirmed = window.confirm('¿Eliminar este producto y sus imágenes? Esta acción no se puede deshacer.')
+    if (!confirmed) return
+
+    try {
+      setLoading(true)
+      setErrorMessage('')
+      setSuccessMessage('')
+
+      const imagePaths = (product.images ?? [])
+        .map((url) => parseSupabaseImagePath(url))
+        .filter((path): path is string => Boolean(path))
+
+      if (imagePaths.length > 0) {
+        await fetch('/api/admin/delete-product-images', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ paths: imagePaths }),
+        })
+      }
+
+      await deleteProduct(product.id)
+      setProducts((current) => current.filter((item) => item.id !== product.id))
+      setSuccessMessage('Producto eliminado correctamente.')
+      if (editingProduct?.id === product.id) {
+        resetForm()
+      }
+    } catch (error) {
+      console.error('Error eliminando producto:', error)
+      setErrorMessage('No se pudo eliminar el producto. Intenta de nuevo.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!subsection) return
 
-    if (!primaryImageFile) {
-      setErrorMessage('La foto principal es obligatoria.')
-      return
-    }
-
     const colors = formState.colors
       .split(',')
       .map((value) => value.trim())
       .filter(Boolean)
 
+    let images = editingProduct?.images ?? []
+    const hasNewImages = Boolean(primaryImageFile) || otherImageFiles.length > 0
+
+    if (!editingProduct && !primaryImageFile) {
+      setErrorMessage('La foto principal es obligatoria.')
+      return
+    }
+
+    if (hasNewImages && !primaryImageFile) {
+      setErrorMessage('La foto principal es obligatoria cuando subes nuevas imágenes.')
+      return
+    }
+
     try {
       setErrorMessage('')
+      setSuccessMessage('')
       setLoading(true)
-      setIsUploadingImages(true)
+      setIsUploadingImages(hasNewImages)
 
-      const uploadData = new FormData()
-      uploadData.append('sectionSlug', sectionSlug)
-      uploadData.append('primaryImage', primaryImageFile)
-      otherImageFiles.forEach((file) => uploadData.append('otherImages', file))
+      if (hasNewImages) {
+        const uploadData = new FormData()
+        uploadData.append('sectionSlug', sectionSlug)
+        if (primaryImageFile) {
+          uploadData.append('primaryImage', primaryImageFile)
+        }
+        otherImageFiles.forEach((file) => uploadData.append('otherImages', file))
 
-      const uploadResponse = await fetch('/api/admin/upload-product-images', {
-        method: 'POST',
-        body: uploadData,
-      })
+        const uploadResponse = await fetch('/api/admin/upload-product-images', {
+          method: 'POST',
+          body: uploadData,
+        })
 
-      const uploadResult = await uploadResponse.json()
+        const uploadResult = await uploadResponse.json()
 
-      if (!uploadResponse.ok || !uploadResult.success) {
-        console.error('Error subiendo imágenes:', uploadResult)
-        setErrorMessage(uploadResult?.message || 'Error subiendo las imágenes.')
-        return
+        if (!uploadResponse.ok || !uploadResult.success) {
+          console.error('Error subiendo imágenes:', uploadResult)
+          setErrorMessage(uploadResult?.message || 'Error subiendo las imágenes.')
+          return
+        }
+
+        images = uploadResult.urls ?? []
       }
 
-      const images = uploadResult.urls ?? []
-
       await upsertProduct({
+        id: editingProduct?.id,
         subsection_id: subsection.id,
         name: formState.name,
         description: formState.description || null,
@@ -189,7 +270,7 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
 
       {adminMode && showForm && (
         <section className="mb-8 rounded-3xl border border-[#D6E7D9] bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-[#0F2A1A] mb-4">Agregar producto a {subsection?.name}</h2>
+          <h2 className="text-lg font-semibold text-[#0F2A1A] mb-4">{editingProduct ? 'Editar producto' : 'Agregar producto'} a {subsection?.name}</h2>
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid gap-4 lg:grid-cols-2">
               <label className="block">
@@ -232,15 +313,17 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
                 <input
                   type="file"
                   accept="image/*"
-                  capture="environment"
                   onChange={(event) => {
                     const file = event.target.files?.[0] ?? null
                     setPrimaryImageFile(file)
                     setPrimaryPreview(file ? URL.createObjectURL(file) : '')
                   }}
-                  required
+                  {...(!editingProduct ? { required: true } : {})}
                   className="mt-2 w-full rounded-2xl border border-[#E4E8E3] bg-[#FBFDF8] px-4 py-3 text-sm text-[#10221E] outline-none transition focus:border-[#3E9A60] focus:ring-2 focus:ring-[#D7F0DA]"
                 />
+                {editingProduct && (
+                  <p className="mt-2 text-xs text-[#5C7A66]">Deja este campo vacío para conservar las imágenes actuales.</p>
+                )}
                 {primaryPreview && (
                   <div className="mt-3 rounded-3xl overflow-hidden border border-[#E4E8E3] bg-[#F7F9F6]">
                     <img src={primaryPreview} alt="Preview foto principal" className="w-full h-52 object-cover" />
@@ -252,7 +335,6 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
                 <input
                   type="file"
                   accept="image/*"
-                  capture="environment"
                   multiple
                   onChange={(event) => {
                     const files = Array.from(event.target.files ?? [])
@@ -336,6 +418,7 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
               </button>
             </div>
 
+            {successMessage && <p className="text-sm text-[#1F6B3C]">{successMessage}</p>}
             {errorMessage && <p className="text-sm text-[#B12A1B]">{errorMessage}</p>}
           </form>
         </section>
@@ -346,7 +429,13 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
           ? Array(4).fill(0).map((_, i) => <ProductCardSkeleton key={i} />)
           : products.map((p, i) => (
               <div key={p.id} style={{ animationDelay: `${i * 50}ms` }} className="animate-slide-up">
-                <ProductCard product={p} href={`/${sectionSlug}/${subSlug}/${p.id}`} />
+                <ProductCard
+                  product={p}
+                  href={`/${sectionSlug}/${subSlug}/${p.id}`}
+                  adminMode={adminMode}
+                  onEdit={handleEditProduct}
+                  onDelete={handleDeleteProduct}
+                />
               </div>
             ))
         }
