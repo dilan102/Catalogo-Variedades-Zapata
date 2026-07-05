@@ -18,11 +18,20 @@ export default function SectionPage({ params }: { params: Promise<{ section: str
       const sectionData = await getSectionBySlug(resolvedParams.section)
       if (sectionData?.name) {
         try {
-          await fetch('/api/admin/ensure-subsections', {
+          console.log('Asegurando subsecciones para:', sectionData.name)
+          const ensureResponse = await fetch('/api/admin/ensure-subsections', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ sectionName: sectionData.name }),
           })
+          const ensureResult = await ensureResponse.json()
+          console.log('Respuesta ensure-subsections:', ensureResult)
+          
+          if (ensureResult.success && ensureResult.created?.length > 0) {
+            console.log('Subsecciones creadas:', ensureResult.created)
+            // Pequeña pausa para asegurar que la BD está sincronizada
+            await new Promise(resolve => setTimeout(resolve, 500))
+          }
         } catch (error) {
           console.error('Error ensuring subsections:', error)
         }

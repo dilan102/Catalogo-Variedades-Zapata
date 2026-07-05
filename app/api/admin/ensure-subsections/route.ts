@@ -1,14 +1,25 @@
-import { createClient } from '@/utils/supabase/client'
+import { NextResponse } from 'next/server'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { categoriesWithSubsections, slugify } from '@/lib/init-categories'
 
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
 export async function POST(req: Request) {
+  if (!supabaseUrl || !supabaseServiceRoleKey) {
+    return NextResponse.json(
+      { success: false, message: 'Falta configurar SUPABASE_SERVICE_ROLE_KEY' },
+      { status: 500 }
+    )
+  }
+
   try {
-    const supabase = createClient()
+    const supabase = createSupabaseClient(supabaseUrl, supabaseServiceRoleKey)
     
     const { sectionName } = await req.json()
 
     if (!sectionName || !categoriesWithSubsections[sectionName]) {
-      return Response.json(
+      return NextResponse.json(
         { success: false, message: `Sección "${sectionName}" no encontrada en la configuración.` },
         { status: 400 }
       )
@@ -22,7 +33,7 @@ export async function POST(req: Request) {
       .single()
 
     if (sectionError || !section) {
-      return Response.json(
+      return NextResponse.json(
         { success: false, message: `Sección "${sectionName}" no existe en la base de datos.` },
         { status: 404 }
       )
@@ -40,7 +51,7 @@ export async function POST(req: Request) {
     )
 
     if (missingSubsections.length === 0) {
-      return Response.json(
+      return NextResponse.json(
         { success: true, message: 'No hay subsecciones faltantes.', created: [] },
         { status: 200 }
       )
@@ -61,13 +72,13 @@ export async function POST(req: Request) {
       .select('*')
 
     if (insertError) {
-      return Response.json(
+      return NextResponse.json(
         { success: false, message: `Error creando subsecciones: ${insertError.message}` },
         { status: 500 }
       )
     }
 
-    return Response.json(
+    return NextResponse.json(
       { 
         success: true, 
         message: `Creadas ${missingSubsections.length} subsecciones.`,
@@ -76,6 +87,7 @@ export async function POST(req: Request) {
       },
       { status: 200 }
     )
+
   } catch (error) {
     console.error('Error en ensure-subsections:', error)
     return Response.json(
