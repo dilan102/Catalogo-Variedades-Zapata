@@ -36,7 +36,7 @@ export default function FeaturedCarousel({ products, loading }: FeaturedCarousel
 
     const interval = window.setInterval(nextSlide, 4000)
     return () => window.clearInterval(interval)
-  }, [items.length])
+  }, [currentIndex, items.length])
 
   useEffect(() => {
     if (currentIndex >= items.length && items.length > 0) {

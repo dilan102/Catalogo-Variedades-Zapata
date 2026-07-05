@@ -1,5 +1,5 @@
 export function getAvailableSizes(sectionSlug: string, subsectionSlug: string): string[] {
-  const adultClothingSections = ['dama', 'caballero', 'joven']
+  const adultClothingSections = ['dama', 'caballero']
   const kidClothingSections = ['nino', 'nina']
   const isShoes = subsectionSlug === 'zapatos'
 

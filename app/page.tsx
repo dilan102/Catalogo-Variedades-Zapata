@@ -21,8 +21,11 @@ export default function HomePage() {
         const [s, latest] = await Promise.all([getSections(), getLatestProducts(5)])
         console.log('Secciones cargadas:', s.length)
         console.log('Últimos productos cargados:', latest.length)
-        const orderedSections = s.slice().sort((a, b) => {
-          const order = ['dama', 'caballero', 'joven', 'nino', 'nina', 'accesorios', 'edredones', 'esika']
+
+        const excludedSections = new Set(['joven', 'jovenes'])
+        const visibleSections = s.filter((section) => !excludedSections.has(section.slug.toLowerCase()))
+        const orderedSections = visibleSections.slice().sort((a, b) => {
+          const order = ['dama', 'caballero', 'nino', 'nina', 'accesorios', 'edredones', 'esika']
           return order.indexOf(a.slug) - order.indexOf(b.slug)
         })
         setSections(orderedSections)
