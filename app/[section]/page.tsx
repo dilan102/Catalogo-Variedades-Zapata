@@ -11,9 +11,29 @@ export default function SectionPage({ params }: { params: Promise<{ section: str
   const [sectionSlug, setSectionSlug] = useState<string>('')
 
   useEffect(() => {
-    params.then((resolvedParams) => {
+    params.then(async (resolvedParams) => {
       setSectionSlug(resolvedParams.section)
-      getSectionBySlug(resolvedParams.section).then(setSection).finally(() => setLoading(false))
+      
+      // Obtener el nombre de la sección para asegurar que existan todas las subsecciones
+      const sectionData = await getSectionBySlug(resolvedParams.section)
+      if (sectionData?.name) {
+        try {
+          await fetch('/api/admin/ensure-subsections', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sectionName: sectionData.name }),
+          })
+        } catch (error) {
+          console.error('Error ensuring subsections:', error)
+        }
+        
+        // Recargar la sección para obtener las subsecciones actualizadas
+        const updatedSection = await getSectionBySlug(resolvedParams.section)
+        setSection(updatedSection)
+      } else {
+        setSection(sectionData)
+      }
+      setLoading(false)
     })
   }, [params])
 
