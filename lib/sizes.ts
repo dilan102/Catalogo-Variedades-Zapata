@@ -15,6 +15,10 @@ export function getAvailableSizes(sectionSlug: string, subsectionSlug: string): 
     return []
   }
 
+  if (sectionSlug === 'dama' && subsectionSlug === 'pantalones') {
+    return ['6', '8', '10', '12', '14', '16', 'S', 'M', 'L']
+  }
+
   if (adultClothingSections.includes(sectionSlug)) {
     return ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL']
   }
