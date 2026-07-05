@@ -17,6 +17,9 @@ const imagesBySlug: Record<string, Record<string, string>> = {
     'ropa-interior': '/ropa_interior_dama.jpeg',
     medias: '/medias_dama.jpg',
     zapatos: '/zapatos_dama.jpg',
+    conjuntos: '/conjunto_dama.jpeg',
+    faldas: '/falda_dama.jpeg',
+    pijamas: '/pijama_dama.jpeg',
   },
   caballero: {
     pantalones: '/pantalon_caballero.jpeg',

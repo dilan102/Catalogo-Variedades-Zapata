@@ -1,18 +1,17 @@
 import Image from 'next/image'
-import Link from 'next/link'
 import { useState } from 'react'
 import type { Product } from '@/types'
 import ImagePlaceholder from '@/components/ui/ImagePlaceholder'
 
 type ProductCardProps = {
   product: Product
-  href: string
   adminMode?: boolean
   onEdit?: (product: Product) => void
   onDelete?: (product: Product) => void
+  onViewGallery?: (product: Product) => void
 }
 
-export default function ProductCard({ product, href, adminMode, onEdit, onDelete }: ProductCardProps) {
+export default function ProductCard({ product, adminMode, onEdit, onDelete, onViewGallery }: ProductCardProps) {
   const image = product.images?.[0]
   const otherImages = product.images?.slice(1, 4) ?? []
   const [imageLoaded, setImageLoaded] = useState(false)
@@ -21,7 +20,12 @@ export default function ProductCard({ product, href, adminMode, onEdit, onDelete
 
   const cardContent = (
     <div className="overflow-hidden rounded-2xl border border-[#DCEFDD] bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg active:scale-[0.98]">
-      <div className="relative mb-3 aspect-[3/4] overflow-hidden bg-[#FAFCF9]">
+      <button
+        type="button"
+        onClick={() => onViewGallery?.(product)}
+        disabled={!onViewGallery}
+        className="relative mb-3 aspect-[3/4] overflow-hidden bg-[#FAFCF9] w-full cursor-pointer hover:opacity-90 transition-opacity"
+      >
         {hasImage ? (
           <>
             <div className={`absolute inset-0 transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}>
@@ -40,7 +44,7 @@ export default function ProductCard({ product, href, adminMode, onEdit, onDelete
         ) : (
           <ImagePlaceholder className="absolute inset-0" />
         )}
-      </div>
+      </button>
 
       {otherImages.length > 0 && (
         <div className="grid grid-cols-3 gap-2 px-3 pb-3">
@@ -98,9 +102,5 @@ export default function ProductCard({ product, href, adminMode, onEdit, onDelete
     </div>
   )
 
-  return (
-    <Link href={href} className="group block">
-      {cardContent}
-    </Link>
-  )
+  return cardContent
 }

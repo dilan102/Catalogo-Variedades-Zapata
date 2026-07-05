@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { getSubsectionBySlug, getProductsBySubsection } from '@/lib/queries'
 import { getAvailableSizes } from '@/lib/sizes'
 import ProductCard from '@/components/catalog/ProductCard'
+import ImageCarouselModal from '@/components/catalog/ImageCarouselModal'
 import { ProductCardSkeleton } from '@/components/ui/Skeletons'
 import { parseJsonResponse } from '@/lib/utils'
 import type { Subsection, Product } from '@/types'
@@ -26,6 +27,7 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
   const [primaryPreview, setPrimaryPreview] = useState('')
   const [otherPreviews, setOtherPreviews] = useState<string[]>([])
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const [selectedProductForGallery, setSelectedProductForGallery] = useState<Product | null>(null)
   const [formState, setFormState] = useState({
     name: '',
     description: '',
@@ -485,16 +487,23 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
               <div key={p.id} style={{ animationDelay: `${i * 50}ms` }} className="animate-slide-up">
                 <ProductCard
                   product={p}
-                  href={`/${sectionSlug}/${subSlug}/${p.id}`}
                   adminMode={adminMode}
                   onEdit={handleEditProduct}
                   onDelete={handleDeleteProduct}
+                  onViewGallery={setSelectedProductForGallery}
                 />
               </div>
             ))
         }
       </div>
 
+      {selectedProductForGallery && (
+        <ImageCarouselModal
+          product={selectedProductForGallery}
+          isOpen={Boolean(selectedProductForGallery)}
+          onClose={() => setSelectedProductForGallery(null)}
+        />
+      )}
       {!loading && products.length === 0 && (
         <p className="text-center py-24 text-[#5C7A66] text-base animate-fade-in">No hay productos aún.</p>
       )}
