@@ -1,7 +1,6 @@
  'use client'
 import { useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
 import { getProductById } from '@/lib/queries'
 import type { Product } from '@/types'
 import ImagePlaceholder from '@/components/ui/ImagePlaceholder'
@@ -11,23 +10,41 @@ export default function ProductPage() {
   const params = useParams() as { section?: string; sub?: string; productId?: string } | null
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(false)
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
 
   useEffect(() => {
     const productId = params?.productId
     if (!productId) return
-    setLoading(true)
-    setProduct(null)
-    void getProductById(productId)
-      .then((result) => {
+
+    const loadProduct = async () => {
+      setLoading(true)
+      setProduct(null)
+      setSelectedImageIndex(0)
+
+      try {
+        const result = await getProductById(productId)
         if (result) setProduct(result)
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false))
+      } catch {
+        // keep empty
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    void loadProduct()
   }, [params?.productId])
 
   const images = useMemo(() => product?.images ?? [], [product])
-  const selectedImage = images[0] ?? null
-  const otherImages = useMemo(() => images.slice(1), [images])
+  const selectedImage = images[selectedImageIndex] ?? null
+  const showImageNavigation = images.length > 1
+
+  const goToPrevious = () => {
+    setSelectedImageIndex((prev) => (prev - 1 + images.length) % images.length)
+  }
+
+  const goToNext = () => {
+    setSelectedImageIndex((prev) => (prev + 1) % images.length)
+  }
 
   if (loading) return <div className="px-4 py-10 text-center text-stone-400 text-sm">Cargando...</div>
   if (!product) return (
@@ -54,11 +71,57 @@ export default function ProductPage() {
         <div className="overflow-hidden rounded-2xl border border-[#DCEFDD] bg-white shadow-sm">
           <div className="relative mb-3 aspect-[3/4] overflow-hidden bg-[#FAFCF9]">
             {selectedImage ? (
-              <Image src={selectedImage} alt={product.name} fill className="object-cover" sizes="(max-width: 640px) 100vw, 50vw" />
+              <>
+                <Image src={selectedImage} alt={product.name} fill className="object-cover" sizes="(max-width: 640px) 100vw, 50vw" />
+                {showImageNavigation && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={goToPrevious}
+                      className="absolute left-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-[#0F2A1A] shadow-sm transition hover:bg-white"
+                      aria-label="Imagen anterior"
+                    >
+                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={goToNext}
+                      className="absolute right-3 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-[#0F2A1A] shadow-sm transition hover:bg-white"
+                      aria-label="Siguiente imagen"
+                    >
+                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                    <div className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full bg-[#0F2A1A]/80 px-3 py-1 text-xs font-semibold text-white">
+                      {selectedImageIndex + 1} / {images.length}
+                    </div>
+                  </>
+                )}
+              </>
             ) : (
               <ImagePlaceholder className="absolute inset-0" />
             )}
           </div>
+
+          {images.length > 1 && (
+            <div className="px-4 pb-4">
+              <div className="flex gap-3 overflow-x-auto pb-2">
+                {images.map((src, index) => (
+                  <button
+                    key={`${src}-${index}`}
+                    type="button"
+                    onClick={() => setSelectedImageIndex(index)}
+                    className={`relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl border transition ${index === selectedImageIndex ? 'border-[#3E9A60] ring-2 ring-[#3E9A60]/20' : 'border-[#E4E8E3]'}`}
+                  >
+                    <Image src={src} alt={`${product.name} vista ${index + 1}`} fill className="object-cover" sizes="80px" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="px-4 pb-4">
             <p className="text-base font-serif font-semibold leading-tight text-[#0F2A1A] line-clamp-2">{product.name}</p>
@@ -72,21 +135,6 @@ export default function ProductPage() {
             </div>
           </div>
         </div>
-
-        {product.images.length > 1 && (
-          <div className="rounded-[32px] border border-[#DCEFDD] bg-white p-6 shadow-sm">
-            <p className="text-sm font-semibold text-[#0F2A1A]">Otros Modelos/Colores</p>
-            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {otherImages.map((src, index) => (
-                <button key={`${src}-${index}`} type="button" onClick={() => window.open(src, '_blank', 'noopener')} className="overflow-hidden rounded-3xl border border-[#E4E8E3] bg-[#F8FBF7] focus:outline-none">
-                  <div className="relative h-32 w-full">
-                    <Image src={src} alt={`${product.name} variante ${index + 2}`} fill className="object-cover" sizes="220px" />
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
       </section>
     </div>
   )
