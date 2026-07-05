@@ -39,13 +39,21 @@ export default function Hero() {
           <p className="text-lg sm:text-xl md:text-2xl text-[#5C7A66] mb-12 max-w-3xl mx-auto leading-relaxed">
             Distribuidora mayorista de ropa para tu negocio.
           </p>
-          <div className="flex justify-center items-center animate-slide-up" style={{ animationDelay: '0.3s' }}>
-            <a 
-              href="#categorias" 
+          <div className="flex flex-wrap justify-center items-center gap-4 animate-slide-up" style={{ animationDelay: '0.3s' }}>
+            <a
+              href="#categorias"
               onClick={handleScroll}
               className={`btn-primary px-8 py-4 text-white font-semibold text-center transition-all duration-300 ${scrolling ? 'scale-95 opacity-80' : ''}`}
             >
               {scrolling ? 'Deslizando...' : 'Ver Catálogo'}
+            </a>
+            <a
+              href="https://wa.me/573054110472"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary px-8 py-4 text-white font-semibold text-center transition-all duration-300 bg-[#25D366] hover:bg-[#1ea952]"
+            >
+              WhatsApp
             </a>
           </div>
         </div>

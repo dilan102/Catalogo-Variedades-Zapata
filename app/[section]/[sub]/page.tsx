@@ -1,5 +1,5 @@
  'use client'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { getSubsectionBySlug, getProductsBySubsection } from '@/lib/queries'
 import { getAvailableSizes } from '@/lib/sizes'
@@ -19,6 +19,8 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
   const [isUploadingImages, setIsUploadingImages] = useState(false)
+  const [isSavingProduct, setIsSavingProduct] = useState(false)
+  const savingProductRef = useRef(false)
   const [primaryImageFile, setPrimaryImageFile] = useState<File | null>(null)
   const [otherImageFiles, setOtherImageFiles] = useState<File[]>([])
   const [primaryPreview, setPrimaryPreview] = useState('')
@@ -186,7 +188,10 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (!subsection) return
+    if (!subsection || savingProductRef.current) return
+
+    savingProductRef.current = true
+    setIsSavingProduct(true)
 
     const colors = formState.colors
       .split(',')
@@ -299,6 +304,8 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
     } finally {
       setLoading(false)
       setIsUploadingImages(false)
+      setIsSavingProduct(false)
+      savingProductRef.current = false
     }
   }
 
@@ -458,9 +465,10 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
               </div>
               <button
                 type="submit"
-                className="inline-flex items-center justify-center rounded-full bg-[#3E9A60] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#2F7A53]"
+                disabled={isSavingProduct || loading || isUploadingImages}
+                className="inline-flex items-center justify-center rounded-full bg-[#3E9A60] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#2F7A53] disabled:cursor-not-allowed disabled:opacity-70"
               >
-                Guardar producto
+                {isSavingProduct ? 'Guardando...' : 'Guardar producto'}
               </button>
             </div>
 
