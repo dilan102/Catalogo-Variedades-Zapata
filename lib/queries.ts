@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/client'
+import { categoriesWithSubsections, slugify } from '@/lib/init-categories'
 import type { Section, Subsection, Product } from '@/types'
 
 export async function getSections(): Promise<Section[]> {
@@ -23,12 +24,40 @@ export async function getSectionBySlug(slug: string): Promise<Section | null> {
       return null
     }
     
-    const { data: subsections, error: subsectionsError } = await supabase.from('subsections').select('*').eq('section_id', section.id).order('order')
+    const { data: subsections, error: subsectionsError } = await supabase.from('subsections').select('*').eq('section_id', section.id).eq('is_active', true).order('order')
     if (subsectionsError) {
       console.error('Supabase error loading subsections:', subsectionsError)
     }
-    
-    const sectionWithSubsections = { ...section, subsections: subsections ?? [] }
+
+    const defaultSubsections = categoriesWithSubsections[section.name] ?? []
+    const existingSubsectionNames = new Set((subsections ?? []).map((subsection) => subsection.name.toLowerCase()))
+    const missingSubsections = defaultSubsections.filter((subsectionName) => !existingSubsectionNames.has(subsectionName.toLowerCase()))
+
+    let createdSubsections: Subsection[] = []
+    if (missingSubsections.length > 0) {
+      const insertPayload = missingSubsections.map((subsectionName, index) => ({
+        section_id: section.id,
+        name: subsectionName,
+        slug: slugify(subsectionName),
+        description: `${subsectionName} de ${section.name}`,
+        order: defaultSubsections.indexOf(subsectionName) + index,
+        is_active: true
+      }))
+
+      const { data: insertedSubsections, error: insertError } = await supabase
+        .from('subsections')
+        .insert(insertPayload)
+        .select('*')
+
+      if (insertError) {
+        console.error('Supabase error inserting missing subsections:', insertError)
+      } else {
+        createdSubsections = insertedSubsections ?? []
+      }
+    }
+
+    const mergedSubsections = [...(subsections ?? []), ...createdSubsections]
+    const sectionWithSubsections = { ...section, subsections: mergedSubsections.sort((a, b) => a.order - b.order) }
     return sectionWithSubsections
   } catch (error) {
     console.error('Error in getSectionBySlug:', error)

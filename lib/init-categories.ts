@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/client'
 
-const categoriesWithSubsections: Record<string, string[]> = {
+export const categoriesWithSubsections: Record<string, string[]> = {
   'Dama': ['Pantalones', 'Camisas', 'Chaquetas', 'Sacos', 'Blusas', 'Vestidos', 'Ropa deportiva', 'Corsets', 'Ropa interior', 'Medias', 'Zapatos', 'Conjuntos', 'Faldas', 'Pijama'],
   'Caballero': ['Pantalones', 'Pantalonetas', 'Camisas', 'Sacos', 'Chaquetas', 'Medias', 'Zapatos', 'Ropa interior', 'Ropa deportiva'],
   'Niño': ['Pantalones', 'Zapatos', 'Camisas', 'Sacos', 'Chaquetas', 'Medias', 'Ropa interior'],
@@ -8,6 +8,10 @@ const categoriesWithSubsections: Record<string, string[]> = {
   'Accesorios': ['Gafas', 'Relojería', 'Joyería', 'Tecnología'],
   'Edredones': ['Sábanas', 'Almohadas', 'Cobijas', 'Cubrelechos', 'Fundas'],
   'Esika': []
+}
+
+export function slugify(value: string): string {
+  return value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '-')
 }
 
 export async function initializeCategories() {
@@ -43,7 +47,7 @@ export async function initializeCategories() {
   // Ahora crear las nuevas categorías
   for (const [categoryName, subsections] of Object.entries(categoriesWithSubsections)) {
     // Generar slug para la sección
-    const slug = categoryName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '-')
+    const slug = slugify(categoryName)
     
     // Crear nueva sección
     const { data: newSection, error: sectionError } = await supabase
@@ -69,7 +73,7 @@ export async function initializeCategories() {
     // Crear subsecciones si la categoría tiene subsecciones
     if (subsections.length > 0) {
       for (const subsectionName of subsections) {
-        const subsectionSlug = subsectionName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '-')
+        const subsectionSlug = slugify(subsectionName)
         
         const { error: subsectionError } = await supabase
           .from('subsections')
