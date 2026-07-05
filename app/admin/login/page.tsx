@@ -2,6 +2,7 @@
 import { useState, type FormEvent } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { parseJsonResponse } from '@/lib/utils'
 
 export default function AdminLogin() {
   const router = useRouter()
@@ -22,7 +23,7 @@ export default function AdminLogin() {
         body: JSON.stringify({ username, password }),
       })
 
-      const data = await response.json()
+      const data = await parseJsonResponse<{ success: boolean; message?: string }>(response)
 
       if (data.success) {
         if (window.history.length > 1) {

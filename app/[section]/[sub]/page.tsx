@@ -5,6 +5,7 @@ import { getSubsectionBySlug, getProductsBySubsection } from '@/lib/queries'
 import { getAvailableSizes } from '@/lib/sizes'
 import ProductCard from '@/components/catalog/ProductCard'
 import { ProductCardSkeleton } from '@/components/ui/Skeletons'
+import { parseJsonResponse } from '@/lib/utils'
 import type { Subsection, Product } from '@/types'
 
 export default function SubsectionPage({ params }: { params: Promise<{ section: string; sub: string }> }) {
@@ -61,7 +62,7 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
 
   useEffect(() => {
     void fetch('/api/me')
-      .then((res) => res.json())
+      .then((res) => parseJsonResponse<{ authenticated?: boolean }>(res))
       .then((data) => setAdminMode(Boolean(data.authenticated)))
       .catch(() => setAdminMode(false))
   }, [])
@@ -146,11 +147,13 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
         .filter((path): path is string => Boolean(path))
 
       if (imagePaths.length > 0) {
-        await fetch('/api/admin/delete-product-images', {
+        const deleteImagesResponse = await fetch('/api/admin/delete-product-images', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ paths: imagePaths }),
         })
+
+        await parseJsonResponse(deleteImagesResponse)
       }
 
       const deleteResponse = await fetch('/api/admin/delete-product', {
@@ -159,7 +162,7 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
         body: JSON.stringify({ id: product.id }),
       })
 
-      const deleteResult = await deleteResponse.json()
+      const deleteResult = await parseJsonResponse<{ success: boolean; message?: string }>(deleteResponse)
 
       if (!deleteResponse.ok || !deleteResult.success) {
         console.error('Error eliminando producto:', deleteResult)
@@ -222,7 +225,7 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
           body: uploadData,
         })
 
-        const uploadResult = await uploadResponse.json()
+        const uploadResult = await parseJsonResponse<{ success: boolean; message?: string; urls?: string[] }>(uploadResponse)
 
         if (!uploadResponse.ok || !uploadResult.success) {
           console.error('Error subiendo imágenes:', uploadResult)
@@ -250,7 +253,7 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
         }),
       })
 
-      const saveResult = await saveResponse.json()
+      const saveResult = await parseJsonResponse<{ success: boolean; message?: string }>(saveResponse)
 
       if (!saveResponse.ok || !saveResult.success) {
         console.error('Error guardando producto:', saveResult)

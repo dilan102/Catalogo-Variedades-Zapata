@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState, type FormEvent } from 'react'
 import { Lock } from 'lucide-react'
+import { parseJsonResponse } from '@/lib/utils'
 
 export default function AdminButton() {
   const [showLogin, setShowLogin] = useState(false)
@@ -16,7 +17,7 @@ export default function AdminButton() {
     const verifySession = async () => {
       try {
         const response = await fetch('/api/me')
-        const data = await response.json()
+        const data = await parseJsonResponse<{ authenticated?: boolean }>(response)
 
         if (active) {
           setIsLoggedIn(Boolean(data.authenticated))
@@ -49,7 +50,7 @@ export default function AdminButton() {
         body: JSON.stringify({ username, password }),
       })
 
-      const data = await response.json()
+      const data = await parseJsonResponse<{ success: boolean; message?: string }>(response)
 
       if (data.success) {
         setIsLoggedIn(true)

@@ -37,7 +37,7 @@ export default function Footer() {
               <h3 className="font-serif font-semibold text-lg mb-4">Contacto</h3>
               <div className="space-y-2 mb-6">
                 <a 
-                  href="https://wa.me/573000000000" 
+                  href="https://wa.me/573064110472" 
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block text-sm text-white/80 hover:text-white transition-colors"
@@ -45,10 +45,10 @@ export default function Footer() {
                   WhatsApp
                 </a>
                 <a 
-                  href="mailto:info@variedadeszapata.com" 
+                  href="variedadeszapata@gmail.com" 
                   className="block text-sm text-white/80 hover:text-white transition-colors"
                 >
-                  info@variedadeszapata.com
+                  variedadeszapata@gmail.com
                 </a>
               </div>
               <div className="flex justify-center md:justify-end gap-4">

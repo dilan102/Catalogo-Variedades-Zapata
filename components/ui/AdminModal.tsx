@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { X, Lock, User as UserIcon } from 'lucide-react'
+import { parseJsonResponse } from '@/lib/utils'
 
 export default function AdminModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [username, setUsername] = useState('')
@@ -20,7 +21,7 @@ export default function AdminModal({ isOpen, onClose }: { isOpen: boolean; onClo
         body: JSON.stringify({ username, password }),
       })
 
-      const data = await response.json()
+      const data = await parseJsonResponse<{ success: boolean; message?: string }>(response)
 
       if (data.success) {
         setLoading(false)
