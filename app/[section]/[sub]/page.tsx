@@ -213,27 +213,54 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
       setIsUploadingImages(hasNewImages)
 
       if (hasNewImages) {
-        const uploadData = new FormData()
-        uploadData.append('sectionSlug', sectionSlug)
-        if (primaryImageFile) {
-          uploadData.append('primaryImage', primaryImageFile)
+        const uploadFiles = [
+          ...(primaryImageFile ? [primaryImageFile] : []),
+          ...otherImageFiles,
+        ]
+
+        const uploadedUrls: string[] = []
+
+        for (const file of uploadFiles) {
+          const uploadResponse = await fetch('/api/admin/upload-product-images', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sectionSlug,
+              fileName: file.name,
+              contentType: file.type || 'application/octet-stream',
+            }),
+          })
+
+          const uploadResult = await parseJsonResponse<{
+            success: boolean
+            message?: string
+            signedUrl?: string
+            publicUrl?: string
+          }>(uploadResponse)
+
+          if (!uploadResponse.ok || !uploadResult.success || !uploadResult.signedUrl || !uploadResult.publicUrl) {
+            console.error('Error preparando subida de imagen:', uploadResult)
+            setErrorMessage(uploadResult?.message || 'Error subiendo las imágenes.')
+            return
+          }
+
+          const directUploadResponse = await fetch(uploadResult.signedUrl, {
+            method: 'PUT',
+            headers: { 'Content-Type': file.type || 'application/octet-stream' },
+            body: file,
+          })
+
+          if (!directUploadResponse.ok) {
+            const directUploadText = await directUploadResponse.text().catch(() => '')
+            console.error('Error subiendo imagen a Supabase:', directUploadText)
+            setErrorMessage('No se pudo cargar una de las imágenes.')
+            return
+          }
+
+          uploadedUrls.push(uploadResult.publicUrl)
         }
-        otherImageFiles.forEach((file) => uploadData.append('otherImages', file))
 
-        const uploadResponse = await fetch('/api/admin/upload-product-images', {
-          method: 'POST',
-          body: uploadData,
-        })
-
-        const uploadResult = await parseJsonResponse<{ success: boolean; message?: string; urls?: string[] }>(uploadResponse)
-
-        if (!uploadResponse.ok || !uploadResult.success) {
-          console.error('Error subiendo imágenes:', uploadResult)
-          setErrorMessage(uploadResult?.message || 'Error subiendo las imágenes.')
-          return
-        }
-
-        images = uploadResult.urls ?? []
+        images = uploadedUrls
       }
 
       const saveResponse = await fetch('/api/admin/save-product', {

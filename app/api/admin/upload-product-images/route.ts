@@ -13,12 +13,6 @@ function sanitizeFileName(value: string) {
     .toLowerCase()
 }
 
-type UploadFile = File | Blob
-
-function isUploadFile(value: unknown): value is UploadFile {
-  return value instanceof Blob
-}
-
 async function ensureBucketExists(supabase: any) {
   const { error } = await supabase.storage.createBucket(bucketName, {
     public: true,
@@ -28,7 +22,7 @@ async function ensureBucketExists(supabase: any) {
     const message = String(error?.message ?? '')
     const alreadyExists = error.status === 409 || /already exists|resource already exists|duplicate/i.test(message)
     if (!alreadyExists) {
-      throw error
+      throw new Error(message || 'No se pudo preparar el bucket de imágenes')
     }
   }
 }
@@ -45,18 +39,24 @@ export async function POST(request: Request) {
     )
   }
 
-  const formData = await request.formData()
-  const sectionSlug = formData.get('sectionSlug')
-  const primaryFile = formData.get('primaryImage')
-  const otherFiles = formData.getAll('otherImages')
+  let payload: { sectionSlug?: string; fileName?: string; contentType?: string } | null = null
+
+  try {
+    payload = await request.json()
+  } catch {
+    payload = null
+  }
+
+  const sectionSlug = payload?.sectionSlug
+  const fileName = payload?.fileName
+  const contentType = payload?.contentType
 
   if (typeof sectionSlug !== 'string' || !sectionSlug) {
     return NextResponse.json({ success: false, message: 'Falta sección' }, { status: 400 })
   }
 
-  const validatedPrimaryFile = isUploadFile(primaryFile) ? primaryFile : null
-  if (!validatedPrimaryFile) {
-    return NextResponse.json({ success: false, message: 'La foto principal es obligatoria' }, { status: 400 })
+  if (typeof fileName !== 'string' || !fileName) {
+    return NextResponse.json({ success: false, message: 'Falta el nombre del archivo' }, { status: 400 })
   }
 
   const supabase = createSupabaseClient(supabaseUrl, supabaseServiceRoleKey, {
@@ -66,45 +66,28 @@ export async function POST(request: Request) {
   try {
     await ensureBucketExists(supabase)
 
-    const uploadedUrls: string[] = []
-    const otherUploadFiles = otherFiles.filter(isUploadFile) as UploadFile[]
-    const filesToUpload: UploadFile[] = [
-      validatedPrimaryFile,
-      ...otherUploadFiles,
-    ]
+    const sanitizedName = `${crypto.randomUUID()}-${sanitizeFileName(fileName)}`
+    const filePath = `${sectionSlug}/${sanitizedName}`
 
-    for (const file of filesToUpload) {
-      const name = file instanceof File ? file.name : `upload-${crypto.randomUUID()}`
-      const fileName = `${crypto.randomUUID()}-${sanitizeFileName(name)}`
-      const filePath = `${sectionSlug}/${fileName}`
+    const { data, error } = await supabase.storage
+      .from(bucketName)
+      .createSignedUploadUrl(filePath, { upsert: false })
 
-      const { error: uploadError } = await supabase.storage
-        .from(bucketName)
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false,
-        })
-
-      if (uploadError) {
-        console.error('Supabase upload error:', uploadError)
-        return NextResponse.json({ success: false, message: uploadError.message }, { status: 500 })
-      }
-
-      const publicUrlResponse: any = await supabase.storage
-        .from(bucketName)
-        .getPublicUrl(filePath)
-
-      const publicUrlData = publicUrlResponse?.data
-
-      if (!publicUrlData?.publicUrl) {
-        console.error('Supabase public URL error:', publicUrlResponse)
-        return NextResponse.json({ success: false, message: 'No se pudo obtener la URL pública' }, { status: 500 })
-      }
-
-      uploadedUrls.push(publicUrlData.publicUrl)
+    if (error || !data?.signedUrl || !data?.token) {
+      console.error('Supabase signed upload URL error:', error)
+      return NextResponse.json({ success: false, message: 'No se pudo preparar la subida' }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, urls: uploadedUrls })
+    const publicUrl = `${supabaseUrl}/storage/v1/object/public/${bucketName}/${filePath}`
+
+    return NextResponse.json({
+      success: true,
+      signedUrl: data.signedUrl,
+      token: data.token,
+      path: filePath,
+      publicUrl,
+      contentType: contentType || 'application/octet-stream',
+    })
   } catch (error) {
     console.error('Error en upload-product-images:', error)
     const message = error instanceof Error ? error.message : 'Error al subir las imágenes'
