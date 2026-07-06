@@ -96,14 +96,42 @@ export default function ProductPage() {
       if (imageUrl && typeof navigator !== 'undefined' && navigator.share && navigator.canShare) {
         const response = await fetch(imageUrl)
         const blob = await response.blob()
-        const extensionMatch = imageUrl.match(/\.([a-zA-Z0-9]+)(?:\?.*)?$/)
-        const extension = extensionMatch ? extensionMatch[1].toLowerCase().replace('jpeg', 'jpg') : 'jpg'
-        const fileName = `${product.name.replace(/[^\w\d]+/g, '_')}.${extension}`
-        const file = new File([blob], fileName, { type: blob.type || `image/${extension}` })
 
-        if (navigator.canShare({ files: [file] })) {
-          await navigator.share({ files: [file], text: message })
-          return
+        let finalBlob: Blob | null = blob
+        let fileName = `${product.name.replace(/[^\w\d]+/g, '_')}.${blob.type.includes('png') ? 'png' : 'jpg'}`
+        let mimeType = blob.type || 'image/jpeg'
+
+        if (!blob.type.startsWith('image/jpeg') && !blob.type.startsWith('image/png')) {
+          const img = new window.Image()
+          img.crossOrigin = 'anonymous'
+          img.src = imageUrl
+
+          await new Promise<void>((resolve, reject) => {
+            img.onload = () => resolve()
+            img.onerror = () => reject(new Error('Image load failed'))
+          })
+
+          const canvas = document.createElement('canvas')
+          canvas.width = img.naturalWidth
+          canvas.height = img.naturalHeight
+          const ctx = canvas.getContext('2d')
+          if (ctx) {
+            ctx.drawImage(img, 0, 0)
+            finalBlob = await new Promise<Blob | null>((resolve) => {
+              canvas.toBlob((blobResult) => resolve(blobResult), 'image/jpeg', 0.95)
+            })
+            fileName = `${product.name.replace(/[^\w\d]+/g, '_')}.jpg`
+            mimeType = 'image/jpeg'
+          }
+        }
+
+        if (finalBlob) {
+          const file = new File([finalBlob], fileName, { type: mimeType })
+
+          if (navigator.canShare({ files: [file], text: message })) {
+            await navigator.share({ files: [file], text: message, title: product.name })
+            return
+          }
         }
       }
     } catch {
