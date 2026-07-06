@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import { useState } from 'react'
+import type { KeyboardEvent } from 'react'
 import type { Product } from '@/types'
 import ImagePlaceholder from '@/components/ui/ImagePlaceholder'
 
@@ -18,87 +19,105 @@ export default function ProductCard({ product, adminMode, onEdit, onDelete, onVi
   const [imageError, setImageError] = useState(false)
   const hasImage = Boolean(image) && !imageError
 
+  const handleOpenGallery = () => {
+    if (onViewGallery) {
+      onViewGallery(product)
+    }
+  }
+
+  const handleCardKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if ((event.key === 'Enter' || event.key === ' ') && onViewGallery) {
+      event.preventDefault()
+      handleOpenGallery()
+    }
+  }
+
   const cardContent = (
     <div className="overflow-hidden rounded-2xl border border-[#DCEFDD] bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg active:scale-[0.98]">
-      <button
-        type="button"
-        onClick={() => onViewGallery?.(product)}
-        disabled={!onViewGallery}
-        className="relative mb-3 aspect-[3/4] overflow-hidden bg-[#FAFCF9] w-full cursor-pointer hover:opacity-90 transition-opacity"
+      <div
+        role={onViewGallery ? 'button' : undefined}
+        tabIndex={onViewGallery ? 0 : -1}
+        onClick={handleOpenGallery}
+        onKeyDown={handleCardKeyDown}
+        className={`cursor-${onViewGallery ? 'pointer' : 'default'} focus:outline-none focus:ring-2 focus:ring-[#3E9A60]/30 focus:ring-offset-2`}
       >
-        {hasImage ? (
-          <>
-            <div className={`absolute inset-0 transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}>
-              <Image
-                src={image!}
-                alt={product.name}
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                sizes="(max-width: 640px) 50vw, 25vw"
-                onLoad={() => setImageLoaded(true)}
-                onError={() => setImageError(true)}
-              />
-            </div>
-            {!imageLoaded && <div className="absolute inset-0 animate-pulse bg-[#EAF8EC]" />}
-          </>
-        ) : (
-          <ImagePlaceholder className="absolute inset-0" />
-        )}
-      </button>
-
-      {otherImages.length > 0 && (
-        <div className="grid grid-cols-3 gap-2 px-3 pb-3">
-          {otherImages.map((src, index) => (
-            <div key={index} className="relative h-16 overflow-hidden rounded-2xl border border-[#E5EEE7] bg-[#F8FBF7]">
-              <Image
-                src={src}
-                alt={`${product.name} variante ${index + 2}`}
-                fill
-                className="object-cover"
-                sizes="120px"
-              />
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div className="px-4 pb-4">
-        <p className="text-base font-serif font-semibold leading-tight text-[#0F2A1A] line-clamp-2 transition-colors duration-300 group-hover:text-[#3E9A60]">{product.name}</p>
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {product.sizes.slice(0, 4).map((size) => (
-            <span key={size} className="rounded-full border border-[#DCEFDD] bg-white px-2 py-1 text-[10px] text-[#0F2A1A]">{size}</span>
-          ))}
+        <div className="relative mb-3 aspect-[3/4] overflow-hidden bg-[#FAFCF9] w-full transition-opacity hover:opacity-90">
+          {hasImage ? (
+            <>
+              <div className={`absolute inset-0 transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}>
+                <Image
+                  src={image!}
+                  alt={product.name}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  sizes="(max-width: 640px) 50vw, 25vw"
+                  onLoad={() => setImageLoaded(true)}
+                  onError={() => setImageError(true)}
+                />
+              </div>
+              {!imageLoaded && <div className="absolute inset-0 animate-pulse bg-[#EAF8EC]" />}
+            </>
+          ) : (
+            <ImagePlaceholder className="absolute inset-0" />
+          )}
         </div>
 
-        {adminMode && (onEdit || onDelete) && (
-          <div className="mt-4 flex flex-wrap gap-2">
-            {onEdit && (
-              <button
-                type="button"
-                onClick={(event) => {
-                  event.preventDefault()
-                  onEdit(product)
-                }}
-                className="inline-flex items-center justify-center rounded-full border border-[#3E9A60] bg-[#EAF8EC] px-3 py-2 text-xs font-semibold text-[#1F6B3C] transition hover:bg-[#D7F5D8]"
-              >
-                Editar
-              </button>
-            )}
-            {onDelete && (
-              <button
-                type="button"
-                onClick={(event) => {
-                  event.preventDefault()
-                  onDelete(product)
-                }}
-                className="inline-flex items-center justify-center rounded-full border border-[#B12A1B] bg-[#FCE8E7] px-3 py-2 text-xs font-semibold text-[#9C1F1F] transition hover:bg-[#F9D7D4]"
-              >
-                Eliminar
-              </button>
-            )}
+        {otherImages.length > 0 && (
+          <div className="grid grid-cols-3 gap-2 px-3 pb-3">
+            {otherImages.map((src, index) => (
+              <div key={index} className="relative h-16 overflow-hidden rounded-2xl border border-[#E5EEE7] bg-[#F8FBF7]">
+                <Image
+                  src={src}
+                  alt={`${product.name} variante ${index + 2}`}
+                  fill
+                  className="object-cover"
+                  sizes="120px"
+                />
+              </div>
+            ))}
           </div>
         )}
+
+        <div className="px-4 pb-4">
+          <p className="text-base font-serif font-semibold leading-tight text-[#0F2A1A] line-clamp-2 transition-colors duration-300 group-hover:text-[#3E9A60]">{product.name}</p>
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {product.sizes.slice(0, 4).map((size) => (
+              <span key={size} className="rounded-full border border-[#DCEFDD] bg-white px-2 py-1 text-[10px] text-[#0F2A1A]">{size}</span>
+            ))}
+          </div>
+        </div>
       </div>
+
+      {adminMode && (onEdit || onDelete) && (
+        <div className="mt-4 flex flex-wrap gap-2 px-4 pb-4">
+          {onEdit && (
+            <button
+              type="button"
+              onClick={(event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                onEdit(product)
+              }}
+              className="inline-flex items-center justify-center rounded-full border border-[#3E9A60] bg-[#EAF8EC] px-3 py-2 text-xs font-semibold text-[#1F6B3C] transition hover:bg-[#D7F5D8]"
+            >
+              Editar
+            </button>
+          )}
+          {onDelete && (
+            <button
+              type="button"
+              onClick={(event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                onDelete(product)
+              }}
+              className="inline-flex items-center justify-center rounded-full border border-[#B12A1B] bg-[#FCE8E7] px-3 py-2 text-xs font-semibold text-[#9C1F1F] transition hover:bg-[#F9D7D4]"
+            >
+              Eliminar
+            </button>
+          )}
+        </div>
+      )}
     </div>
   )
 

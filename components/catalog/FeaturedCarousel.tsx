@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { Product } from '@/types'
@@ -23,26 +23,20 @@ export default function FeaturedCarousel({ products, loading }: FeaturedCarousel
     setCurrentIndex(normalized)
   }
 
-  const nextSlide = () => {
+  const nextSlide = useCallback(() => {
     setCurrentIndex((current) => (items.length > 0 ? (current + 1) % items.length : current))
-  }
+  }, [items.length])
 
-  const prevSlide = () => {
+  const prevSlide = useCallback(() => {
     setCurrentIndex((current) => (items.length > 0 ? (current - 1 + items.length) % items.length : current))
-  }
+  }, [items.length])
 
   useEffect(() => {
     if (items.length === 0) return
 
     const interval = window.setInterval(nextSlide, 4000)
     return () => window.clearInterval(interval)
-  }, [currentIndex, items.length])
-
-  useEffect(() => {
-    if (currentIndex >= items.length && items.length > 0) {
-      setCurrentIndex(0)
-    }
-  }, [items.length, currentIndex])
+  }, [nextSlide, items.length])
 
   return (
     <div className="relative rounded-3xl bg-white p-6 sm:p-10 animate-fade-in">
@@ -80,12 +74,18 @@ export default function FeaturedCarousel({ products, loading }: FeaturedCarousel
             : items.map((product) => {
                 const image = product.images?.[0]
                 const hasImage = Boolean(image)
-                const href = `/${(product as any).subsection?.section?.slug || ''}/${(product as any).subsection?.slug || ''}/${product.id}`
+                const sectionSlug = product.subsection?.section?.slug ?? ''
+                const subsectionSlug = product.subsection?.slug ?? ''
+                const href = sectionSlug && subsectionSlug ? `/${sectionSlug}/${subsectionSlug}/${product.id}` : `/${product.id}`
+                const subcategoryName = product.subsection?.name || 'Nueva colección'
 
                 return (
                   <article key={product.id} className="min-w-full shrink-0 px-2 sm:px-4">
                     <Link href={href} className="group block overflow-hidden rounded-[28px] bg-[#FAFCF9] shadow-sm">
                       <div className="relative aspect-[3/4] overflow-hidden bg-[#FAFCF9]">
+                        <div className="absolute left-3 top-3 z-10 rounded-full border border-[#E7EFE8] bg-white/90 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-[#0F2A1A] shadow-sm backdrop-blur-sm">
+                          {subcategoryName}
+                        </div>
                         {hasImage ? (
                           <Image
                             src={image!}
