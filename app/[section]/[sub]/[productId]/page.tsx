@@ -73,75 +73,15 @@ export default function ProductPage() {
     changeImage((selectedImageIndex + 1) % images.length)
   }
 
-  const shareProduct = async () => {
+  const shareProduct = () => {
     if (!product) return
 
-    const messageLines = [
-      `Hola, quisiera mas información acerca de este producto: ${product.name}`,
-    ]
+    const productUrl = typeof window !== 'undefined' ? `${window.location.origin}${window.location.pathname}` : ''
+    const message = `Hola, quisiera más información acerca de este producto.\n${product.name}\n${productUrl}`
+    const encodedMessage = encodeURIComponent(message)
+    const whatsappUrl = `https://wa.me/573054110472?text=${encodedMessage}`
 
-    if (whatsappProductColor) messageLines.push(`Color: ${whatsappProductColor}`)
-    if (whatsappSizes) messageLines.push(`Tallas disponibles: ${whatsappSizes}`)
-    if (product.description) messageLines.push(`Modelo / detalles: ${product.description}`)
-
-    const message = messageLines.join('\n')
-    const imageUrl = selectedImage || images[0]
-
-    if (typeof window === 'undefined') return
-
-    const apiWhatsAppUrl = `https://api.whatsapp.com/send?phone=573054110472&text=${encodeURIComponent(message)}`
-    const waMeUrl = `https://wa.me/573054110472?text=${encodeURIComponent(message)}`
-
-    try {
-      if (imageUrl && typeof navigator !== 'undefined' && navigator.share && navigator.canShare) {
-        const response = await fetch(imageUrl)
-        const blob = await response.blob()
-
-        let finalBlob: Blob | null = blob
-        let fileName = `${product.name.replace(/[^\w\d]+/g, '_')}.${blob.type.includes('png') ? 'png' : 'jpg'}`
-        let mimeType = blob.type || 'image/jpeg'
-
-        if (!blob.type.startsWith('image/jpeg') && !blob.type.startsWith('image/png')) {
-          const img = new window.Image()
-          img.crossOrigin = 'anonymous'
-          img.src = imageUrl
-
-          await new Promise<void>((resolve, reject) => {
-            img.onload = () => resolve()
-            img.onerror = () => reject(new Error('Image load failed'))
-          })
-
-          const canvas = document.createElement('canvas')
-          canvas.width = img.naturalWidth
-          canvas.height = img.naturalHeight
-          const ctx = canvas.getContext('2d')
-          if (ctx) {
-            ctx.drawImage(img, 0, 0)
-            finalBlob = await new Promise<Blob | null>((resolve) => {
-              canvas.toBlob((blobResult) => resolve(blobResult), 'image/jpeg', 0.95)
-            })
-            fileName = `${product.name.replace(/[^\w\d]+/g, '_')}.jpg`
-            mimeType = 'image/jpeg'
-          }
-        }
-
-        if (finalBlob) {
-          const file = new File([finalBlob], fileName, { type: mimeType })
-
-          if (navigator.canShare({ files: [file], text: message })) {
-            await navigator.share({ files: [file], text: message, title: product.name })
-            return
-          }
-        }
-      }
-    } catch {
-      // ignored, fallback to direct WhatsApp open
-    }
-
-    window.location.href = apiWhatsAppUrl
-    window.setTimeout(() => {
-      window.open(waMeUrl, '_blank', 'noopener,noreferrer')
-    }, 150)
+    window.location.href = whatsappUrl
   }
 
   if (loading) return <div className="px-4 py-10 text-center text-stone-400 text-sm">Cargando...</div>
