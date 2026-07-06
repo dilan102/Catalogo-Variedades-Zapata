@@ -55,6 +55,7 @@ const imagesBySlug: Record<string, Record<string, string>> = {
     'ropa-interior': '/ropa_interior_niña.jpeg',
     medias: '/medias_niña.jpeg',
     zapatos: '/zapatos_niña.jpeg',
+    conjuntos: '/conjunto_dama.jpeg',
   },
   nino: {
     pantalones: '/pantalon_niño.avif',
@@ -64,6 +65,7 @@ const imagesBySlug: Record<string, Record<string, string>> = {
     chaquetas: '/chaqueta_niño.jpeg',
     medias: '/medias_niño.jpeg',
     'ropa-interior': '/ropa_interior_niño.png',
+    conjuntos: '/conjunto_dama.jpeg',
   },
   accesorios: {
     gafas: '/gafas_accesorios.jpeg',
