@@ -54,14 +54,37 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
 
   useEffect(() => {
     if (!sectionSlug || !subSlug) return
-    setLoading(true)
-    getSubsectionBySlug(sectionSlug, subSlug).then(async (sub) => {
-      setSubsection(sub)
-      if (sub) {
-        const prods = await getProductsBySubsection(sub.id)
-        setProducts(prods)
+
+    let cancelled = false
+
+    const loadSubsection = async () => {
+      setLoading(true)
+      setProducts([])
+      setSubsection(null)
+
+      try {
+        const sub = await getSubsectionBySlug(sectionSlug, subSlug)
+        if (cancelled) return
+
+        setSubsection(sub)
+        if (sub) {
+          const prods = await getProductsBySubsection(sub.id)
+          if (!cancelled) {
+            setProducts(prods)
+          }
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false)
+        }
       }
-    }).finally(() => setLoading(false))
+    }
+
+    void loadSubsection()
+
+    return () => {
+      cancelled = true
+    }
   }, [sectionSlug, subSlug])
 
   useEffect(() => {
@@ -491,6 +514,8 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
                   onEdit={handleEditProduct}
                   onDelete={handleDeleteProduct}
                   onViewGallery={setSelectedProductForGallery}
+                  sectionSlug={sectionSlug}
+                  subsectionSlug={subSlug}
                 />
               </div>
             ))

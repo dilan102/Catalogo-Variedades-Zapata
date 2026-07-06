@@ -10,16 +10,18 @@ type ProductCardProps = {
   onEdit?: (product: Product) => void
   onDelete?: (product: Product) => void
   onViewGallery?: (product: Product) => void
+  sectionSlug?: string
+  subsectionSlug?: string
 }
 
-export default function ProductCard({ product, adminMode, onEdit, onDelete }: ProductCardProps) {
+export default function ProductCard({ product, adminMode, onEdit, onDelete, sectionSlug, subsectionSlug }: ProductCardProps) {
   const image = product.images?.[0]
   const otherImages = product.images?.slice(1, 4) ?? []
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageError, setImageError] = useState(false)
   const hasImage = Boolean(image) && !imageError
 
-  const productHref = `/${product.subsection?.section?.slug ?? ''}/${product.subsection?.slug ?? ''}/${product.id}`
+  const productHref = `/${sectionSlug || product.subsection?.section?.slug || ''}/${subsectionSlug || product.subsection?.slug || ''}/${product.id}`
 
   const cardContent = (
     <div className="overflow-hidden rounded-2xl border border-[#DCEFDD] bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg active:scale-[0.98]">
