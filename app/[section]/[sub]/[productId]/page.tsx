@@ -38,6 +38,19 @@ export default function ProductPage() {
   const selectedImage = images[selectedImageIndex] ?? null
   const showImageNavigation = images.length > 1
 
+  useEffect(() => {
+    if (!images.length) return
+
+    const preloadImages = () => {
+      images.forEach((src) => {
+        const img = new window.Image()
+        img.src = src
+      })
+    }
+
+    preloadImages()
+  }, [images])
+
   const changeImage = (index: number) => {
     if (index === selectedImageIndex || images.length === 0) return
     setIsTransitioning(true)
