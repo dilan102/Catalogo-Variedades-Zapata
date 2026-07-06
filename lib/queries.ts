@@ -2,13 +2,20 @@ import { createClient } from '@/utils/supabase/client'
 import { categoriesWithSubsections, slugify } from '@/lib/init-categories'
 import type { Section, Subsection, Product } from '@/types'
 
+const excludedSectionSlugs = new Set(['joven', 'jovenes'])
+
+function filterVisibleSections(sections: Section[] | null | undefined): Section[] {
+  return (sections ?? []).filter((section) => !excludedSectionSlugs.has(section.slug?.toLowerCase() ?? ''))
+}
+
 export async function getSections(): Promise<Section[]> {
   try {
     const supabase = createClient()
     const { data, error } = await supabase.from('sections').select('*').eq('is_active', true).order('order')
     if (error) throw new Error(`Error al cargar secciones: ${error.message}`)
-    console.log('Secciones cargadas:', data?.map(s => ({ name: s.name, slug: s.slug, image_url: s.image_url })))
-    return data ?? []
+    const visibleSections = filterVisibleSections(data)
+    console.log('Secciones cargadas:', visibleSections.map(s => ({ name: s.name, slug: s.slug, image_url: s.image_url })))
+    return visibleSections
   } catch (error) {
     console.error('Error in getSections:', error)
     throw error
@@ -17,6 +24,10 @@ export async function getSections(): Promise<Section[]> {
 
 export async function getSectionBySlug(slug: string): Promise<Section | null> {
   try {
+    if (excludedSectionSlugs.has(slug.toLowerCase())) {
+      return null
+    }
+
     const supabase = createClient()
     const { data: section, error: sectionError } = await supabase.from('sections').select('*').eq('slug', slug).eq('is_active', true).single()
     if (sectionError || !section) {
@@ -70,7 +81,7 @@ export async function getAllSectionsAdmin(): Promise<Section[]> {
     const supabase = createClient()
     const { data, error } = await supabase.from('sections').select('*').order('order')
     if (error) throw new Error(`Error al cargar secciones: ${error.message}`)
-    return data ?? []
+    return filterVisibleSections(data)
   } catch (error) {
     console.error('Error in getAllSectionsAdmin:', error)
     throw error
