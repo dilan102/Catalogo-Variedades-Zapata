@@ -1,6 +1,5 @@
  'use client'
 import { useEffect, useMemo, useState } from 'react'
-import Image from 'next/image'
 import { getProductById } from '@/lib/queries'
 import type { Product } from '@/types'
 import ImagePlaceholder from '@/components/ui/ImagePlaceholder'
@@ -11,6 +10,7 @@ export default function ProductPage() {
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(false)
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
   useEffect(() => {
     const productId = params?.productId
@@ -38,12 +38,21 @@ export default function ProductPage() {
   const selectedImage = images[selectedImageIndex] ?? null
   const showImageNavigation = images.length > 1
 
+  const changeImage = (index: number) => {
+    if (index === selectedImageIndex || images.length === 0) return
+    setIsTransitioning(true)
+    setSelectedImageIndex(index)
+    window.setTimeout(() => setIsTransitioning(false), 120)
+  }
+
   const goToPrevious = () => {
-    setSelectedImageIndex((prev) => (prev - 1 + images.length) % images.length)
+    if (images.length <= 1) return
+    changeImage((selectedImageIndex - 1 + images.length) % images.length)
   }
 
   const goToNext = () => {
-    setSelectedImageIndex((prev) => (prev + 1) % images.length)
+    if (images.length <= 1) return
+    changeImage((selectedImageIndex + 1) % images.length)
   }
 
   if (loading) return <div className="px-4 py-10 text-center text-stone-400 text-sm">Cargando...</div>
@@ -72,7 +81,14 @@ export default function ProductPage() {
           <div className="relative mb-3 aspect-[3/4] overflow-hidden bg-[#FAFCF9]">
             {selectedImage ? (
               <>
-                <Image src={selectedImage} alt={product.name} fill className="object-cover" sizes="(max-width: 640px) 100vw, 50vw" />
+                <img
+                  key={selectedImage}
+                  src={selectedImage}
+                  alt={product.name}
+                  className={`h-full w-full object-cover transition-opacity duration-150 ${isTransitioning ? 'opacity-80' : 'opacity-100'}`}
+                  loading="eager"
+                  decoding="async"
+                />
                 {showImageNavigation && (
                   <>
                     <button
@@ -113,10 +129,16 @@ export default function ProductPage() {
                   <button
                     key={`${src}-${index}`}
                     type="button"
-                    onClick={() => setSelectedImageIndex(index)}
+                    onClick={() => changeImage(index)}
                     className={`relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl border transition ${index === selectedImageIndex ? 'border-[#3E9A60] ring-2 ring-[#3E9A60]/20' : 'border-[#E4E8E3]'}`}
                   >
-                    <Image src={src} alt={`${product.name} vista ${index + 1}`} fill className="object-cover" sizes="80px" />
+                    <img
+                      src={src}
+                      alt={`${product.name} vista ${index + 1}`}
+                      className="h-full w-full object-cover"
+                      loading="eager"
+                      decoding="async"
+                    />
                   </button>
                 ))}
               </div>
