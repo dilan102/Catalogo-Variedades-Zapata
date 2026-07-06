@@ -1,6 +1,6 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import { useState } from 'react'
-import type { KeyboardEvent } from 'react'
 import type { Product } from '@/types'
 import ImagePlaceholder from '@/components/ui/ImagePlaceholder'
 
@@ -12,35 +12,18 @@ type ProductCardProps = {
   onViewGallery?: (product: Product) => void
 }
 
-export default function ProductCard({ product, adminMode, onEdit, onDelete, onViewGallery }: ProductCardProps) {
+export default function ProductCard({ product, adminMode, onEdit, onDelete }: ProductCardProps) {
   const image = product.images?.[0]
   const otherImages = product.images?.slice(1, 4) ?? []
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageError, setImageError] = useState(false)
   const hasImage = Boolean(image) && !imageError
 
-  const handleOpenGallery = () => {
-    if (onViewGallery) {
-      onViewGallery(product)
-    }
-  }
-
-  const handleCardKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if ((event.key === 'Enter' || event.key === ' ') && onViewGallery) {
-      event.preventDefault()
-      handleOpenGallery()
-    }
-  }
+  const productHref = `/${product.subsection?.section?.slug ?? ''}/${product.subsection?.slug ?? ''}/${product.id}`
 
   const cardContent = (
     <div className="overflow-hidden rounded-2xl border border-[#DCEFDD] bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg active:scale-[0.98]">
-      <div
-        role={onViewGallery ? 'button' : undefined}
-        tabIndex={onViewGallery ? 0 : -1}
-        onClick={handleOpenGallery}
-        onKeyDown={handleCardKeyDown}
-        className={`cursor-${onViewGallery ? 'pointer' : 'default'} focus:outline-none focus:ring-2 focus:ring-[#3E9A60]/30 focus:ring-offset-2`}
-      >
+      <Link href={productHref} className="block focus:outline-none focus:ring-2 focus:ring-[#3E9A60]/30 focus:ring-offset-2">
         <div className="relative mb-3 aspect-[3/4] overflow-hidden bg-[#FAFCF9] w-full transition-opacity hover:opacity-90">
           {hasImage ? (
             <>
@@ -86,7 +69,7 @@ export default function ProductCard({ product, adminMode, onEdit, onDelete, onVi
             ))}
           </div>
         </div>
-      </div>
+      </Link>
 
       {adminMode && (onEdit || onDelete) && (
         <div className="mt-4 flex flex-wrap gap-2 px-4 pb-4">
@@ -95,7 +78,6 @@ export default function ProductCard({ product, adminMode, onEdit, onDelete, onVi
               type="button"
               onClick={(event) => {
                 event.preventDefault()
-                event.stopPropagation()
                 onEdit(product)
               }}
               className="inline-flex items-center justify-center rounded-full border border-[#3E9A60] bg-[#EAF8EC] px-3 py-2 text-xs font-semibold text-[#1F6B3C] transition hover:bg-[#D7F5D8]"
@@ -108,7 +90,6 @@ export default function ProductCard({ product, adminMode, onEdit, onDelete, onVi
               type="button"
               onClick={(event) => {
                 event.preventDefault()
-                event.stopPropagation()
                 onDelete(product)
               }}
               className="inline-flex items-center justify-center rounded-full border border-[#B12A1B] bg-[#FCE8E7] px-3 py-2 text-xs font-semibold text-[#9C1F1F] transition hover:bg-[#F9D7D4]"
