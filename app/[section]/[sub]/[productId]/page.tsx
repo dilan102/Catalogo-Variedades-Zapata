@@ -86,9 +86,11 @@ export default function ProductPage() {
     const message = messageLines.join('\n')
     const imageUrl = selectedImage || images[0]
 
-    if (typeof navigator !== 'undefined' && navigator.share && navigator.canShare) {
-      try {
-        if (imageUrl) {
+    if (typeof window !== 'undefined') {
+      const targetUrl = `https://wa.me/573054110472?text=${encodeURIComponent(message)}`
+
+      if (imageUrl && typeof navigator !== 'undefined' && navigator.share && navigator.canShare) {
+        try {
           const response = await fetch(imageUrl)
           const blob = await response.blob()
           const extensionMatch = imageUrl.match(/\.([a-zA-Z0-9]+)(?:\?.*)?$/)
@@ -100,13 +102,13 @@ export default function ProductPage() {
             await navigator.share({ files: [file], text: message })
             return
           }
+        } catch {
+          // fallback to direct WhatsApp message
         }
-      } catch (error) {
-        // Fallback to URL share if file share fails.
       }
-    }
 
-    window.open(whatsappHref, '_blank', 'noopener')
+      window.open(targetUrl, '_blank', 'noopener')
+    }
   }
 
   if (loading) return <div className="px-4 py-10 text-center text-stone-400 text-sm">Cargando...</div>
@@ -217,9 +219,6 @@ export default function ProductPage() {
               >
                 ¿Quieres Este Producto?
               </button>
-              <p className="mt-3 text-sm leading-6 text-[#5C7A66]">
-                Se intentará enviar la foto del producto junto con este texto: Hola, quisiera más información acerca de este producto{product?.colors?.length ? `, color ${product.colors[0]}` : ''}{product?.sizes?.length ? `, talla ${product.sizes.slice(0, 4).join(', ')}` : ''}{product?.description ? `, modelo ${product.description}` : ''}.
-              </p>
             </div>
           </div>
         </div>
