@@ -75,6 +75,7 @@ export default function ProductPage() {
 
   const shareProduct = async () => {
     if (!product) return
+
     const messageLines = [
       `Hola, quisiera mas información acerca de este producto: ${product.name}`,
     ]
@@ -86,29 +87,33 @@ export default function ProductPage() {
     const message = messageLines.join('\n')
     const imageUrl = selectedImage || images[0]
 
-    if (typeof window !== 'undefined') {
-      const targetUrl = `https://wa.me/573054110472?text=${encodeURIComponent(message)}`
+    if (typeof window === 'undefined') return
 
+    const apiWhatsAppUrl = `https://api.whatsapp.com/send?phone=573054110472&text=${encodeURIComponent(message)}`
+    const waMeUrl = `https://wa.me/573054110472?text=${encodeURIComponent(message)}`
+
+    try {
       if (imageUrl && typeof navigator !== 'undefined' && navigator.share && navigator.canShare) {
-        try {
-          const response = await fetch(imageUrl)
-          const blob = await response.blob()
-          const extensionMatch = imageUrl.match(/\.([a-zA-Z0-9]+)(?:\?.*)?$/)
-          const extension = extensionMatch ? extensionMatch[1].toLowerCase().replace('jpeg', 'jpg') : 'jpg'
-          const fileName = `${product.name.replace(/[^\w\d]+/g, '_')}.${extension}`
-          const file = new File([blob], fileName, { type: blob.type || `image/${extension}` })
+        const response = await fetch(imageUrl)
+        const blob = await response.blob()
+        const extensionMatch = imageUrl.match(/\.([a-zA-Z0-9]+)(?:\?.*)?$/)
+        const extension = extensionMatch ? extensionMatch[1].toLowerCase().replace('jpeg', 'jpg') : 'jpg'
+        const fileName = `${product.name.replace(/[^\w\d]+/g, '_')}.${extension}`
+        const file = new File([blob], fileName, { type: blob.type || `image/${extension}` })
 
-          if (navigator.canShare({ files: [file] })) {
-            await navigator.share({ files: [file], text: message })
-            return
-          }
-        } catch {
-          // fallback to direct WhatsApp message
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], text: message })
+          return
         }
       }
-
-      window.open(targetUrl, '_blank', 'noopener')
+    } catch {
+      // ignored, fallback to direct WhatsApp open
     }
+
+    window.location.href = apiWhatsAppUrl
+    window.setTimeout(() => {
+      window.open(waMeUrl, '_blank', 'noopener,noreferrer')
+    }, 150)
   }
 
   if (loading) return <div className="px-4 py-10 text-center text-stone-400 text-sm">Cargando...</div>
