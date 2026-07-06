@@ -37,6 +37,10 @@ export default function ProductPage() {
   const images = useMemo(() => product?.images ?? [], [product])
   const selectedImage = images[selectedImageIndex] ?? null
   const showImageNavigation = images.length > 1
+  const whatsappNumber = '573054110472'
+  const whatsappImageUrl = images[0] ?? ''
+  const whatsappMessage = `Hola, quisiera mas informacion acerca de este producto: ${product?.name ?? ''}${whatsappImageUrl ? `\nImagen: ${whatsappImageUrl}` : ''}`
+  const whatsappHref = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`
 
   useEffect(() => {
     if (!images.length) return
@@ -167,6 +171,16 @@ export default function ProductPage() {
               {product.sizes.slice(0, 4).map((size) => (
                 <span key={size} className="rounded-full border border-[#DCEFDD] bg-white px-2 py-1 text-[10px] text-[#0F2A1A]">{size}</span>
               ))}
+            </div>
+            <div className="mt-5">
+              <a
+                href={whatsappHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex w-full items-center justify-center rounded-3xl bg-[#3E9A60] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#34784c] focus:outline-none focus:ring-2 focus:ring-[#3E9A60]/40"
+              >
+                Hola, quisiera mas informacion acerca de este producto
+              </a>
             </div>
           </div>
         </div>
