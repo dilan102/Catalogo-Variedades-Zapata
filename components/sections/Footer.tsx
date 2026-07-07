@@ -12,10 +12,6 @@ export default function Footer() {
   const emailUrl = `mailto:${emailAddress}`
   const facebookUrl = '#'
 
-  const handleAdminAccess = () => {
-    setShowAdminModal(true)
-  }
-
   const handleModalClose = () => {
     setShowAdminModal(false)
   }
@@ -71,12 +67,6 @@ export default function Footer() {
                   <span>Facebook</span>
                 </a>
               </div>
-              <button 
-                onClick={handleAdminAccess}
-                className="block text-sm text-white/60 hover:text-white transition-colors cursor-pointer text-right w-full mt-4"
-              >
-                Acceso interno
-              </button>
             </div>
           </div>
 

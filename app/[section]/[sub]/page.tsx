@@ -9,6 +9,11 @@ import { ProductCardSkeleton } from '@/components/ui/Skeletons'
 import { parseJsonResponse } from '@/lib/utils'
 import type { Subsection, Product } from '@/types'
 
+type EditingImageEntry = {
+  url: string
+  replacementFile: File | null
+}
+
 export default function SubsectionPage({ params }: { params: Promise<{ section: string; sub: string }> }) {
   const [sectionSlug, setSectionSlug] = useState<string>('')
   const [subSlug, setSubSlug] = useState<string>('')
@@ -27,7 +32,9 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
   const [primaryPreview, setPrimaryPreview] = useState('')
   const [otherPreviews, setOtherPreviews] = useState<string[]>([])
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
+  const [editingImageEntries, setEditingImageEntries] = useState<EditingImageEntry[]>([])
   const [selectedProductForGallery, setSelectedProductForGallery] = useState<Product | null>(null)
+  const formSectionRef = useRef<HTMLElement | null>(null)
   const [formState, setFormState] = useState({
     name: '',
     description: '',
@@ -123,6 +130,7 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
 
   const resetForm = () => {
     setEditingProduct(null)
+    setEditingImageEntries([])
     setFormState({
       name: '',
       description: '',
@@ -140,12 +148,19 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
     setSuccessMessage('')
   }
 
+  const scrollToForm = () => {
+    window.setTimeout(() => {
+      formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 120)
+  }
+
   const handleEditProduct = (product: Product) => {
     setEditingProduct(product)
+    setEditingImageEntries((product.images ?? []).map((url) => ({ url, replacementFile: null })))
     setFormState({
       name: product.name,
       description: product.description ?? '',
-      sizes: product.sizes ?? [] ,
+      sizes: product.sizes ?? [],
       colors: product.colors.join(', '),
       is_active: product.is_active,
       is_featured: product.is_featured,
@@ -158,6 +173,7 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
     setErrorMessage('')
     setSuccessMessage('')
     setShowForm(true)
+    scrollToForm()
   }
 
   const handleDeleteProduct = async (product: Product) => {
@@ -223,16 +239,26 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
       .map((value) => value.trim())
       .filter(Boolean)
 
-    let images = editingProduct?.images ?? []
-    const hasNewImages = Boolean(primaryImageFile) || otherImageFiles.length > 0
+    const additionalUploadFiles = [
+      ...(primaryImageFile ? [primaryImageFile] : []),
+      ...otherImageFiles,
+    ]
+    const replacementFiles = editingImageEntries
+      .filter((entry) => Boolean(entry.replacementFile))
+      .map((entry) => entry.replacementFile as File)
+    const hasNewImages = additionalUploadFiles.length > 0 || replacementFiles.length > 0
 
     if (!editingProduct && !primaryImageFile) {
       setErrorMessage('La foto principal es obligatoria.')
+      savingProductRef.current = false
+      setIsSavingProduct(false)
       return
     }
 
-    if (hasNewImages && !primaryImageFile) {
-      setErrorMessage('La foto principal es obligatoria cuando subes nuevas imágenes.')
+    if (editingProduct && editingImageEntries.length === 0 && additionalUploadFiles.length === 0 && replacementFiles.length === 0) {
+      setErrorMessage('El producto debe tener al menos una imagen.')
+      savingProductRef.current = false
+      setIsSavingProduct(false)
       return
     }
 
@@ -242,55 +268,59 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
       setLoading(true)
       setIsUploadingImages(hasNewImages)
 
-      if (hasNewImages) {
-        const uploadFiles = [
-          ...(primaryImageFile ? [primaryImageFile] : []),
-          ...otherImageFiles,
-        ]
+      const uploadImageFile = async (file: File) => {
+        const uploadResponse = await fetch('/api/admin/upload-product-images', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sectionSlug,
+            fileName: file.name,
+            contentType: file.type || 'application/octet-stream',
+          }),
+        })
 
-        const uploadedUrls: string[] = []
+        const uploadResult = await parseJsonResponse<{
+          success: boolean
+          message?: string
+          signedUrl?: string
+          publicUrl?: string
+        }>(uploadResponse)
 
-        for (const file of uploadFiles) {
-          const uploadResponse = await fetch('/api/admin/upload-product-images', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              sectionSlug,
-              fileName: file.name,
-              contentType: file.type || 'application/octet-stream',
-            }),
-          })
-
-          const uploadResult = await parseJsonResponse<{
-            success: boolean
-            message?: string
-            signedUrl?: string
-            publicUrl?: string
-          }>(uploadResponse)
-
-          if (!uploadResponse.ok || !uploadResult.success || !uploadResult.signedUrl || !uploadResult.publicUrl) {
-            console.error('Error preparando subida de imagen:', uploadResult)
-            setErrorMessage(uploadResult?.message || 'Error subiendo las imágenes.')
-            return
-          }
-
-          const directUploadResponse = await fetch(uploadResult.signedUrl, {
-            method: 'PUT',
-            headers: { 'Content-Type': file.type || 'application/octet-stream' },
-            body: file,
-          })
-
-          if (!directUploadResponse.ok) {
-            const directUploadText = await directUploadResponse.text().catch(() => '')
-            console.error('Error subiendo imagen a Supabase:', directUploadText)
-            setErrorMessage('No se pudo cargar una de las imágenes.')
-            return
-          }
-
-          uploadedUrls.push(uploadResult.publicUrl)
+        if (!uploadResponse.ok || !uploadResult.success || !uploadResult.signedUrl || !uploadResult.publicUrl) {
+          console.error('Error preparando subida de imagen:', uploadResult)
+          throw new Error(uploadResult?.message || 'Error subiendo las imágenes.')
         }
 
-        images = uploadedUrls
+        const directUploadResponse = await fetch(uploadResult.signedUrl, {
+          method: 'PUT',
+          headers: { 'Content-Type': file.type || 'application/octet-stream' },
+          body: file,
+        })
+
+        if (!directUploadResponse.ok) {
+          const directUploadText = await directUploadResponse.text().catch(() => '')
+          console.error('Error subiendo imagen a Supabase:', directUploadText)
+          throw new Error('No se pudo cargar una de las imágenes.')
+        }
+
+        return uploadResult.publicUrl
+      }
+
+      let images: string[] = []
+
+      if (editingProduct) {
+        for (const entry of editingImageEntries) {
+          if (entry.replacementFile) {
+            images.push(await uploadImageFile(entry.replacementFile))
+          } else if (entry.url) {
+            images.push(entry.url)
+          }
+        }
+      }
+
+      if (additionalUploadFiles.length > 0) {
+        const uploadedUrls = await Promise.all(additionalUploadFiles.map((file) => uploadImageFile(file)))
+        images = [...images, ...uploadedUrls]
       }
 
       const saveResponse = await fetch('/api/admin/save-product', {
@@ -367,7 +397,7 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
       </div>
 
       {adminMode && showForm && (
-        <section className="mb-8 rounded-3xl border border-[#D6E7D9] bg-white p-6 shadow-sm">
+        <section ref={formSectionRef} className="mb-8 rounded-3xl border border-[#D6E7D9] bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-[#0F2A1A] mb-4">{editingProduct ? 'Editar producto' : 'Agregar producto'} a {subsection?.name}</h2>
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid gap-4 lg:grid-cols-2">
@@ -394,52 +424,119 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
               />
             </label>
 
-            <div className="grid gap-4 lg:grid-cols-2">
-              <label className="block">
-                <span className="text-sm font-medium text-[#0F2A1A]">Foto principal</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(event) => {
-                    const file = event.target.files?.[0] ?? null
-                    setPrimaryImageFile(file)
-                    setPrimaryPreview(file ? URL.createObjectURL(file) : '')
-                  }}
-                  {...(!editingProduct ? { required: true } : {})}
-                  className="mt-2 w-full rounded-2xl border border-[#E4E8E3] bg-[#FBFDF8] px-4 py-3 text-sm text-[#10221E] outline-none transition focus:border-[#3E9A60] focus:ring-2 focus:ring-[#D7F0DA]"
-                />
-                {editingProduct && (
-                  <p className="mt-2 text-xs text-[#5C7A66]">Deja este campo vacío para conservar las imágenes actuales.</p>
-                )}
-                {primaryPreview && (
-                  <div className="mt-3 rounded-3xl overflow-hidden border border-[#E4E8E3] bg-[#F7F9F6]">
-                    <img src={primaryPreview} alt="Preview foto principal" className="w-full h-52 object-cover" />
-                  </div>
-                )}
-              </label>
-              <label className="block">
-                <span className="text-sm font-medium text-[#0F2A1A]">Fotos de otros colores/estilos</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={(event) => {
-                    const files = Array.from(event.target.files ?? [])
-                    setOtherImageFiles(files)
-                    setOtherPreviews(files.map((file) => URL.createObjectURL(file)))
-                  }}
-                  className="mt-2 w-full rounded-2xl border border-[#E4E8E3] bg-[#FBFDF8] px-4 py-3 text-sm text-[#10221E] outline-none transition focus:border-[#3E9A60] focus:ring-2 focus:ring-[#D7F0DA]"
-                />
-                {otherPreviews.length > 0 && (
-                  <div className="mt-3 grid grid-cols-2 gap-2">
-                    {otherPreviews.map((preview, index) => (
-                      <div key={preview} className="overflow-hidden rounded-3xl border border-[#E4E8E3] bg-[#F7F9F6]">
-                        <img src={preview} alt={`Preview adicional ${index + 1}`} className="w-full h-28 object-cover" />
+            {editingProduct && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-medium text-[#0F2A1A]">Imágenes actuales</span>
+                  <span className="text-xs text-[#5C7A66]">Puedes cambiar o eliminar cada foto individualmente</span>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  {editingImageEntries.map((entry, index) => (
+                    <div key={`${entry.url}-${index}`} className="overflow-hidden rounded-3xl border border-[#E4E8E3] bg-[#F7F9F6]">
+                      <div className="relative aspect-square overflow-hidden bg-[#FAFCF9]">
+                        <img src={entry.url} alt={`${formState.name} imagen ${index + 1}`} className="h-full w-full object-cover" />
                       </div>
-                    ))}
-                  </div>
-                )}
-              </label>
+                      <div className="flex flex-wrap gap-2 p-3">
+                        <label className="inline-flex cursor-pointer items-center rounded-full border border-[#3E9A60] bg-white px-3 py-2 text-xs font-semibold text-[#1F6B3C] transition hover:bg-[#EAF8EC]">
+                          Cambiar
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(event) => {
+                              const file = event.target.files?.[0] ?? null
+                              setEditingImageEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, replacementFile: file } : item))
+                            }}
+                          />
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingImageEntries((current) => current.filter((_, itemIndex) => itemIndex !== index))
+                          }}
+                          className="inline-flex items-center rounded-full border border-[#B12A1B] bg-[#FCE8E7] px-3 py-2 text-xs font-semibold text-[#9C1F1F] transition hover:bg-[#F9D7D4]"
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="grid gap-4 lg:grid-cols-2">
+              {!editingProduct ? (
+                <>
+                  <label className="block">
+                    <span className="text-sm font-medium text-[#0F2A1A]">Foto principal</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(event) => {
+                        const file = event.target.files?.[0] ?? null
+                        setPrimaryImageFile(file)
+                        setPrimaryPreview(file ? URL.createObjectURL(file) : '')
+                      }}
+                      required
+                      className="mt-2 w-full rounded-2xl border border-[#E4E8E3] bg-[#FBFDF8] px-4 py-3 text-sm text-[#10221E] outline-none transition focus:border-[#3E9A60] focus:ring-2 focus:ring-[#D7F0DA]"
+                    />
+                    {primaryPreview && (
+                      <div className="mt-3 rounded-3xl overflow-hidden border border-[#E4E8E3] bg-[#F7F9F6]">
+                        <img src={primaryPreview} alt="Preview foto principal" className="w-full h-52 object-cover" />
+                      </div>
+                    )}
+                  </label>
+                  <label className="block">
+                    <span className="text-sm font-medium text-[#0F2A1A]">Fotos de otros colores/estilos</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(event) => {
+                        const files = Array.from(event.target.files ?? [])
+                        setOtherImageFiles(files)
+                        setOtherPreviews(files.map((file) => URL.createObjectURL(file)))
+                      }}
+                      className="mt-2 w-full rounded-2xl border border-[#E4E8E3] bg-[#FBFDF8] px-4 py-3 text-sm text-[#10221E] outline-none transition focus:border-[#3E9A60] focus:ring-2 focus:ring-[#D7F0DA]"
+                    />
+                    {otherPreviews.length > 0 && (
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        {otherPreviews.map((preview, index) => (
+                          <div key={preview} className="overflow-hidden rounded-3xl border border-[#E4E8E3] bg-[#F7F9F6]">
+                            <img src={preview} alt={`Preview adicional ${index + 1}`} className="w-full h-28 object-cover" />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </label>
+                </>
+              ) : (
+                <label className="block lg:col-span-2">
+                  <span className="text-sm font-medium text-[#0F2A1A]">Agregar nuevas fotos</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={(event) => {
+                      const files = Array.from(event.target.files ?? [])
+                      setOtherImageFiles(files)
+                      setOtherPreviews(files.map((file) => URL.createObjectURL(file)))
+                    }}
+                    className="mt-2 w-full rounded-2xl border border-[#E4E8E3] bg-[#FBFDF8] px-4 py-3 text-sm text-[#10221E] outline-none transition focus:border-[#3E9A60] focus:ring-2 focus:ring-[#D7F0DA]"
+                  />
+                  <p className="mt-2 text-xs text-[#5C7A66]">Estas imágenes se añadirán como fotos nuevas del producto.</p>
+                  {otherPreviews.length > 0 && (
+                    <div className="mt-3 grid grid-cols-2 gap-2">
+                      {otherPreviews.map((preview, index) => (
+                        <div key={preview} className="overflow-hidden rounded-3xl border border-[#E4E8E3] bg-[#F7F9F6]">
+                          <img src={preview} alt={`Preview adicional ${index + 1}`} className="w-full h-28 object-cover" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </label>
+              )}
             </div>
 
             {isUploadingImages && (
@@ -477,15 +574,6 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
                     className="h-4 w-4 rounded border-[#BCCFBC] text-[#3E9A60] focus:ring-[#3E9A60]"
                   />
                   Producto activo
-                </label>
-                <label className="inline-flex items-center gap-2 text-sm text-[#0F2A1A]">
-                  <input
-                    type="checkbox"
-                    checked={formState.is_featured}
-                    onChange={(event) => setFormState({ ...formState, is_featured: event.target.checked })}
-                    className="h-4 w-4 rounded border-[#BCCFBC] text-[#3E9A60] focus:ring-[#3E9A60]"
-                  />
-                  Destacado
                 </label>
               </div>
               <button

@@ -20,6 +20,8 @@ const imagesBySlug: Record<string, Record<string, string>> = {
     conjuntos: '/conjunto_dama.jpeg',
     faldas: '/faldas_dama.jpeg',
     pijama: '/pijama_dama.jpeg',
+      
+    body: '/blusa_dama.jpeg',
   },
   caballero: {
     pantalones: '/pantalon_caballero.jpeg',
@@ -55,7 +57,7 @@ const imagesBySlug: Record<string, Record<string, string>> = {
     'ropa-interior': '/ropa_interior_niña.jpeg',
     medias: '/medias_niña.jpeg',
     zapatos: '/zapatos_niña.jpeg',
-    conjuntos: '/conjunto_dama.jpeg',
+    conjuntos: '/conjunto_niña.jpeg',
   },
   nino: {
     pantalones: '/pantalon_niño.avif',
@@ -65,11 +67,11 @@ const imagesBySlug: Record<string, Record<string, string>> = {
     chaquetas: '/chaqueta_niño.jpeg',
     medias: '/medias_niño.jpeg',
     'ropa-interior': '/ropa_interior_niño.png',
-    conjuntos: '/conjunto_dama.jpeg',
+    conjuntos: '/conjunto_niño.jpeg',
   },
   accesorios: {
     gafas: '/gafas_accesorios.jpeg',
-    relojeria: '/joyeria_accesorio.jpeg',
+    relojeria: '/reloj_accesorio.jpeg',
     joyeria: '/joyeria_accesorio.jpeg',
     tecnologia: '/tecnologia_accesorios.png',
   },
@@ -79,6 +81,7 @@ const imagesBySlug: Record<string, Record<string, string>> = {
     cobijas: '/cobijas_edredones.jpeg',
     cubrelechos: '/cubrelecho_edredones.png',
     fundas: '/fundas_edredones.png',
+    cortinas: '/cobijas_edredones.jpeg',
   },
 }
 
