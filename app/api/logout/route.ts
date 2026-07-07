@@ -1,14 +1,12 @@
 import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
+import { getAdminSession } from '@/lib/session'
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
-    const cookieStore = await cookies()
-    
-    // Eliminar la cookie de sesión
-    cookieStore.delete('admin-session')
-
-    return NextResponse.json({ success: true, message: 'Logout exitoso' })
+    const response = NextResponse.json({ success: true, message: 'Logout exitoso' })
+    const session = await getAdminSession(request, response)
+    await session.destroy()
+    return response
   } catch (error) {
     console.error('Error en logout:', error)
     return NextResponse.json({ success: false, message: 'Error del servidor' }, { status: 500 })

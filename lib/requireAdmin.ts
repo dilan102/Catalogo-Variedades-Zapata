@@ -1,9 +1,21 @@
-import { cookies } from 'next/headers'
+import { getAdminSession } from '@/lib/session'
 
-// TODO: persist and invalidate admin sessions in a dedicated table for stronger control.
-export async function requireAdminSession() {
-  const cookieStore = await cookies()
-  const sessionCookie = cookieStore.get('admin-session')
+export async function requireAdminSession(request: Request) {
+  try {
+    const response = new Response()
+    const session = await getAdminSession(request, response)
+    const admin = session.admin
 
-  return Boolean(sessionCookie?.value)
+    if (!admin?.isAdmin || !admin.createdAt) {
+      return false
+    }
+
+    const sessionAgeMs = Date.now() - admin.createdAt
+    const maxAgeMs = 7 * 24 * 60 * 60 * 1000
+
+    return sessionAgeMs <= maxAgeMs
+  } catch (error) {
+    console.error('Error verificando sesión admin:', error)
+    return false
+  }
 }

@@ -40,35 +40,7 @@ export async function getSectionBySlug(slug: string): Promise<Section | null> {
       console.error('Supabase error loading subsections:', subsectionsError)
     }
 
-    const defaultSubsections = categoriesWithSubsections[section.name] ?? []
-    const existingSubsectionNames = new Set((subsections ?? []).map((subsection) => subsection.name.toLowerCase()))
-    const missingSubsections = defaultSubsections.filter((subsectionName) => !existingSubsectionNames.has(subsectionName.toLowerCase()))
-
-    let createdSubsections: Subsection[] = []
-    if (missingSubsections.length > 0) {
-      const insertPayload = missingSubsections.map((subsectionName, index) => ({
-        section_id: section.id,
-        name: subsectionName,
-        slug: slugify(subsectionName),
-        description: `${subsectionName} de ${section.name}`,
-        order: defaultSubsections.indexOf(subsectionName) + index,
-        is_active: true
-      }))
-
-      const { data: insertedSubsections, error: insertError } = await supabase
-        .from('subsections')
-        .insert(insertPayload)
-        .select('*')
-
-      if (insertError) {
-        console.error('Supabase error inserting missing subsections:', insertError)
-      } else {
-        createdSubsections = insertedSubsections ?? []
-      }
-    }
-
-    const mergedSubsections = [...(subsections ?? []), ...createdSubsections]
-    const sectionWithSubsections = { ...section, subsections: mergedSubsections.sort((a, b) => a.order - b.order) }
+    const sectionWithSubsections = { ...section, subsections: subsections ?? [] }
     return sectionWithSubsections
   } catch (error) {
     console.error('Error in getSectionBySlug:', error)
@@ -174,12 +146,21 @@ export async function deleteSubsection(id: string): Promise<void> {
   }
 }
 
-export async function getProductsBySubsection(subsectionId: string): Promise<Product[]> {
+export async function getProductsBySubsection(subsectionId: string, page = 0, pageSize = 24): Promise<{ products: Product[]; count: number }> {
   try {
     const supabase = createClient()
-    const { data, error } = await supabase.from('products').select('*').eq('subsection_id', subsectionId).eq('is_active', true).order('order')
+    const from = page * pageSize
+    const to = page * pageSize + pageSize - 1
+    const { data, error, count } = await supabase
+      .from('products')
+      .select('*', { count: 'exact' })
+      .eq('subsection_id', subsectionId)
+      .eq('is_active', true)
+      .order('order')
+      .range(from, to)
+
     if (error) throw new Error(`Error al cargar productos: ${error.message}`)
-    return data ?? []
+    return { products: data ?? [], count: count ?? 0 }
   } catch (error) {
     console.error('Error in getProductsBySubsection:', error)
     throw error

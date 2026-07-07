@@ -7,7 +7,7 @@ const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 const bucketName = 'product-images'
 
 export async function POST(request: Request) {
-  if (!await requireAdminSession()) {
+  if (!await requireAdminSession(request)) {
     return NextResponse.json({ success: false, message: 'No autorizado' }, { status: 401 })
   }
 

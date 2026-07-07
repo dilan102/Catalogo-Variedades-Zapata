@@ -28,7 +28,7 @@ async function ensureBucketExists(supabase: any) {
 }
 
 export async function POST(request: Request) {
-  if (!await requireAdminSession()) {
+  if (!await requireAdminSession(request)) {
     return NextResponse.json({ success: false, message: 'No autorizado' }, { status: 401 })
   }
 

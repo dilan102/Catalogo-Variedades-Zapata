@@ -19,11 +19,15 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
   const [subSlug, setSubSlug] = useState<string>('')
   const [subsection, setSubsection] = useState<Subsection | null>(null)
   const [products, setProducts] = useState<Product[]>([])
+  const [totalProducts, setTotalProducts] = useState(0)
+  const [currentPage, setCurrentPage] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
   const [adminMode, setAdminMode] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
+  const [compressionSummary, setCompressionSummary] = useState('')
   const [isUploadingImages, setIsUploadingImages] = useState(false)
   const [isSavingProduct, setIsSavingProduct] = useState(false)
   const savingProductRef = useRef(false)
@@ -52,6 +56,60 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
     return url.substring(index + marker.length)
   }
 
+  const compressImageFile = async (file: File): Promise<File> => {
+    if (!file.type.startsWith('image/')) return file
+
+    const imageBitmap = await createImageBitmap(file)
+    const maxSide = 1600
+    const ratio = Math.min(1, maxSide / Math.max(imageBitmap.width, imageBitmap.height))
+    const width = Math.round(imageBitmap.width * ratio)
+    const height = Math.round(imageBitmap.height * ratio)
+
+    const canvas = document.createElement('canvas')
+    canvas.width = width
+    canvas.height = height
+    const context = canvas.getContext('2d')
+    if (!context) return file
+
+    context.drawImage(imageBitmap, 0, 0, width, height)
+
+    const compressedBlob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob(resolve, 'image/jpeg', 0.82)
+    })
+
+    if (!compressedBlob) return file
+
+    const compressedFile = new File([
+      compressedBlob,
+    ], file.name.replace(/\.[^.]+$/, '.jpg'), {
+      type: 'image/jpeg',
+    })
+
+    const originalKB = (file.size / 1024).toFixed(1)
+    const compressedKB = (compressedFile.size / 1024).toFixed(1)
+    setCompressionSummary((current) =>
+      `${current}• ${file.name}: ${originalKB}KB → ${compressedKB}KB\n`
+    )
+
+    return compressedFile
+  }
+
+  const loadMoreProducts = async () => {
+    if (!subsection) return
+    setIsLoadingMore(true)
+
+    try {
+      const nextPage = currentPage + 1
+      const { products: nextProducts } = await getProductsBySubsection(subsection.id, nextPage)
+      setProducts((current) => [...current, ...nextProducts])
+      setCurrentPage(nextPage)
+    } catch (error) {
+      console.error('Error cargando más productos:', error)
+    } finally {
+      setIsLoadingMore(false)
+    }
+  }
+
   useEffect(() => {
     params.then((resolved) => {
       setSectionSlug(resolved.section)
@@ -75,9 +133,11 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
 
         setSubsection(sub)
         if (sub) {
-          const prods = await getProductsBySubsection(sub.id)
+          const { products: prods, count } = await getProductsBySubsection(sub.id)
           if (!cancelled) {
             setProducts(prods)
+            setTotalProducts(count)
+            setCurrentPage(0)
           }
         }
       } finally {
@@ -265,17 +325,20 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
     try {
       setErrorMessage('')
       setSuccessMessage('')
+      setCompressionSummary('')
       setLoading(true)
       setIsUploadingImages(hasNewImages)
 
       const uploadImageFile = async (file: File) => {
+        const compressedFile = await compressImageFile(file)
+
         const uploadResponse = await fetch('/api/admin/upload-product-images', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             sectionSlug,
-            fileName: file.name,
-            contentType: file.type || 'application/octet-stream',
+            fileName: compressedFile.name,
+            contentType: compressedFile.type || 'application/octet-stream',
           }),
         })
 
@@ -293,8 +356,8 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
 
         const directUploadResponse = await fetch(uploadResult.signedUrl, {
           method: 'PUT',
-          headers: { 'Content-Type': file.type || 'application/octet-stream' },
-          body: file,
+          headers: { 'Content-Type': compressedFile.type || 'application/octet-stream' },
+          body: compressedFile,
         })
 
         if (!directUploadResponse.ok) {
@@ -348,8 +411,10 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
         return
       }
 
-      const refreshedProducts = await getProductsBySubsection(subsection.id)
-      setProducts(refreshedProducts)
+      const refreshed = await getProductsBySubsection(subsection.id)
+      setProducts(refreshed.products)
+      setTotalProducts(refreshed.count)
+      setCurrentPage(0)
       setShowForm(false)
       resetForm()
     } catch (error) {
@@ -543,6 +608,12 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
               <p className="text-sm text-[#3E9A60]">Subiendo imagen...</p>
             )}
 
+            {compressionSummary && (
+              <pre className="mt-2 rounded-3xl bg-[#F7F9F6] p-3 text-xs text-[#5C7A66] whitespace-pre-wrap">
+                {compressionSummary}
+              </pre>
+            )}
+
             <div className="grid gap-4 lg:grid-cols-[1fr_auto]">
               {availableSizes.length > 0 && (
                 <div className="space-y-3">
@@ -617,6 +688,20 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
           onClose={() => setSelectedProductForGallery(null)}
         />
       )}
+
+      {!loading && products.length > 0 && products.length < totalProducts && (
+        <div className="mt-8 flex justify-center">
+          <button
+            type="button"
+            onClick={loadMoreProducts}
+            disabled={isLoadingMore}
+            className="inline-flex items-center justify-center rounded-full bg-[#3E9A60] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#2F7A53] disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            {isLoadingMore ? 'Cargando más...' : 'Cargar más productos'}
+          </button>
+        </div>
+      )}
+
       {!loading && products.length === 0 && (
         <p className="text-center py-24 text-[#5C7A66] text-base animate-fade-in">No hay productos aún.</p>
       )}

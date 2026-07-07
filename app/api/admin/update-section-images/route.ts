@@ -12,9 +12,9 @@ const sectionImages = {
   esika: '/Esika.png',
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const isAuthenticated = await requireAdminSession()
+    const isAuthenticated = await requireAdminSession(request)
 
     if (!isAuthenticated) {
       return NextResponse.json({ success: false, message: 'No autorizado' }, { status: 401 })
@@ -34,9 +34,9 @@ export async function GET() {
   }
 }
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
-    const isAuthenticated = await requireAdminSession()
+    const isAuthenticated = await requireAdminSession(request)
 
     if (!isAuthenticated) {
       return NextResponse.json({ success: false, message: 'No autorizado' }, { status: 401 })

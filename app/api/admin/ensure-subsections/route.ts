@@ -1,11 +1,16 @@
 import { NextResponse } from 'next/server'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { categoriesWithSubsections, slugify } from '@/lib/init-categories'
+import { requireAdminSession } from '@/lib/requireAdmin'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 export async function POST(req: Request) {
+  if (!await requireAdminSession(req)) {
+    return NextResponse.json({ success: false, message: 'No autorizado' }, { status: 401 })
+  }
+
   if (!supabaseUrl || !supabaseServiceRoleKey) {
     return NextResponse.json(
       { success: false, message: 'Falta configurar SUPABASE_SERVICE_ROLE_KEY' },

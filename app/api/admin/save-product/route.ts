@@ -7,7 +7,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 export async function POST(request: Request) {
-  if (!await requireAdminSession()) {
+  if (!await requireAdminSession(request)) {
     return NextResponse.json({ success: false, message: 'No autorizado' }, { status: 401 })
   }
 

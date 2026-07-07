@@ -11,9 +11,9 @@ function toSlug(value: string) {
     .replace(/[^a-z0-9]/g, '-')
 }
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
-    const isAuthenticated = await requireAdminSession()
+    const isAuthenticated = await requireAdminSession(request)
 
     if (!isAuthenticated) {
       return NextResponse.json({ success: false, message: 'No autorizado' }, { status: 401 })
