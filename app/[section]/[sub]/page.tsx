@@ -497,7 +497,7 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                   {editingImageEntries.map((entry, index) => (
-                    <div key={`${entry.url}-${index}`} className="overflow-hidden rounded-3xl border border-[#E4E8E3] bg-[#F7F9F6]">
+                    <div key={`${entry.url}-${index}`} className="overflow-hidden rounded-3xl border border-[#E4E8E3] bg-[#F7F9F6] max-w-[46vw] sm:max-w-[240px] mx-auto">
                       <div className="relative aspect-square overflow-hidden bg-[#FAFCF9]">
                         <img src={entry.url} alt={`${formState.name} imagen ${index + 1}`} className="h-full w-full object-cover" />
                       </div>
