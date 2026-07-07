@@ -20,8 +20,7 @@ const imagesBySlug: Record<string, Record<string, string>> = {
     conjuntos: '/conjunto_dama.jpeg',
     faldas: '/faldas_dama.jpeg',
     pijama: '/pijama_dama.jpeg',
-      
-    body: '/blusa_dama.jpeg',
+    body: '/body_dama.jpeg',
   },
   caballero: {
     pantalones: '/pantalon_caballero.jpeg',
@@ -81,7 +80,7 @@ const imagesBySlug: Record<string, Record<string, string>> = {
     cobijas: '/cobijas_edredones.jpeg',
     cubrelechos: '/cubrelecho_edredones.png',
     fundas: '/fundas_edredones.png',
-    cortinas: '/cobijas_edredones.jpeg',
+    cortinas: '/cortinas_edredones.jpeg',
   },
 }
 

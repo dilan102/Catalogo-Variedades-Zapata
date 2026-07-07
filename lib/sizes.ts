@@ -16,7 +16,7 @@ export function getAvailableSizes(sectionSlug: string, subsectionSlug: string): 
   }
 
   if (sectionSlug === 'dama' && subsectionSlug === 'pantalones') {
-    return ['6', '8', '10', '12', '14', '16', 'S', 'M', 'L', 'Plus', 'Única']
+    return ['6', '8', '10', '12', '14', '16', '18', '20', '22', '24', '26', '28', 'S', 'M', 'L', 'Plus',  'Única']
   }
 
   if (sectionSlug === 'caballero' && subsectionSlug === 'pantalones') {
@@ -24,7 +24,7 @@ export function getAvailableSizes(sectionSlug: string, subsectionSlug: string): 
   }
 
   if (adultClothingSections.includes(sectionSlug)) {
-    return ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'Plus', 'Única']
+    return ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '16', '18', '20', '22', '24', '26', '28', 'Plus', 'Única']
   }
 
   if (kidClothingSections.includes(sectionSlug)) {
