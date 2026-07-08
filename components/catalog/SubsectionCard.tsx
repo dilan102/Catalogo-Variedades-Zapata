@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { useState, useMemo } from 'react'
 import type { Subsection } from '@/types'
 import ImagePlaceholder from '@/components/ui/ImagePlaceholder'
+import { Short_Stack } from 'next/font/google'
 
 const imagesBySlug: Record<string, Record<string, string>> = {
   dama: {
@@ -21,6 +22,7 @@ const imagesBySlug: Record<string, Record<string, string>> = {
     faldas: '/faldas_dama.jpeg',
     pijama: '/pijama_dama.jpeg',
     body: '/body_dama.jpeg',
+    shorts: '/Shorts_dama.jpeg',
   },
   caballero: {
     pantalones: '/pantalon_caballero.jpeg',
