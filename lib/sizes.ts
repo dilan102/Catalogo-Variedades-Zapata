@@ -19,6 +19,10 @@ export function getAvailableSizes(sectionSlug: string, subsectionSlug: string): 
     return ['6', '8', '10', '12', '14', '16', '18', '20', '22', '24', '26', '28', 'S', 'M', 'L', 'Plus',  'Única']
   }
 
+   if (sectionSlug === 'dama' && subsectionSlug === 'Shorts') {
+    return ['4', '6', '8', '10', '12', '14', '16', '18', '20', '22', '24', '26', '28', 'S', 'M', 'L', 'Plus',  'Única']
+  }
+
   if (sectionSlug === 'caballero' && subsectionSlug === 'pantalones') {
     return ['24', '26', '28', '30', '32', '34', '36', '38', 'Plus', 'Única']
   }
