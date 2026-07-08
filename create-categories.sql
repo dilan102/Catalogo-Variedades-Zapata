@@ -21,10 +21,10 @@ INSERT INTO subsections (id, section_id, name, slug, description, "order", is_ac
 SELECT 
   gen_random_uuid(), 
   (SELECT id FROM sections WHERE slug = 'dama'),
-  unnest(ARRAY['Pantalones', 'Camisas', 'Chaquetas', 'Sacos', 'Blusas', 'Vestidos', 'Ropa deportiva', 'Corsets', 'Ropa interior', 'Medias', 'Zapatos']),
-  unnest(ARRAY['pantalones', 'camisas', 'chaquetas', 'sacos', 'blusas', 'vestidos', 'ropa-deportiva', 'corsets', 'ropa-interior', 'medias', 'zapatos']),
-  unnest(ARRAY['Pantalones de dama', 'Camisas de dama', 'Chaquetas de dama', 'Sacos de dama', 'Blusas de dama', 'Vestidos de dama', 'Ropa deportiva de dama', 'Corsets de dama', 'Ropa interior de dama', 'Medias de dama', 'Zapatos de dama']),
-  generate_series(0, 10),
+  unnest(ARRAY['Pantalones', 'Shorts', 'Camisas', 'Chaquetas', 'Sacos', 'Blusas', 'Vestidos', 'Ropa deportiva', 'Corsets', 'Ropa interior', 'Medias', 'Zapatos']),
+  unnest(ARRAY['pantalones', 'shorts', 'camisas', 'chaquetas', 'sacos', 'blusas', 'vestidos', 'ropa-deportiva', 'corsets', 'ropa-interior', 'medias', 'zapatos']),
+  unnest(ARRAY['Pantalones de dama', 'Shorts de dama', 'Camisas de dama', 'Chaquetas de dama', 'Sacos de dama', 'Blusas de dama', 'Vestidos de dama', 'Ropa deportiva de dama', 'Corsets de dama', 'Ropa interior de dama', 'Medias de dama', 'Zapatos de dama']),
+  generate_series(0, 11),
   true,
   NOW();
 
