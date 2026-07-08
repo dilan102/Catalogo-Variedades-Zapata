@@ -25,7 +25,7 @@ export default function Contact() {
           </div>
           <div className="order-first md:order-last">
             <Image 
-              src="/dama_elegante2.png" 
+              src="/Dama_elegante2.jpeg" 
               alt="Variedades Zapata" 
               width={600} 
               height={400} 
