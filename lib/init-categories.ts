@@ -5,7 +5,7 @@ export const categoriesWithSubsections: Record<string, string[]> = {
   'Caballero': ['Pantalones', 'Pantalonetas', 'Camisas', 'Sacos', 'Chaquetas', 'Medias', 'Zapatos', 'Ropa interior', 'Ropa deportiva'],
   'Niño': ['Pantalones', 'Zapatos', 'Camisas', 'Sacos', 'Chaquetas', 'Medias', 'Ropa interior', 'Conjuntos'],
   'Niña': ['Pantalones', 'Camisas', 'Chaquetas', 'Sacos', 'Blusas', 'Zapatos', 'Vestidos', 'Ropa interior', 'Medias', 'Conjuntos'],
-  'Accesorios': ['Gafas', 'Relojería', 'Joyería', 'Tecnología'],
+  'Accesorios': ['Gafas', 'Relojería', 'Joyería', 'Tecnología', 'Bolsos'],
   'Edredones': ['Sábanas', 'Almohadas', 'Cobijas', 'Cubrelechos', 'Fundas', 'Cortinas'],
   'Esika': []
 }

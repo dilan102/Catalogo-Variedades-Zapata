@@ -81,10 +81,10 @@ INSERT INTO subsections (id, section_id, name, slug, description, "order", is_ac
 SELECT 
   gen_random_uuid(), 
   (SELECT id FROM sections WHERE slug = 'accesorios'),
-  unnest(ARRAY['Gafas', 'Relojería', 'Joyería', 'Tecnología']),
-  unnest(ARRAY['gafas', 'relojeria', 'joyeria', 'tecnologia']),
-  unnest(ARRAY['Gafas', 'Relojería', 'Joyería', 'Tecnología']),
-  generate_series(0, 3),
+  unnest(ARRAY['Gafas', 'Relojería', 'Joyería', 'Tecnología', 'Bolsos']),
+  unnest(ARRAY['gafas', 'relojeria', 'joyeria', 'tecnologia', 'bolsos']),
+  unnest(ARRAY['Gafas', 'Relojería', 'Joyería', 'Tecnología', 'Bolsos']),
+  generate_series(0, 4),
   true,
   NOW();
 
