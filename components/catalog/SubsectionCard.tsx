@@ -75,6 +75,7 @@ const imagesBySlug: Record<string, Record<string, string>> = {
     relojeria: '/reloj_accesorio.jpeg',
     joyeria: '/joyeria_accesorio.jpeg',
     tecnologia: '/tecnologia_accesorios.png',
+    bolsos: '/bolsos_accesorios.jpeg',
   },
   edredones: {
     sabanas: '/sabana_edredones.png',
