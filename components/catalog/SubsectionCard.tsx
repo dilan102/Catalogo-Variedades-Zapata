@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import type { Subsection } from '@/types'
 import ImagePlaceholder from '@/components/ui/ImagePlaceholder'
 import { Short_Stack } from 'next/font/google'
@@ -96,7 +96,63 @@ export default function SubsectionCard({ subsection, sectionSlug }: { subsection
     return sectionImages?.[subsection.slug] || subsection.image_url
   }, [sectionSlug, subsection.slug, subsection.image_url])
 
-  const hasImage = Boolean(imageUrl) && !imageError
+  const [resolvedImageUrl, setResolvedImageUrl] = useState<string | null>(imageUrl ?? null)
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function findImage() {
+      // If we already have an imageUrl from mapping or DB, use it
+      if (imageUrl) {
+        setResolvedImageUrl(imageUrl)
+        return
+      }
+
+      const candidates = [] as string[]
+      const exts = ['webp', 'jpeg', 'jpg', 'png', 'avif']
+      const base = subsection.slug
+      const s = sectionSlug
+
+      // common patterns: `${base}_${section}`, `${base}`
+      for (const ext of exts) {
+        candidates.push(`/${base}_${s}.${ext}`)
+      }
+      for (const ext of exts) {
+        candidates.push(`/${base}.${ext}`)
+      }
+
+      // try capitalized base variants (some files start with uppercase)
+      const capBase = base.charAt(0).toUpperCase() + base.slice(1)
+      for (const ext of exts) {
+        candidates.push(`/${capBase}_${s}.${ext}`)
+        candidates.push(`/${capBase}.${ext}`)
+      }
+
+      for (const url of candidates) {
+        try {
+          const resp = await fetch(url, { method: 'GET', cache: 'no-store' })
+          if (cancelled) return
+          if (resp.ok) {
+            setResolvedImageUrl(url)
+            return
+          }
+        } catch (e) {
+          // ignore and continue
+        }
+      }
+
+      // nothing found
+      setResolvedImageUrl(null)
+    }
+
+    findImage()
+
+    return () => {
+      cancelled = true
+    }
+  }, [imageUrl, subsection.slug, sectionSlug])
+
+  const hasImage = Boolean(resolvedImageUrl) && !imageError
 
   return (
     <Link
