@@ -34,6 +34,7 @@ export default function ProductCard({ product, adminMode, onEdit, onDelete, sect
                   src={image!}
                   alt={product.name}
                   fill
+                  unoptimized={typeof image === 'string' && image.startsWith('http')}
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                   sizes="(max-width: 640px) 50vw, 25vw"
                   onLoad={() => setImageLoaded(true)}
@@ -55,6 +56,7 @@ export default function ProductCard({ product, adminMode, onEdit, onDelete, sect
                   src={src}
                   alt={`${product.name} variante ${index + 2}`}
                   fill
+                    unoptimized={typeof src === 'string' && src.startsWith('http')}
                   className="object-cover"
                   sizes="120px"
                 />

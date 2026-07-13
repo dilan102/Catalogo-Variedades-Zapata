@@ -104,7 +104,11 @@ export default function SubsectionCard({ subsection, sectionSlug }: { subsection
     async function findImage() {
       // If we already have an imageUrl from mapping or DB, use it
       if (imageUrl) {
-        setResolvedImageUrl(imageUrl)
+        try {
+          setResolvedImageUrl(encodeURI(imageUrl))
+        } catch (e) {
+          setResolvedImageUrl(imageUrl)
+        }
         return
       }
 
@@ -133,7 +137,11 @@ export default function SubsectionCard({ subsection, sectionSlug }: { subsection
           const resp = await fetch(url, { method: 'GET', cache: 'no-store' })
           if (cancelled) return
           if (resp.ok) {
-            setResolvedImageUrl(url)
+            try {
+              setResolvedImageUrl(encodeURI(url))
+            } catch (e) {
+              setResolvedImageUrl(url)
+            }
             return
           }
         } catch (e) {
@@ -152,6 +160,10 @@ export default function SubsectionCard({ subsection, sectionSlug }: { subsection
     }
   }, [imageUrl, subsection.slug, sectionSlug])
 
+  useEffect(() => {
+    console.debug('Subsection image resolution:', { sectionSlug, slug: subsection.slug, mapped: imageUrl, resolved: resolvedImageUrl, imageError })
+  }, [sectionSlug, subsection.slug, imageUrl, resolvedImageUrl, imageError])
+
   const hasImage = Boolean(resolvedImageUrl) && !imageError
 
   return (
@@ -167,6 +179,7 @@ export default function SubsectionCard({ subsection, sectionSlug }: { subsection
                 src={imageUrl!}
                 alt={subsection.name}
                 fill
+                unoptimized={typeof resolvedImageUrl === 'string' && resolvedImageUrl.startsWith('http')}
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
                 sizes="(max-width: 640px) 50vw, 25vw"
                 onLoad={() => setImageLoaded(true)}
