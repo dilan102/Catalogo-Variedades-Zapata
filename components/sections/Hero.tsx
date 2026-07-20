@@ -16,37 +16,46 @@ export default function Hero() {
   }
 
   return (
-    <section className="relative min-h-[75vh] flex items-center justify-center bg-[#FAFCF9] overflow-hidden">
-      {/* Radial gradient natural */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_10%,rgba(111,203,140,0.15),transparent_55%)]" />
-      
-      {/* Imagen de fondo elegante */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-full max-w-3xl h-[70%] opacity-30">
-        <Image 
-          src="/fondo_elegante.png" 
-          alt="Fondo elegante" 
-          fill 
-          className="object-contain object-center"
+    <section className="relative isolate overflow-hidden bg-[#f7f4eb]">
+      <div className="absolute inset-0">
+        <Image
+          src="/Fondo_hero_pc.png"
+          alt="Fondo hero principal"
+          fill
           priority
+          sizes="100vw"
+          className="hidden object-cover object-center md:block"
+        />
+        <Image
+          src="/Fondo_hero_celular.png"
+          alt="Fondo hero principal móvil"
+          fill
+          priority
+          sizes="100vw"
+          className="block object-cover object-center md:hidden"
         />
       </div>
-      
-      <div className="relative z-10 px-4 py-20 max-w-7xl mx-auto text-center">
-        <div className="animate-fade-in">
-          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold text-[#0F2A1A] leading-tight mb-6">
-            No vendemos prendas <span className="text-[#1F6B3C]">Vendemos sueños</span>
-          </h1>
-          <p className="text-lg sm:text-xl md:text-2xl text-[#5C7A66] mb-12 max-w-3xl mx-auto leading-relaxed">
-            Distribuidora mayorista de ropa para tu negocio.
-          </p>
-          <div className="flex justify-center items-center animate-slide-up" style={{ animationDelay: '0.3s' }}>
-            <a
-              href="#categorias"
-              onClick={handleScroll}
-              className={`btn-primary px-8 py-4 text-white font-semibold text-center transition-all duration-300 ${scrolling ? 'scale-95 opacity-80' : ''}`}
-            >
-              {scrolling ? 'Deslizando...' : 'Ver Catálogo'}
-            </a>
+
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(9,22,12,0.86)_0%,rgba(9,22,12,0.55)_42%,rgba(9,22,12,0.2)_100%)]" />
+
+      <div className="relative z-10 mx-auto flex min-h-[85vh] w-full max-w-7xl items-center justify-center px-4 py-24 sm:px-6 lg:px-8">
+        <div className="w-full max-w-2xl text-center sm:text-center">
+          <div className="animate-fade-in">
+            <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold text-white leading-tight mb-6">
+              No vendemos prendas <span className="text-[#D9F5DE]">Vendemos sueños</span>
+            </h1>
+            <p className="mx-auto text-lg sm:text-xl md:text-2xl text-white/90 mb-10 max-w-3xl leading-relaxed">
+              Distribuidora mayorista de ropa para tu negocio.
+            </p>
+            <div className="flex justify-center items-center animate-slide-up" style={{ animationDelay: '0.3s' }}>
+              <a
+                href="#categorias"
+                onClick={handleScroll}
+                className={`btn-primary px-8 py-4 text-white font-semibold text-center transition-all duration-300 ${scrolling ? 'scale-95 opacity-80' : ''}`}
+              >
+                {scrolling ? 'Deslizando...' : 'Ver Catálogo'}
+              </a>
+            </div>
           </div>
         </div>
       </div>
