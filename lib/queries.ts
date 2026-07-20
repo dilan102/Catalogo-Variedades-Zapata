@@ -156,7 +156,9 @@ export async function getProductsBySubsection(subsectionId: string, page = 0, pa
       .select('*', { count: 'exact' })
       .eq('subsection_id', subsectionId)
       .eq('is_active', true)
-      .order('order')
+      .order('created_at', { ascending: false })
+      .order('order', { ascending: true })
+      .order('id', { ascending: false })
       .range(from, to)
 
     if (error) throw new Error(`Error al cargar productos: ${error.message}`)
