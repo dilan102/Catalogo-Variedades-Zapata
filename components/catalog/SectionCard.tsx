@@ -51,12 +51,12 @@ export default function SectionCard({ section }: { section: Section }) {
         )}
       </div>
 
-      <div className="absolute inset-x-0 bottom-0 border-t border-[#E7F3E9] bg-[#F8FCF8]/90 p-4 backdrop-blur-[1px] sm:p-5">
+      <div className="absolute inset-x-0 bottom-0 border-t border-[#0f2a1a] bg-[#000000]/90 p-4 backdrop-blur-[1px] sm:p-5">
         <p className="font-serif text-lg font-semibold leading-tight text-[#2F5E3F] sm:text-xl">
           {section.name}
         </p>
         {section.description && (
-          <p className="mt-2 text-xs text-[#557562] sm:text-sm">
+          <p className="mt-2 text-xs text-[#fff] sm:text-sm">
             {section.description}
           </p>
         )}

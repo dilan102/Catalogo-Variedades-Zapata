@@ -1,394 +1,455 @@
- 'use client'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import Link from 'next/link'
-import { getSubsectionBySlug, getProductsBySubsection } from '@/lib/queries'
-import { getAvailableSizes } from '@/lib/sizes'
-import ProductCard from '@/components/catalog/ProductCard'
-import ImageCarouselModal from '@/components/catalog/ImageCarouselModal'
-import { ProductCardSkeleton } from '@/components/ui/Skeletons'
-import { parseJsonResponse } from '@/lib/utils'
-import type { Subsection, Product } from '@/types'
+"use client";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import { getSubsectionBySlug, getProductsBySubsection } from "@/lib/queries";
+import { getAvailableSizes } from "@/lib/sizes";
+import ProductCard from "@/components/catalog/ProductCard";
+import ImageCarouselModal from "@/components/catalog/ImageCarouselModal";
+import { ProductCardSkeleton } from "@/components/ui/Skeletons";
+import { parseJsonResponse } from "@/lib/utils";
+import type { Subsection, Product } from "@/types";
 
 type EditingImageEntry = {
-  url: string
-  replacementFile: File | null
-}
+  url: string;
+  replacementFile: File | null;
+};
 
-export default function SubsectionPage({ params }: { params: Promise<{ section: string; sub: string }> }) {
-  const [sectionSlug, setSectionSlug] = useState<string>('')
-  const [subSlug, setSubSlug] = useState<string>('')
-  const [subsection, setSubsection] = useState<Subsection | null>(null)
-  const [products, setProducts] = useState<Product[]>([])
-  const [totalProducts, setTotalProducts] = useState(0)
-  const [currentPage, setCurrentPage] = useState(0)
-  const [loading, setLoading] = useState(true)
-  const [isLoadingMore, setIsLoadingMore] = useState(false)
-  const [adminMode, setAdminMode] = useState(false)
-  const [showForm, setShowForm] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
-  const [successMessage, setSuccessMessage] = useState('')
-  const [compressionSummary, setCompressionSummary] = useState('')
-  const [isUploadingImages, setIsUploadingImages] = useState(false)
-  const [isSavingProduct, setIsSavingProduct] = useState(false)
-  const savingProductRef = useRef(false)
-  const [primaryImageFile, setPrimaryImageFile] = useState<File | null>(null)
-  const [otherImageFiles, setOtherImageFiles] = useState<File[]>([])
-  const [primaryPreview, setPrimaryPreview] = useState('')
-  const [otherPreviews, setOtherPreviews] = useState<string[]>([])
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
-  const [editingImageEntries, setEditingImageEntries] = useState<EditingImageEntry[]>([])
-  const [selectedProductForGallery, setSelectedProductForGallery] = useState<Product | null>(null)
-  const formSectionRef = useRef<HTMLElement | null>(null)
+export default function SubsectionPage({
+  params,
+}: {
+  params: Promise<{ section: string; sub: string }>;
+}) {
+  const [sectionSlug, setSectionSlug] = useState<string>("");
+  const [subSlug, setSubSlug] = useState<string>("");
+  const [subsection, setSubsection] = useState<Subsection | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [adminMode, setAdminMode] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [compressionSummary, setCompressionSummary] = useState("");
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
+  const [isSavingProduct, setIsSavingProduct] = useState(false);
+  const savingProductRef = useRef(false);
+  const [primaryImageFile, setPrimaryImageFile] = useState<File | null>(null);
+  const [otherImageFiles, setOtherImageFiles] = useState<File[]>([]);
+  const [primaryPreview, setPrimaryPreview] = useState("");
+  const [otherPreviews, setOtherPreviews] = useState<string[]>([]);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editingImageEntries, setEditingImageEntries] = useState<
+    EditingImageEntry[]
+  >([]);
+  const [selectedProductForGallery, setSelectedProductForGallery] =
+    useState<Product | null>(null);
+  const formSectionRef = useRef<HTMLElement | null>(null);
   const [formState, setFormState] = useState({
-    name: '',
-    description: '',
+    name: "",
+    description: "",
     sizes: [] as string[],
-    colors: '',
+    colors: "",
     is_active: true,
     is_featured: false,
     order: 0,
-  })
+  });
 
   const parseSupabaseImagePath = (url: string) => {
-    const marker = '/object/public/product-images/'
-    const index = url.indexOf(marker)
-    if (index === -1) return null
-    return url.substring(index + marker.length)
-  }
+    const marker = "/object/public/product-images/";
+    const index = url.indexOf(marker);
+    if (index === -1) return null;
+    return url.substring(index + marker.length);
+  };
 
   const compressImageFile = async (file: File): Promise<File> => {
-    if (!file.type.startsWith('image/')) return file
+    if (!file.type.startsWith("image/")) return file;
 
-    const imageBitmap = await createImageBitmap(file)
-    const maxSide = 1600
-    const ratio = Math.min(1, maxSide / Math.max(imageBitmap.width, imageBitmap.height))
-    const width = Math.round(imageBitmap.width * ratio)
-    const height = Math.round(imageBitmap.height * ratio)
+    const imageBitmap = await createImageBitmap(file);
+    const maxSide = 1600;
+    const ratio = Math.min(
+      1,
+      maxSide / Math.max(imageBitmap.width, imageBitmap.height),
+    );
+    const width = Math.round(imageBitmap.width * ratio);
+    const height = Math.round(imageBitmap.height * ratio);
 
-    const canvas = document.createElement('canvas')
-    canvas.width = width
-    canvas.height = height
-    const context = canvas.getContext('2d')
-    if (!context) return file
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext("2d");
+    if (!context) return file;
 
-    context.drawImage(imageBitmap, 0, 0, width, height)
+    context.drawImage(imageBitmap, 0, 0, width, height);
 
     const compressedBlob = await new Promise<Blob | null>((resolve) => {
-      canvas.toBlob(resolve, 'image/jpeg', 0.82)
-    })
+      canvas.toBlob(resolve, "image/jpeg", 0.82);
+    });
 
-    if (!compressedBlob) return file
+    if (!compressedBlob) return file;
 
-    const compressedFile = new File([
-      compressedBlob,
-    ], file.name.replace(/\.[^.]+$/, '.jpg'), {
-      type: 'image/jpeg',
-    })
+    const compressedFile = new File(
+      [compressedBlob],
+      file.name.replace(/\.[^.]+$/, ".jpg"),
+      {
+        type: "image/jpeg",
+      },
+    );
 
-    const originalKB = (file.size / 1024).toFixed(1)
-    const compressedKB = (compressedFile.size / 1024).toFixed(1)
-    setCompressionSummary((current) =>
-      `${current}• ${file.name}: ${originalKB}KB → ${compressedKB}KB\n`
-    )
+    const originalKB = (file.size / 1024).toFixed(1);
+    const compressedKB = (compressedFile.size / 1024).toFixed(1);
+    setCompressionSummary(
+      (current) =>
+        `${current}• ${file.name}: ${originalKB}KB → ${compressedKB}KB\n`,
+    );
 
-    return compressedFile
-  }
+    return compressedFile;
+  };
 
   const loadMoreProducts = async () => {
-    if (!subsection) return
-    setIsLoadingMore(true)
+    if (!subsection) return;
+    setIsLoadingMore(true);
 
     try {
-      const nextPage = currentPage + 1
-      const { products: nextProducts } = await getProductsBySubsection(subsection.id, nextPage)
-      setProducts((current) => [...current, ...nextProducts])
-      setCurrentPage(nextPage)
+      const nextPage = currentPage + 1;
+      const { products: nextProducts } = await getProductsBySubsection(
+        subsection.id,
+        nextPage,
+      );
+      setProducts((current) => [...current, ...nextProducts]);
+      setCurrentPage(nextPage);
     } catch (error) {
-      console.error('Error cargando más productos:', error)
+      console.error("Error cargando más productos:", error);
     } finally {
-      setIsLoadingMore(false)
+      setIsLoadingMore(false);
     }
-  }
+  };
 
   useEffect(() => {
     params.then((resolved) => {
-      setSectionSlug(resolved.section)
-      setSubSlug(resolved.sub)
-    })
-  }, [params])
+      setSectionSlug(resolved.section);
+      setSubSlug(resolved.sub);
+    });
+  }, [params]);
 
   useEffect(() => {
-    if (!sectionSlug || !subSlug) return
+    if (!sectionSlug || !subSlug) return;
 
-    let cancelled = false
+    let cancelled = false;
 
     const loadSubsection = async () => {
-      setLoading(true)
-      setProducts([])
-      setSubsection(null)
+      setLoading(true);
+      setProducts([]);
+      setSubsection(null);
 
       try {
-        const sub = await getSubsectionBySlug(sectionSlug, subSlug)
-        if (cancelled) return
+        const sub = await getSubsectionBySlug(sectionSlug, subSlug);
+        if (cancelled) return;
 
-        setSubsection(sub)
+        setSubsection(sub);
         if (sub) {
-          const { products: prods, count } = await getProductsBySubsection(sub.id)
+          const { products: prods, count } = await getProductsBySubsection(
+            sub.id,
+          );
           if (!cancelled) {
-            setProducts(prods)
-            setTotalProducts(count)
-            setCurrentPage(0)
+            setProducts(prods);
+            setTotalProducts(count);
+            setCurrentPage(0);
           }
         }
       } finally {
         if (!cancelled) {
-          setLoading(false)
+          setLoading(false);
         }
       }
-    }
+    };
 
-    void loadSubsection()
+    void loadSubsection();
 
     return () => {
-      cancelled = true
-    }
-  }, [sectionSlug, subSlug])
+      cancelled = true;
+    };
+  }, [sectionSlug, subSlug]);
 
   useEffect(() => {
-    void fetch('/api/me')
+    void fetch("/api/me")
       .then((res) => parseJsonResponse<{ authenticated?: boolean }>(res))
       .then((data) => setAdminMode(Boolean(data.authenticated)))
-      .catch(() => setAdminMode(false))
-  }, [])
+      .catch(() => setAdminMode(false));
+  }, []);
 
-  const section = subsection?.section
+  const section = subsection?.section;
 
   const availableSizes = useMemo(
-    () => getAvailableSizes(section?.slug ?? '', subsection?.slug ?? ''),
-    [section?.slug, subsection?.slug]
-  )
+    () => getAvailableSizes(section?.slug ?? "", subsection?.slug ?? ""),
+    [section?.slug, subsection?.slug],
+  );
 
-  const selectedSizes = useMemo(() => new Set(formState.sizes), [formState.sizes])
+  const selectedSizes = useMemo(
+    () => new Set(formState.sizes),
+    [formState.sizes],
+  );
 
   useEffect(() => {
     return () => {
       if (primaryPreview) {
-        URL.revokeObjectURL(primaryPreview)
+        URL.revokeObjectURL(primaryPreview);
       }
-      otherPreviews.forEach((preview) => URL.revokeObjectURL(preview))
-    }
-  }, [primaryPreview, otherPreviews])
+      otherPreviews.forEach((preview) => URL.revokeObjectURL(preview));
+    };
+  }, [primaryPreview, otherPreviews]);
 
   const toggleSize = (size: string) => {
     setFormState((current) => {
       const sizes = current.sizes.includes(size)
         ? current.sizes.filter((item) => item !== size)
-        : [...current.sizes, size]
-      return { ...current, sizes }
-    })
-  }
+        : [...current.sizes, size];
+      return { ...current, sizes };
+    });
+  };
 
   const resetForm = () => {
-    setEditingProduct(null)
-    setEditingImageEntries([])
+    setEditingProduct(null);
+    setEditingImageEntries([]);
     setFormState({
-      name: '',
-      description: '',
+      name: "",
+      description: "",
       sizes: [],
-      colors: '',
+      colors: "",
       is_active: true,
       is_featured: false,
       order: products.length,
-    })
-    setPrimaryImageFile(null)
-    setOtherImageFiles([])
-    setPrimaryPreview('')
-    setOtherPreviews([])
-    setErrorMessage('')
-    setSuccessMessage('')
-  }
+    });
+    setPrimaryImageFile(null);
+    setOtherImageFiles([]);
+    setPrimaryPreview("");
+    setOtherPreviews([]);
+    setErrorMessage("");
+    setSuccessMessage("");
+  };
 
   const scrollToForm = () => {
     window.setTimeout(() => {
-      formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }, 120)
-  }
+      formSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 120);
+  };
 
   const handleEditProduct = (product: Product) => {
-    setEditingProduct(product)
-    setEditingImageEntries((product.images ?? []).map((url) => ({ url, replacementFile: null })))
+    setEditingProduct(product);
+    setEditingImageEntries(
+      (product.images ?? []).map((url) => ({ url, replacementFile: null })),
+    );
     setFormState({
       name: product.name,
-      description: product.description ?? '',
+      description: product.description ?? "",
       sizes: product.sizes ?? [],
-      colors: product.colors.join(', '),
+      colors: product.colors.join(", "),
       is_active: product.is_active,
       is_featured: product.is_featured,
       order: product.order ?? products.length,
-    })
-    setPrimaryImageFile(null)
-    setOtherImageFiles([])
-    setPrimaryPreview('')
-    setOtherPreviews([])
-    setErrorMessage('')
-    setSuccessMessage('')
-    setShowForm(true)
-    scrollToForm()
-  }
+    });
+    setPrimaryImageFile(null);
+    setOtherImageFiles([]);
+    setPrimaryPreview("");
+    setOtherPreviews([]);
+    setErrorMessage("");
+    setSuccessMessage("");
+    setShowForm(true);
+    scrollToForm();
+  };
 
   const handleDeleteProduct = async (product: Product) => {
-    const confirmed = window.confirm('¿Eliminar este producto y sus imágenes? Esta acción no se puede deshacer.')
-    if (!confirmed) return
+    const confirmed = window.confirm(
+      "¿Eliminar este producto y sus imágenes? Esta acción no se puede deshacer.",
+    );
+    if (!confirmed) return;
 
     try {
-      setLoading(true)
-      setErrorMessage('')
-      setSuccessMessage('')
+      setLoading(true);
+      setErrorMessage("");
+      setSuccessMessage("");
 
       const imagePaths = (product.images ?? [])
         .map((url) => parseSupabaseImagePath(url))
-        .filter((path): path is string => Boolean(path))
+        .filter((path): path is string => Boolean(path));
 
       if (imagePaths.length > 0) {
-        const deleteImagesResponse = await fetch('/api/admin/delete-product-images', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ paths: imagePaths }),
-        })
+        const deleteImagesResponse = await fetch(
+          "/api/admin/delete-product-images",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ paths: imagePaths }),
+          },
+        );
 
-        await parseJsonResponse(deleteImagesResponse)
+        await parseJsonResponse(deleteImagesResponse);
       }
 
-      const deleteResponse = await fetch('/api/admin/delete-product', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const deleteResponse = await fetch("/api/admin/delete-product", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: product.id }),
-      })
+      });
 
-      const deleteResult = await parseJsonResponse<{ success: boolean; message?: string }>(deleteResponse)
+      const deleteResult = await parseJsonResponse<{
+        success: boolean;
+        message?: string;
+      }>(deleteResponse);
 
       if (!deleteResponse.ok || !deleteResult.success) {
-        console.error('Error eliminando producto:', deleteResult)
-        setErrorMessage(deleteResult?.message || 'No se pudo eliminar el producto. Intenta de nuevo.')
-        return
+        console.error("Error eliminando producto:", deleteResult);
+        setErrorMessage(
+          deleteResult?.message ||
+            "No se pudo eliminar el producto. Intenta de nuevo.",
+        );
+        return;
       }
 
-      setProducts((current) => current.filter((item) => item.id !== product.id))
-      setSuccessMessage('Producto eliminado correctamente.')
+      setProducts((current) =>
+        current.filter((item) => item.id !== product.id),
+      );
+      setSuccessMessage("Producto eliminado correctamente.");
       if (editingProduct?.id === product.id) {
-        resetForm()
+        resetForm();
       }
     } catch (error) {
-      console.error('Error eliminando producto:', error)
-      const errorMessage = error instanceof Error ? error.message : 'No se pudo eliminar el producto. Intenta de nuevo.'
-      setErrorMessage(errorMessage)
+      console.error("Error eliminando producto:", error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "No se pudo eliminar el producto. Intenta de nuevo.";
+      setErrorMessage(errorMessage);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    if (!subsection || savingProductRef.current) return
+    event.preventDefault();
+    if (!subsection || savingProductRef.current) return;
 
-    savingProductRef.current = true
-    setIsSavingProduct(true)
+    savingProductRef.current = true;
+    setIsSavingProduct(true);
 
     const colors = formState.colors
-      .split(',')
+      .split(",")
       .map((value) => value.trim())
-      .filter(Boolean)
+      .filter(Boolean);
 
     const additionalUploadFiles = [
       ...(primaryImageFile ? [primaryImageFile] : []),
       ...otherImageFiles,
-    ]
+    ];
     const replacementFiles = editingImageEntries
       .filter((entry) => Boolean(entry.replacementFile))
-      .map((entry) => entry.replacementFile as File)
-    const hasNewImages = additionalUploadFiles.length > 0 || replacementFiles.length > 0
+      .map((entry) => entry.replacementFile as File);
+    const hasNewImages =
+      additionalUploadFiles.length > 0 || replacementFiles.length > 0;
 
     if (!editingProduct && !primaryImageFile) {
-      setErrorMessage('La foto principal es obligatoria.')
-      savingProductRef.current = false
-      setIsSavingProduct(false)
-      return
+      setErrorMessage("La foto principal es obligatoria.");
+      savingProductRef.current = false;
+      setIsSavingProduct(false);
+      return;
     }
 
-    if (editingProduct && editingImageEntries.length === 0 && additionalUploadFiles.length === 0 && replacementFiles.length === 0) {
-      setErrorMessage('El producto debe tener al menos una imagen.')
-      savingProductRef.current = false
-      setIsSavingProduct(false)
-      return
+    if (
+      editingProduct &&
+      editingImageEntries.length === 0 &&
+      additionalUploadFiles.length === 0 &&
+      replacementFiles.length === 0
+    ) {
+      setErrorMessage("El producto debe tener al menos una imagen.");
+      savingProductRef.current = false;
+      setIsSavingProduct(false);
+      return;
     }
 
     try {
-      setErrorMessage('')
-      setSuccessMessage('')
-      setCompressionSummary('')
-      setLoading(true)
-      setIsUploadingImages(hasNewImages)
+      setErrorMessage("");
+      setSuccessMessage("");
+      setCompressionSummary("");
+      setLoading(true);
+      setIsUploadingImages(hasNewImages);
 
       const uploadImageFile = async (file: File) => {
-        const compressedFile = await compressImageFile(file)
+        const compressedFile = await compressImageFile(file);
 
-        const uploadResponse = await fetch('/api/admin/upload-product-images', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        const uploadResponse = await fetch("/api/admin/upload-product-images", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             sectionSlug,
             fileName: compressedFile.name,
-            contentType: compressedFile.type || 'application/octet-stream',
+            contentType: compressedFile.type || "application/octet-stream",
           }),
-        })
+        });
 
         const uploadResult = await parseJsonResponse<{
-          success: boolean
-          message?: string
-          signedUrl?: string
-          publicUrl?: string
-        }>(uploadResponse)
+          success: boolean;
+          message?: string;
+          signedUrl?: string;
+          publicUrl?: string;
+        }>(uploadResponse);
 
-        if (!uploadResponse.ok || !uploadResult.success || !uploadResult.signedUrl || !uploadResult.publicUrl) {
-          console.error('Error preparando subida de imagen:', uploadResult)
-          throw new Error(uploadResult?.message || 'Error subiendo las imágenes.')
+        if (
+          !uploadResponse.ok ||
+          !uploadResult.success ||
+          !uploadResult.signedUrl ||
+          !uploadResult.publicUrl
+        ) {
+          console.error("Error preparando subida de imagen:", uploadResult);
+          throw new Error(
+            uploadResult?.message || "Error subiendo las imágenes.",
+          );
         }
 
         const directUploadResponse = await fetch(uploadResult.signedUrl, {
-          method: 'PUT',
-          headers: { 'Content-Type': compressedFile.type || 'application/octet-stream' },
+          method: "PUT",
+          headers: {
+            "Content-Type": compressedFile.type || "application/octet-stream",
+          },
           body: compressedFile,
-        })
+        });
 
         if (!directUploadResponse.ok) {
-          const directUploadText = await directUploadResponse.text().catch(() => '')
-          console.error('Error subiendo imagen a Supabase:', directUploadText)
-          throw new Error('No se pudo cargar una de las imágenes.')
+          const directUploadText = await directUploadResponse
+            .text()
+            .catch(() => "");
+          console.error("Error subiendo imagen a Supabase:", directUploadText);
+          throw new Error("No se pudo cargar una de las imágenes.");
         }
 
-        return uploadResult.publicUrl
-      }
+        return uploadResult.publicUrl;
+      };
 
-      let images: string[] = []
+      let images: string[] = [];
 
       if (editingProduct) {
         for (const entry of editingImageEntries) {
           if (entry.replacementFile) {
-            images.push(await uploadImageFile(entry.replacementFile))
+            images.push(await uploadImageFile(entry.replacementFile));
           } else if (entry.url) {
-            images.push(entry.url)
+            images.push(entry.url);
           }
         }
       }
 
       if (additionalUploadFiles.length > 0) {
-        const uploadedUrls = await Promise.all(additionalUploadFiles.map((file) => uploadImageFile(file)))
-        images = [...images, ...uploadedUrls]
+        const uploadedUrls = await Promise.all(
+          additionalUploadFiles.map((file) => uploadImageFile(file)),
+        );
+        images = [...images, ...uploadedUrls];
       }
 
-      const saveResponse = await fetch('/api/admin/save-product', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const saveResponse = await fetch("/api/admin/save-product", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id: editingProduct?.id,
           subsection_id: subsection.id,
@@ -401,310 +462,433 @@ export default function SubsectionPage({ params }: { params: Promise<{ section: 
           is_featured: formState.is_featured,
           order: Number(formState.order) || products.length,
         }),
-      })
+      });
 
-      const saveResult = await parseJsonResponse<{ success: boolean; message?: string }>(saveResponse)
+      const saveResult = await parseJsonResponse<{
+        success: boolean;
+        message?: string;
+      }>(saveResponse);
 
       if (!saveResponse.ok || !saveResult.success) {
-        console.error('Error guardando producto:', saveResult)
-        setErrorMessage(saveResult?.message || 'No se pudo guardar el producto. Revisa los datos e intenta de nuevo.')
-        return
+        console.error("Error guardando producto:", saveResult);
+        setErrorMessage(
+          saveResult?.message ||
+            "No se pudo guardar el producto. Revisa los datos e intenta de nuevo.",
+        );
+        return;
       }
 
-      const refreshed = await getProductsBySubsection(subsection.id)
-      setProducts(refreshed.products)
-      setTotalProducts(refreshed.count)
-      setCurrentPage(0)
-      setShowForm(false)
-      resetForm()
+      const refreshed = await getProductsBySubsection(subsection.id);
+      setProducts(refreshed.products);
+      setTotalProducts(refreshed.count);
+      setCurrentPage(0);
+      setShowForm(false);
+      resetForm();
     } catch (error) {
-      console.error('Error guardando producto:', error)
-      const errorMessage = error instanceof Error ? error.message : 'No se pudo guardar el producto. Revisa los datos e intenta de nuevo.'
-      setErrorMessage(errorMessage)
+      console.error("Error guardando producto:", error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "No se pudo guardar el producto. Revisa los datos e intenta de nuevo.";
+      setErrorMessage(errorMessage);
     } finally {
-      setLoading(false)
-      setIsUploadingImages(false)
-      setIsSavingProduct(false)
-      savingProductRef.current = false
+      setLoading(false);
+      setIsUploadingImages(false);
+      setIsSavingProduct(false);
+      savingProductRef.current = false;
     }
-  }
+  };
 
   return (
-    <div className="px-4 py-6 sm:py-8 max-w-7xl mx-auto">
-      <p className="text-xs text-[#5C7A66] mb-2 animate-fade-in">
-        <Link href="/" className="underline hover:text-[#3E9A60] transition-colors">Inicio</Link>
-        {' / '}
-        <Link href={`/${sectionSlug}`} className="underline hover:text-[#3E9A60] transition-colors">{section?.name ?? sectionSlug}</Link>
-        {' / '}
-        {subsection?.name}
-      </p>
+    <div className="min-h-screen bg-white">
+      <div className="px-4 py-6 sm:py-8 max-w-7xl mx-auto">
+        <p className="text-xs text-[#5C7A66] mb-2 animate-fade-in">
+          <Link
+            href="/"
+            className="underline hover:text-[#3E9A60] transition-colors"
+          >
+            Inicio
+          </Link>
+          {" / "}
+          <Link
+            href={`/${sectionSlug}`}
+            className="underline hover:text-[#3E9A60] transition-colors"
+          >
+            {section?.name ?? sectionSlug}
+          </Link>
+          {" / "}
+          {subsection?.name}
+        </p>
 
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between mb-6 animate-fade-in">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#0F2A1A]">{subsection?.name ?? '...'}</h1>
-          {adminMode && <p className="mt-2 text-sm text-[#3E9A60]">Modo administrador activo: puedes agregar productos directamente en esta subsección.</p>}
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between mb-6 animate-fade-in">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#0F2A1A]">
+              {subsection?.name ?? "..."}
+            </h1>
+            {adminMode && (
+              <p className="mt-2 text-sm text-[#3E9A60]">
+                Modo administrador activo: puedes agregar productos directamente
+                en esta subsección.
+              </p>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            {!loading && (
+              <span className="text-sm text-[#5C7A66]">
+                {products.length} productos
+              </span>
+            )}
+            {adminMode && (
+              <button
+                type="button"
+                onClick={() => {
+                  resetForm();
+                  setShowForm((current) => !current);
+                }}
+                className="rounded-full bg-[#3E9A60] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#2F7A53]"
+              >
+                {showForm ? "Cerrar formulario" : "Agregar producto"}
+              </button>
+            )}
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          {!loading && <span className="text-sm text-[#5C7A66]">{products.length} productos</span>}
-          {adminMode && (
-            <button
-              type="button"
-              onClick={() => {
-                resetForm()
-                setShowForm((current) => !current)
-              }}
-              className="rounded-full bg-[#3E9A60] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#2F7A53]"
-            >
-              {showForm ? 'Cerrar formulario' : 'Agregar producto'}
-            </button>
-          )}
-        </div>
-      </div>
 
-      {adminMode && showForm && (
-        <section ref={formSectionRef} className="mb-8 rounded-3xl border border-[#D6E7D9] bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-[#0F2A1A] mb-4">{editingProduct ? 'Editar producto' : 'Agregar producto'} a {subsection?.name}</h2>
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="grid gap-4 lg:grid-cols-2">
+        {adminMode && showForm && (
+          <section
+            ref={formSectionRef}
+            className="mb-8 rounded-3xl border border-[#D6E7D9] bg-white p-6 shadow-sm"
+          >
+            <h2 className="text-lg font-semibold text-[#0F2A1A] mb-4">
+              {editingProduct ? "Editar producto" : "Agregar producto"} a{" "}
+              {subsection?.name}
+            </h2>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="grid gap-4 lg:grid-cols-2">
+                <label className="block">
+                  <span className="text-sm font-medium text-[#0F2A1A]">
+                    Nombre del producto
+                  </span>
+                  <input
+                    value={formState.name}
+                    onChange={(event) =>
+                      setFormState({ ...formState, name: event.target.value })
+                    }
+                    required
+                    className="mt-2 w-full rounded-2xl border border-[#E4E8E3] bg-[#FBFDF8] px-4 py-3 text-sm text-[#10221E] outline-none transition focus:border-[#3E9A60] focus:ring-2 focus:ring-[#D7F0DA]"
+                    placeholder="Ej: Blusa deportiva"
+                  />
+                </label>
+              </div>
+
               <label className="block">
-                <span className="text-sm font-medium text-[#0F2A1A]">Nombre del producto</span>
-                <input
-                  value={formState.name}
-                  onChange={(event) => setFormState({ ...formState, name: event.target.value })}
-                  required
-                  className="mt-2 w-full rounded-2xl border border-[#E4E8E3] bg-[#FBFDF8] px-4 py-3 text-sm text-[#10221E] outline-none transition focus:border-[#3E9A60] focus:ring-2 focus:ring-[#D7F0DA]"
-                  placeholder="Ej: Blusa deportiva"
+                <span className="text-sm font-medium text-[#0F2A1A]">
+                  Descripción
+                </span>
+                <textarea
+                  value={formState.description}
+                  onChange={(event) =>
+                    setFormState({
+                      ...formState,
+                      description: event.target.value,
+                    })
+                  }
+                  rows={4}
+                  className="mt-2 w-full rounded-3xl border border-[#E4E8E3] bg-[#FBFDF8] px-4 py-3 text-sm text-[#10221E] outline-none transition focus:border-[#3E9A60] focus:ring-2 focus:ring-[#D7F0DA]"
+                  placeholder="Describe las características del producto"
                 />
               </label>
-            </div>
 
-            <label className="block">
-              <span className="text-sm font-medium text-[#0F2A1A]">Descripción</span>
-              <textarea
-                value={formState.description}
-                onChange={(event) => setFormState({ ...formState, description: event.target.value })}
-                rows={4}
-                className="mt-2 w-full rounded-3xl border border-[#E4E8E3] bg-[#FBFDF8] px-4 py-3 text-sm text-[#10221E] outline-none transition focus:border-[#3E9A60] focus:ring-2 focus:ring-[#D7F0DA]"
-                placeholder="Describe las características del producto"
-              />
-            </label>
-
-            {editingProduct && (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-medium text-[#0F2A1A]">Imágenes actuales</span>
-                  <span className="text-xs text-[#5C7A66]">Puedes cambiar o eliminar cada foto individualmente</span>
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                  {editingImageEntries.map((entry, index) => (
-                    <div key={`${entry.url}-${index}`} className="overflow-hidden rounded-3xl border border-[#E4E8E3] bg-[#F7F9F6] max-w-[46vw] sm:max-w-[240px] mx-auto">
-                      <div className="relative aspect-square overflow-hidden bg-[#FAFCF9]">
-                        <img src={entry.url} alt={`${formState.name} imagen ${index + 1}`} className="h-full w-full object-cover" />
-                      </div>
-                      <div className="flex flex-wrap gap-2 p-3">
-                        <label className="inline-flex cursor-pointer items-center rounded-full border border-[#3E9A60] bg-white px-3 py-2 text-xs font-semibold text-[#1F6B3C] transition hover:bg-[#EAF8EC]">
-                          Cambiar
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(event) => {
-                              const file = event.target.files?.[0] ?? null
-                              setEditingImageEntries((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, replacementFile: file } : item))
-                            }}
+              {editingProduct && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-medium text-[#0F2A1A]">
+                      Imágenes actuales
+                    </span>
+                    <span className="text-xs text-[#5C7A66]">
+                      Puedes cambiar o eliminar cada foto individualmente
+                    </span>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                    {editingImageEntries.map((entry, index) => (
+                      <div
+                        key={`${entry.url}-${index}`}
+                        className="overflow-hidden rounded-3xl border border-[#E4E8E3] bg-[#F7F9F6] max-w-[46vw] sm:max-w-[240px] mx-auto"
+                      >
+                        <div className="relative aspect-square overflow-hidden bg-[#FAFCF9]">
+                          <img
+                            src={entry.url}
+                            alt={`${formState.name} imagen ${index + 1}`}
+                            className="h-full w-full object-cover"
                           />
-                        </label>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditingImageEntries((current) => current.filter((_, itemIndex) => itemIndex !== index))
-                          }}
-                          className="inline-flex items-center rounded-full border border-[#B12A1B] bg-[#FCE8E7] px-3 py-2 text-xs font-semibold text-[#9C1F1F] transition hover:bg-[#F9D7D4]"
-                        >
-                          Eliminar
-                        </button>
+                        </div>
+                        <div className="flex flex-wrap gap-2 p-3">
+                          <label className="inline-flex cursor-pointer items-center rounded-full border border-[#3E9A60] bg-white px-3 py-2 text-xs font-semibold text-[#1F6B3C] transition hover:bg-[#EAF8EC]">
+                            Cambiar
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(event) => {
+                                const file = event.target.files?.[0] ?? null;
+                                setEditingImageEntries((current) =>
+                                  current.map((item, itemIndex) =>
+                                    itemIndex === index
+                                      ? { ...item, replacementFile: file }
+                                      : item,
+                                  ),
+                                );
+                              }}
+                            />
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingImageEntries((current) =>
+                                current.filter(
+                                  (_, itemIndex) => itemIndex !== index,
+                                ),
+                              );
+                            }}
+                            className="inline-flex items-center rounded-full border border-[#B12A1B] bg-[#FCE8E7] px-3 py-2 text-xs font-semibold text-[#9C1F1F] transition hover:bg-[#F9D7D4]"
+                          >
+                            Eliminar
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            <div className="grid gap-4 lg:grid-cols-2">
-              {!editingProduct ? (
-                <>
-                  <label className="block">
-                    <span className="text-sm font-medium text-[#0F2A1A]">Foto principal</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(event) => {
-                        const file = event.target.files?.[0] ?? null
-                        setPrimaryImageFile(file)
-                        setPrimaryPreview(file ? URL.createObjectURL(file) : '')
-                      }}
-                      required
-                      className="mt-2 w-full rounded-2xl border border-[#E4E8E3] bg-[#FBFDF8] px-4 py-3 text-sm text-[#10221E] outline-none transition focus:border-[#3E9A60] focus:ring-2 focus:ring-[#D7F0DA]"
-                    />
-                    {primaryPreview && (
-                      <div className="mt-3 rounded-3xl overflow-hidden border border-[#E4E8E3] bg-[#F7F9F6]">
-                        <img src={primaryPreview} alt="Preview foto principal" className="w-full h-52 object-cover" />
-                      </div>
-                    )}
-                  </label>
-                  <label className="block">
-                    <span className="text-sm font-medium text-[#0F2A1A]">Fotos de otros colores/estilos</span>
+              <div className="grid gap-4 lg:grid-cols-2">
+                {!editingProduct ? (
+                  <>
+                    <label className="block">
+                      <span className="text-sm font-medium text-[#0F2A1A]">
+                        Foto principal
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(event) => {
+                          const file = event.target.files?.[0] ?? null;
+                          setPrimaryImageFile(file);
+                          setPrimaryPreview(
+                            file ? URL.createObjectURL(file) : "",
+                          );
+                        }}
+                        required
+                        className="mt-2 w-full rounded-2xl border border-[#E4E8E3] bg-[#FBFDF8] px-4 py-3 text-sm text-[#10221E] outline-none transition focus:border-[#3E9A60] focus:ring-2 focus:ring-[#D7F0DA]"
+                      />
+                      {primaryPreview && (
+                        <div className="mt-3 rounded-3xl overflow-hidden border border-[#E4E8E3] bg-[#F7F9F6]">
+                          <img
+                            src={primaryPreview}
+                            alt="Preview foto principal"
+                            className="w-full h-52 object-cover"
+                          />
+                        </div>
+                      )}
+                    </label>
+                    <label className="block">
+                      <span className="text-sm font-medium text-[#0F2A1A]">
+                        Fotos de otros colores/estilos
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={(event) => {
+                          const files = Array.from(event.target.files ?? []);
+                          setOtherImageFiles(files);
+                          setOtherPreviews(
+                            files.map((file) => URL.createObjectURL(file)),
+                          );
+                        }}
+                        className="mt-2 w-full rounded-2xl border border-[#E4E8E3] bg-[#FBFDF8] px-4 py-3 text-sm text-[#10221E] outline-none transition focus:border-[#3E9A60] focus:ring-2 focus:ring-[#D7F0DA]"
+                      />
+                      {otherPreviews.length > 0 && (
+                        <div className="mt-3 grid grid-cols-2 gap-2">
+                          {otherPreviews.map((preview, index) => (
+                            <div
+                              key={preview}
+                              className="overflow-hidden rounded-3xl border border-[#E4E8E3] bg-[#F7F9F6]"
+                            >
+                              <img
+                                src={preview}
+                                alt={`Preview adicional ${index + 1}`}
+                                className="w-full h-28 object-cover"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </label>
+                  </>
+                ) : (
+                  <label className="block lg:col-span-2">
+                    <span className="text-sm font-medium text-[#0F2A1A]">
+                      Agregar nuevas fotos
+                    </span>
                     <input
                       type="file"
                       accept="image/*"
                       multiple
                       onChange={(event) => {
-                        const files = Array.from(event.target.files ?? [])
-                        setOtherImageFiles(files)
-                        setOtherPreviews(files.map((file) => URL.createObjectURL(file)))
+                        const files = Array.from(event.target.files ?? []);
+                        setOtherImageFiles(files);
+                        setOtherPreviews(
+                          files.map((file) => URL.createObjectURL(file)),
+                        );
                       }}
                       className="mt-2 w-full rounded-2xl border border-[#E4E8E3] bg-[#FBFDF8] px-4 py-3 text-sm text-[#10221E] outline-none transition focus:border-[#3E9A60] focus:ring-2 focus:ring-[#D7F0DA]"
                     />
+                    <p className="mt-2 text-xs text-[#5C7A66]">
+                      Estas imágenes se añadirán como fotos nuevas del producto.
+                    </p>
                     {otherPreviews.length > 0 && (
                       <div className="mt-3 grid grid-cols-2 gap-2">
                         {otherPreviews.map((preview, index) => (
-                          <div key={preview} className="overflow-hidden rounded-3xl border border-[#E4E8E3] bg-[#F7F9F6]">
-                            <img src={preview} alt={`Preview adicional ${index + 1}`} className="w-full h-28 object-cover" />
+                          <div
+                            key={preview}
+                            className="overflow-hidden rounded-3xl border border-[#E4E8E3] bg-[#F7F9F6]"
+                          >
+                            <img
+                              src={preview}
+                              alt={`Preview adicional ${index + 1}`}
+                              className="w-full h-28 object-cover"
+                            />
                           </div>
                         ))}
                       </div>
                     )}
                   </label>
-                </>
-              ) : (
-                <label className="block lg:col-span-2">
-                  <span className="text-sm font-medium text-[#0F2A1A]">Agregar nuevas fotos</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={(event) => {
-                      const files = Array.from(event.target.files ?? [])
-                      setOtherImageFiles(files)
-                      setOtherPreviews(files.map((file) => URL.createObjectURL(file)))
-                    }}
-                    className="mt-2 w-full rounded-2xl border border-[#E4E8E3] bg-[#FBFDF8] px-4 py-3 text-sm text-[#10221E] outline-none transition focus:border-[#3E9A60] focus:ring-2 focus:ring-[#D7F0DA]"
-                  />
-                  <p className="mt-2 text-xs text-[#5C7A66]">Estas imágenes se añadirán como fotos nuevas del producto.</p>
-                  {otherPreviews.length > 0 && (
-                    <div className="mt-3 grid grid-cols-2 gap-2">
-                      {otherPreviews.map((preview, index) => (
-                        <div key={preview} className="overflow-hidden rounded-3xl border border-[#E4E8E3] bg-[#F7F9F6]">
-                          <img src={preview} alt={`Preview adicional ${index + 1}`} className="w-full h-28 object-cover" />
-                        </div>
+                )}
+              </div>
+
+              {isUploadingImages && (
+                <p className="text-sm text-[#3E9A60]">Subiendo imagen...</p>
+              )}
+
+              {compressionSummary && (
+                <pre className="mt-2 rounded-3xl bg-[#F7F9F6] p-3 text-xs text-[#5C7A66] whitespace-pre-wrap">
+                  {compressionSummary}
+                </pre>
+              )}
+
+              <div className="grid gap-4 lg:grid-cols-[1fr_auto]">
+                {availableSizes.length > 0 && (
+                  <div className="space-y-3">
+                    <span className="text-sm font-medium text-[#0F2A1A]">
+                      Tallas disponibles
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {availableSizes.map((size) => (
+                        <label
+                          key={size}
+                          className="inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm transition hover:border-[#3E9A60]"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedSizes.has(size)}
+                            onChange={() => toggleSize(size)}
+                            className="h-4 w-4 rounded border-[#BCCFBC] text-[#3E9A60] focus:ring-[#3E9A60]"
+                          />
+                          <span>{size}</span>
+                        </label>
                       ))}
                     </div>
-                  )}
-                </label>
-              )}
-            </div>
-
-            {isUploadingImages && (
-              <p className="text-sm text-[#3E9A60]">Subiendo imagen...</p>
-            )}
-
-            {compressionSummary && (
-              <pre className="mt-2 rounded-3xl bg-[#F7F9F6] p-3 text-xs text-[#5C7A66] whitespace-pre-wrap">
-                {compressionSummary}
-              </pre>
-            )}
-
-            <div className="grid gap-4 lg:grid-cols-[1fr_auto]">
-              {availableSizes.length > 0 && (
-                <div className="space-y-3">
-                  <span className="text-sm font-medium text-[#0F2A1A]">Tallas disponibles</span>
-                  <div className="flex flex-wrap gap-2">
-                    {availableSizes.map((size) => (
-                      <label key={size} className="inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm transition hover:border-[#3E9A60]">
-                        <input
-                          type="checkbox"
-                          checked={selectedSizes.has(size)}
-                          onChange={() => toggleSize(size)}
-                          className="h-4 w-4 rounded border-[#BCCFBC] text-[#3E9A60] focus:ring-[#3E9A60]"
-                        />
-                        <span>{size}</span>
-                      </label>
-                    ))}
                   </div>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-wrap gap-3">
+                  <label className="inline-flex items-center gap-2 text-sm text-[#0F2A1A]">
+                    <input
+                      type="checkbox"
+                      checked={formState.is_active}
+                      onChange={(event) =>
+                        setFormState({
+                          ...formState,
+                          is_active: event.target.checked,
+                        })
+                      }
+                      className="h-4 w-4 rounded border-[#BCCFBC] text-[#3E9A60] focus:ring-[#3E9A60]"
+                    />
+                    Producto activo
+                  </label>
                 </div>
+                <button
+                  type="submit"
+                  disabled={isSavingProduct || loading || isUploadingImages}
+                  className="inline-flex items-center justify-center rounded-full bg-[#3E9A60] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#2F7A53] disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {isSavingProduct ? "Guardando..." : "Guardar producto"}
+                </button>
+              </div>
+
+              {successMessage && (
+                <p className="text-sm text-[#1F6B3C]">{successMessage}</p>
               )}
-            </div>
+              {errorMessage && (
+                <p className="text-sm text-[#B12A1B]">{errorMessage}</p>
+              )}
+            </form>
+          </section>
+        )}
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex flex-wrap gap-3">
-                <label className="inline-flex items-center gap-2 text-sm text-[#0F2A1A]">
-                  <input
-                    type="checkbox"
-                    checked={formState.is_active}
-                    onChange={(event) => setFormState({ ...formState, is_active: event.target.checked })}
-                    className="h-4 w-4 rounded border-[#BCCFBC] text-[#3E9A60] focus:ring-[#3E9A60]"
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4">
+          {loading
+            ? Array(4)
+                .fill(0)
+                .map((_, i) => <ProductCardSkeleton key={i} />)
+            : products.map((p, i) => (
+                <div
+                  key={p.id}
+                  style={{ animationDelay: `${i * 50}ms` }}
+                  className="animate-slide-up"
+                >
+                  <ProductCard
+                    product={p}
+                    adminMode={adminMode}
+                    onEdit={handleEditProduct}
+                    onDelete={handleDeleteProduct}
+                    onViewGallery={setSelectedProductForGallery}
+                    sectionSlug={sectionSlug}
+                    subsectionSlug={subSlug}
                   />
-                  Producto activo
-                </label>
-              </div>
-              <button
-                type="submit"
-                disabled={isSavingProduct || loading || isUploadingImages}
-                className="inline-flex items-center justify-center rounded-full bg-[#3E9A60] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#2F7A53] disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {isSavingProduct ? 'Guardando...' : 'Guardar producto'}
-              </button>
-            </div>
-
-            {successMessage && <p className="text-sm text-[#1F6B3C]">{successMessage}</p>}
-            {errorMessage && <p className="text-sm text-[#B12A1B]">{errorMessage}</p>}
-          </form>
-        </section>
-      )}
-
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4">
-        {loading
-          ? Array(4).fill(0).map((_, i) => <ProductCardSkeleton key={i} />)
-          : products.map((p, i) => (
-              <div key={p.id} style={{ animationDelay: `${i * 50}ms` }} className="animate-slide-up">
-                <ProductCard
-                  product={p}
-                  adminMode={adminMode}
-                  onEdit={handleEditProduct}
-                  onDelete={handleDeleteProduct}
-                  onViewGallery={setSelectedProductForGallery}
-                  sectionSlug={sectionSlug}
-                  subsectionSlug={subSlug}
-                />
-              </div>
-            ))
-        }
-      </div>
-
-      {selectedProductForGallery && (
-        <ImageCarouselModal
-          product={selectedProductForGallery}
-          isOpen={Boolean(selectedProductForGallery)}
-          onClose={() => setSelectedProductForGallery(null)}
-        />
-      )}
-
-      {!loading && products.length > 0 && products.length < totalProducts && (
-        <div className="mt-8 flex justify-center">
-          <button
-            type="button"
-            onClick={loadMoreProducts}
-            disabled={isLoadingMore}
-            className="inline-flex items-center justify-center rounded-full bg-[#3E9A60] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#2F7A53] disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            {isLoadingMore ? 'Cargando más...' : 'Cargar más productos'}
-          </button>
+                </div>
+              ))}
         </div>
-      )}
 
-      {!loading && products.length === 0 && (
-        <p className="text-center py-24 text-[#5C7A66] text-base animate-fade-in">No hay productos aún.</p>
-      )}
+        {selectedProductForGallery && (
+          <ImageCarouselModal
+            product={selectedProductForGallery}
+            isOpen={Boolean(selectedProductForGallery)}
+            onClose={() => setSelectedProductForGallery(null)}
+          />
+        )}
+
+        {!loading && products.length > 0 && products.length < totalProducts && (
+          <div className="mt-8 flex justify-center">
+            <button
+              type="button"
+              onClick={loadMoreProducts}
+              disabled={isLoadingMore}
+              className="inline-flex items-center justify-center rounded-full bg-[#3E9A60] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#2F7A53] disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {isLoadingMore ? "Cargando más..." : "Cargar más productos"}
+            </button>
+          </div>
+        )}
+
+        {!loading && products.length === 0 && (
+          <p className="text-center py-24 text-[#5C7A66] text-base animate-fade-in">
+            No hay productos aún.
+          </p>
+        )}
+      </div>
     </div>
-  )
+  );
 }

@@ -104,7 +104,7 @@ export default function ProductPage() {
   )
 
   return (
-    <div className="px-4 py-8 sm:py-10 max-w-7xl mx-auto">
+    <div className="px-4 py-8 sm:py-10 max-w-7xl mx-auto bg-white">
       <section className="space-y-6">
         <div className="overflow-hidden rounded-2xl border border-[#DCEFDD] bg-white shadow-sm">
           <div className="relative mb-3 aspect-[3/4] overflow-hidden bg-[#FAFCF9]">

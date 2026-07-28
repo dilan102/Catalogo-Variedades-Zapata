@@ -61,7 +61,7 @@ export default function HomePage() {
       <div className="px-4 py-20 sm:py-24 max-w-7xl mx-auto">
         <section
           id="categorias"
-          className="mb-16 rounded-3xl border border-[#E7F3E9] bg-[#F8FCF8] p-6 sm:p-10"
+          className="mb-16 rounded-3xl border border-[#0f2a1a] bg-[#cfefd1] p-6 sm:p-10"
         >
           <div className="mb-8">
             <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[#6A7F72]">

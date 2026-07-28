@@ -53,7 +53,7 @@ export default function SectionPage({ params }: { params: Promise<{ section: str
   const subsections = [...(section?.subsections ?? [])].sort((a: Subsection, b: Subsection) => a.order - b.order)
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
+    <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8 bg-white">
       <p className="mb-2 text-xs text-[#5C7A66] animate-fade-in">
         <Link href="/" className="underline transition-colors hover:text-[#3E9A60]">Inicio</Link> / {section?.name ?? '...'}
       </p>
