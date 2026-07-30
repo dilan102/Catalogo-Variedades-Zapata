@@ -33,6 +33,28 @@ body {
   font-family: var(--font-space-grotesk), sans-serif;
 }
 
+.page-logo-background {
+  position: relative;
+  background-color: #f8fbf6;
+}
+
+.page-logo-background::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("/logo.jpg");
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 45rem;
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+.page-logo-background > * {
+  position: relative;
+  z-index: 1;
+}
+
 h1,
 h2,
 h3,
