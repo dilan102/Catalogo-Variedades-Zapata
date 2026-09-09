@@ -28,15 +28,15 @@ SELECT
   true,
   NOW();
 
--- Insertar subsecciones para Joven
+-- Insertar subsecciones para Hogar
 INSERT INTO subsections (id, section_id, name, slug, description, "order", is_active, created_at)
 SELECT 
   gen_random_uuid(),
-  (SELECT id FROM sections WHERE slug = 'joven'),
+  (SELECT id FROM sections WHERE slug = 'hogar'),
   unnest(ARRAY['Accesorios de Hogar']),
-  unnest(ARRAY['Accesorios de Hogar']),
-  unnest(ARRAY['Accesorios de Hogar']),
-  generate_series(0, 1),
+  unnest(ARRAY['accesorios-de-hogar']),
+  unnest(ARRAY['Accesorios para el hogar']),
+  generate_series(0, 0),
   true,
   NOW();
 
