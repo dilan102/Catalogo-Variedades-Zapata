@@ -38,6 +38,7 @@ export default function HomePage() {
             "accesorios",
             "edredones",
             "esika",
+            "hogar",
           ];
           return order.indexOf(a.slug) - order.indexOf(b.slug);
         });
