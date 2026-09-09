@@ -84,6 +84,9 @@ const imagesBySlug: Record<string, Record<string, string>> = {
     fundas: "/fundas_edredones.png",
     cortinas: "/cortinas_edredones.jpeg",
   },
+  hogar: {
+    "accesorios-de-hogar": "/Accesorios-Hogar.jpeg",
+  },
 };
 
 export default function SubsectionCard({

@@ -13,6 +13,7 @@ const sectionImages: Record<string, string> = {
   accesorios: "/silueta_accesorios_seccion.jpeg",
   edredones: "/silueta_edredones_seccion.jpg",
   esika: "/silueta_esika_seccion.jpg",
+  hogar: "/Hogar.jpeg",
 };
 
 export default function SectionCard({ section }: { section: Section }) {

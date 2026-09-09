@@ -10,6 +10,7 @@ const sectionImages = {
   accesorios: '/Accesorios.avif',
   edredones: '/edredon.jpeg',
   esika: '/Esika.png',
+  hogar: '/Hogar.jpeg',
 }
 
 export async function GET(request: Request) {
