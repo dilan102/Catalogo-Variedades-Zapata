@@ -8,7 +8,7 @@ export const categoriesWithSubsections: Record<string, string[]> = {
   'Accesorios': ['Gafas', 'Relojería', 'Joyería', 'Tecnología', 'Bolsos'],
   'Edredones': ['Sábanas', 'Almohadas', 'Cobijas', 'Cubrelechos', 'Fundas', 'Cortinas'],
   'Esika': [],
-  'Hogar': ['Accesorios de Hogar']
+  'Hogar' : ['Accesorios de Hogar']
 }
 
 export function slugify(value: string): string {

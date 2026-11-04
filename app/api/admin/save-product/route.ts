@@ -20,11 +20,16 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json()
+    const price = body.price === '' || body.price === null || body.price === undefined ? null : Number(body.price)
+    if (price !== null && (!Number.isFinite(price) || price < 0)) {
+      return NextResponse.json({ success: false, message: 'El precio no es válido' }, { status: 400 })
+    }
     const productData: Partial<Product> = {
       id: body.id,
       subsection_id: body.subsection_id,
       name: body.name,
       description: body.description,
+      price,
       images: body.images,
       sizes: body.sizes,
       colors: body.colors,

@@ -67,6 +67,7 @@ export default function ProductCard({ product, adminMode, onEdit, onDelete, sect
 
         <div className="px-4 pb-4">
           <p className="text-base font-serif font-semibold leading-tight text-[#0F2A1A] line-clamp-2 transition-colors duration-300 group-hover:text-[#3E9A60]">{product.name}</p>
+          {product.price !== null && product.price !== undefined && <p className="mt-2 text-sm font-bold text-[#1F6B3C]">{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(product.price)}</p>}
           <div className="mt-3 flex flex-wrap gap-1.5">
             {product.sizes.slice(0, 4).map((size) => (
               <span key={size} className="rounded-full border border-[#DCEFDD] bg-white px-2 py-1 text-[10px] text-[#0F2A1A]">{size}</span>

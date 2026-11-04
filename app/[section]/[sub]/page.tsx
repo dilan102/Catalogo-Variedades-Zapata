@@ -49,6 +49,7 @@ export default function SubsectionPage({
   const [formState, setFormState] = useState({
     name: "",
     description: "",
+    price: "",
     sizes: [] as string[],
     colors: "",
     is_active: true,
@@ -175,7 +176,13 @@ export default function SubsectionPage({
   useEffect(() => {
     void fetch("/api/me")
       .then((res) => parseJsonResponse<{ authenticated?: boolean }>(res))
-      .then((data) => setAdminMode(Boolean(data.authenticated)))
+      .then((data) => {
+        const authenticated = Boolean(data.authenticated);
+        setAdminMode(authenticated);
+        if (authenticated && new URLSearchParams(window.location.search).get("new") === "1") {
+          setShowForm(true);
+        }
+      })
       .catch(() => setAdminMode(false));
   }, []);
 
@@ -215,6 +222,7 @@ export default function SubsectionPage({
     setFormState({
       name: "",
       description: "",
+      price: "",
       sizes: [],
       colors: "",
       is_active: true,
@@ -246,6 +254,7 @@ export default function SubsectionPage({
     setFormState({
       name: product.name,
       description: product.description ?? "",
+      price: product.price?.toString() ?? "",
       sizes: product.sizes ?? [],
       colors: product.colors.join(", "),
       is_active: product.is_active,
@@ -455,6 +464,7 @@ export default function SubsectionPage({
           subsection_id: subsection.id,
           name: formState.name,
           description: formState.description || null,
+          price: formState.price,
           images,
           sizes: formState.sizes,
           colors,
@@ -577,6 +587,10 @@ export default function SubsectionPage({
                     className="mt-2 w-full rounded-2xl border border-[#E4E8E3] bg-[#FBFDF8] px-4 py-3 text-sm text-[#10221E] outline-none transition focus:border-[#3E9A60] focus:ring-2 focus:ring-[#D7F0DA]"
                     placeholder="Ej: Blusa deportiva"
                   />
+                </label>
+                <label className="block">
+                  <span className="text-sm font-medium text-[#0F2A1A]">Precio</span>
+                  <input type="number" min="0" step="0.01" value={formState.price} onChange={(event) => setFormState({ ...formState, price: event.target.value })} className="mt-2 w-full rounded-2xl border border-[#E4E8E3] bg-[#FBFDF8] px-4 py-3 text-sm text-[#10221E] outline-none transition focus:border-[#3E9A60] focus:ring-2 focus:ring-[#D7F0DA]" placeholder="Ej: 49900" />
                 </label>
               </div>
 

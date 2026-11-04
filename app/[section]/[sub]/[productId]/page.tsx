@@ -176,6 +176,7 @@ export default function ProductPage() {
 
           <div className="px-4 pb-4">
             <p className="text-base font-serif font-semibold leading-tight text-[#0F2A1A] line-clamp-2">{product.name}</p>
+            {product.price !== null && product.price !== undefined && <p className="mt-2 text-lg font-bold text-[#1F6B3C]">{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(product.price)}</p>}
             {product.description && (
               <p className="mt-3 text-sm leading-6 text-[#5C7A66]">{product.description}</p>
             )}

@@ -26,11 +26,7 @@ export default function AdminLogin() {
       const data = await parseJsonResponse<{ success: boolean; message?: string }>(response)
 
       if (data.success) {
-        if (window.history.length > 1) {
-          router.back()
-        } else {
-          router.push('/')
-        }
+        router.push('/admin')
         router.refresh()
         return
       }

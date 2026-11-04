@@ -1,16 +1,31 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Menu, X } from 'lucide-react'
 import { getSections } from '@/lib/queries'
+import { parseJsonResponse } from '@/lib/utils'
 import type { Section } from '@/types'
 
 export default function Navbar() {
   const [open, setOpen] = useState(false)
   const [sections, setSections] = useState<Section[]>([])
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => { getSections().then(setSections).catch(() => {}) }, [])
+  const checkAdminSession = useCallback(async () => {
+    try {
+      const response = await fetch('/api/me')
+      const data = await parseJsonResponse<{ authenticated?: boolean }>(response)
+      setIsAdmin(Boolean(data.authenticated))
+    } catch {
+      setIsAdmin(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    void checkAdminSession()
+  }, [checkAdminSession])
 
   return (
     <>
@@ -22,7 +37,7 @@ export default function Navbar() {
             </div>
             <span className="font-semibold text-lg sm:text-xl tracking-tight text-[#0F2A1A]">Variedades Zapata</span>
           </Link>
-          <button onClick={() => setOpen(true)} className="p-2 text-[#3E9A60] hover:bg-[#EAF8EC] rounded-xl transition-all duration-200 hover:scale-105"><Menu size={24} /></button>
+          <button onClick={() => { setOpen(true); void checkAdminSession() }} className="p-2 text-[#3E9A60] hover:bg-[#EAF8EC] rounded-xl transition-all duration-200 hover:scale-105"><Menu size={24} /></button>
         </div>
       </header>
       {open && (
@@ -49,6 +64,11 @@ export default function Navbar() {
               {s.name}
             </Link>
           ))}
+          {isAdmin && (
+            <Link href="/admin" onClick={() => setOpen(false)} className="flex px-6 py-4 text-base font-semibold text-[#1F6B3C] hover:bg-[#EAF8EC] border-b border-[#DCEFDD] transition-all duration-200 hover:border-l-2 hover:border-l-[#3E9A60]">
+              Admin
+            </Link>
+          )}
         </nav>
       </aside>
     </>
